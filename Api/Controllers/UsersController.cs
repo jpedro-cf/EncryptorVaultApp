@@ -6,7 +6,7 @@ using MyMVCProject.Api.Services;
 namespace MyMVCProject.Api.Controllers;
 
 [ApiController]
-[Route("users")]
+[Route("api/users")]
 public class UsersController(UsersService usersService) : ControllerBase
 {
 }

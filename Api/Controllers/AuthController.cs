@@ -10,7 +10,7 @@ using MyMVCProject.Api.Services;
 namespace MyMVCProject.Api.Controllers;
 
 [ApiController]
-[Route("auth")]
+[Route("api/auth")]
 public class AuthController(
     UsersService usersService, 
     AuthService authService, 
