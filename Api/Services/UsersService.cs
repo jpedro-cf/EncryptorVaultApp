@@ -1,0 +1,27 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using MyMVCProject.Api.Dtos.Users;
+using MyMVCProject.Api.Entities;
+using MyMVCProject.Api.Global.Exceptions;
+using MyMVCProject.Api.Infra.Security;
+using MyMVCProject.Config;
+
+namespace MyMVCProject.Api.Services;
+
+public class UsersService(UserManager<User> userManager)
+{
+    public async Task Create(RegisterUserRequest data)
+    {
+        var identityUser = new User
+        {
+            UserName = data.Email,
+            Email = data.Email,
+            EmailConfirmed = true
+        };
+        var result = await userManager.CreateAsync(identityUser, data.Password);
+        if (!result.Succeeded)
+        {
+            throw new UnauthorizedException(result.Errors.First().Description);
+        }
+    }
+}
