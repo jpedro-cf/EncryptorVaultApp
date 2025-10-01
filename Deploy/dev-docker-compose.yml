@@ -45,3 +45,7 @@ services:
       - ./volumes/pgadmin:/var/lib/pgadmin
     networks:
       - encryption-app-network
+      
+networks:
+  encryption-app-network:
+    driver: bridge
