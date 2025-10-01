@@ -26,4 +26,16 @@ public class FoldersController(FoldersService foldersService) : ControllerBase
         
         return Ok(result);
     }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetFolder([FromRoute] Guid id, [FromQuery] GetFolderRequest data)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(data);
+        }
+        var result = await foldersService.GetFolder(id, null, data);
+
+        return Ok(result);
+    }
 }

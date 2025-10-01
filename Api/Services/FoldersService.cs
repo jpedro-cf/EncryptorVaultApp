@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MyMVCProject.Api.Dtos.Folders;
 using MyMVCProject.Api.Entities;
+using MyMVCProject.Api.Global;
 using MyMVCProject.Api.Infra.Security;
 using MyMVCProject.Config;
 
@@ -28,10 +29,10 @@ public class FoldersService(AppDbContext ctx, UsersService usersService)
 
         var parent = await ctx.Folders.FirstAsync(f => f.Id == data.ParentId!);
 
-        // Verify if keys provided are correct by trying to decrypt them.
+        // Verify if keys provided are correct by trying to decrypt with them.
         // If is not correct, it will throw an error internally
         var parentKey = EncryptionHandler.Decrypt(parent.EncryptedKey, data.EncryptionKey!);
-        var parentRootKey = EncryptionHandler.Decrypt(parent.KeyEncryptedByRoot, data.RootEncryptionKey!);
+        EncryptionHandler.Decrypt(parent.KeyEncryptedByRoot, data.RootEncryptionKey!);
         
         var encryptedKey = EncryptionHandler.Encrypt(encryptionKey, parentKey);
         var encryptedKeyByRoot = EncryptionHandler.Encrypt(encryptionKey, data.RootEncryptionKey!);
@@ -49,7 +50,25 @@ public class FoldersService(AppDbContext ctx, UsersService usersService)
         
         return new CreateFolderResponse(FolderResponse.From(subFolder), parentKey, data.RootEncryptionKey!);
     }
-    
+
+    public async Task<GetFolderResponse> GetFolder(Guid folderId, Guid? userId, GetFolderRequest data)
+    {
+        var folder = await ctx.Folders.FirstAsync(f => f.Id == folderId);
+        string decryptedKey;
+        
+        if (!string.IsNullOrWhiteSpace(data.Secret))
+        {
+            var (_, key) = KeyDerivationHandler.CreateDerivedKey(folder.RootKeySalt.GetBytes(), data.Secret);
+
+            decryptedKey = EncryptionHandler.Decrypt(folder.KeyEncryptedByRoot, key);
+
+            return new GetFolderResponse(FolderResponse.From(folder), decryptedKey);
+        }
+
+        decryptedKey = EncryptionHandler.Decrypt(folder.EncryptedKey, data.EncryptionKey!);
+
+        return new GetFolderResponse(FolderResponse.From(folder), decryptedKey);
+    }
     
     public bool CanBeViewedByUser(Guid userId, Folder folder)
     {

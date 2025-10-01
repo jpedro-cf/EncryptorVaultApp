@@ -18,4 +18,16 @@ public class KeyDerivationHandler
 
         return (Convert.ToBase64String(salt),Convert.ToBase64String(pbkdf2));
     }
+    
+    public static (string salt, string key) CreateDerivedKey(byte[] salt, string secret)
+    {
+        var pbkdf2 = KeyDerivation.Pbkdf2(
+            password: secret,
+            salt: salt,
+            prf: KeyDerivationPrf.HMACSHA256,
+            iterationCount: 100000,
+            numBytesRequested: 32); // 256 bits
+
+        return (Convert.ToBase64String(salt),Convert.ToBase64String(pbkdf2));
+    }
 }

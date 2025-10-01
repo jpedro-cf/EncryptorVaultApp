@@ -19,7 +19,7 @@ public static class StringExtensions
 
     public static byte[] GetBytes(this string value)
     {
-        return Encoding.UTF8.GetBytes(value);
+        return Convert.FromBase64String(value);
     }
 
     public static string ToBase64(this string value)

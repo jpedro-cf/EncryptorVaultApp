@@ -32,7 +32,7 @@ public static class AuthConfig
                 OnMessageReceived = context =>
                 {
                     var cookieJwt = context.Request.Cookies["accessToken"];
-                    if (!cookieJwt.IsNullOrEmpty())
+                    if (!string.IsNullOrWhiteSpace(cookieJwt))
                     {
                         context.Token = cookieJwt;
                     }
