@@ -8,7 +8,7 @@ using MyMVCProject.Config;
 
 namespace MyMVCProject.Api.Services;
 
-public class UsersService(UserManager<User> userManager)
+public class UsersService(AppDbContext ctx, UserManager<User> userManager)
 {
     public async Task Create(RegisterUserRequest data)
     {
@@ -23,5 +23,15 @@ public class UsersService(UserManager<User> userManager)
         {
             throw new UnauthorizedException(result.Errors.First().Description);
         }
+    }
+
+    public async Task<User> FindById(Guid id)
+    {
+        return await ctx.Users.FirstAsync(u => u.Id == id);
+    }
+
+    public bool PasswordMatch(Guid userId, string password)
+    {
+        return true;
     }
 }

@@ -4,7 +4,7 @@ using MyMVCProject.Api.Dtos.Users;
 using MyMVCProject.Api.Entities;
 using MyMVCProject.Api.Global.Exceptions;
 using MyMVCProject.Api.Infra.Security;
-using MyMVCProject.Api.Utils;
+using MyMVCProject.Api.Global;
 using MyMVCProject.Config;
 
 namespace MyMVCProject.Api.Services;

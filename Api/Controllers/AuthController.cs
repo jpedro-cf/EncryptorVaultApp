@@ -38,7 +38,6 @@ public class AuthController(
             return BadRequest(data);
         }
 
-
         var result = await authService.Login(data);
         if (result.RequiresTwoFactor)
         {
@@ -84,14 +83,25 @@ public class AuthController(
     [Authorize]
     public async Task<IActionResult> SetupMfa([FromBody] SetupMfaRequest data)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(data);
+        }
+        
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         await authService.SetupMfa(Guid.Parse(userId!),data.Token);
         
         return NoContent();
     }
+    
     [HttpPost("mfa/login")]
     public async Task<IActionResult> LoginMfa([FromBody] LoginMfaRequest data)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(data);
+        }
+        
         var result = await authService.LoginMfa(data.Code);
         
         var cookieOptions = new CookieOptions

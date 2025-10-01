@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Api\Dtos\Files\" />
     <Folder Include="Migrations\" />
     <Folder Include="Web\" />
   </ItemGroup>
