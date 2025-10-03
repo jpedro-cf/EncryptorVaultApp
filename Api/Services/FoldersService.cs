@@ -62,12 +62,12 @@ public class FoldersService(AppDbContext ctx, UsersService usersService)
 
             decryptedKey = EncryptionHandler.Decrypt(folder.KeyEncryptedByRoot, key);
 
-            return new GetFolderResponse(FolderResponse.From(folder), decryptedKey);
+            return new GetFolderResponse(FolderResponse.From(folder), decryptedKey, key);
         }
 
         decryptedKey = EncryptionHandler.Decrypt(folder.EncryptedKey, data.EncryptionKey!);
 
-        return new GetFolderResponse(FolderResponse.From(folder), decryptedKey);
+        return new GetFolderResponse(FolderResponse.From(folder), decryptedKey, null);
     }
     
     public bool CanBeViewedByUser(Guid userId, Folder folder)

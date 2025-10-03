@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text;
 using QRCoder;
 
@@ -25,5 +26,16 @@ public static class StringExtensions
     public static string ToBase64(this string value)
     {
         return Convert.ToBase64String(GetBytes(value));
+    }
+
+    public static string ToMd5Base64(this string value)
+    {
+        byte[] bytes = value.GetBytes();
+        using (var md5 = MD5.Create())
+        {
+            byte[] md5Bytes = md5.ComputeHash(bytes);
+
+            return Convert.ToBase64String(md5Bytes);
+        }
     }
 }

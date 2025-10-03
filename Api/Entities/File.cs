@@ -9,6 +9,9 @@ public class File : BaseEncryptedEntity
     public string StorageKey { get; set; }
     
     [Required]
+    public long Size { get; set; }
+    
+    [Required]
     public Guid ParentFolderId { get; set; }
     public Folder ParentFolder { get; set; }
 }
