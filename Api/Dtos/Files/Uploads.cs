@@ -10,10 +10,10 @@ public class UploadFileRequest
     [Required(ErrorMessage = "File size is required")]
     public long FileSize { get; set; }
     
-    [Required(ErrorMessage = "Encryption key is requried.")]
-    public string EncryptionKey { get; set; }
-    [Required(ErrorMessage = "Root encryption key is requried.")]
-    public string RootEncryptionKey { get; set; }
+    [Required(ErrorMessage = "Encrypted key is requried.")]
+    public string EncryptedKey { get; set; }
+    [Required(ErrorMessage = "Key encrypted by root is requried.")]
+    public string KeyEncryptedByRoot { get; set; }
 
     public Guid? ParentFolderId { get; set; }
 }

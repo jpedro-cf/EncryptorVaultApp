@@ -14,7 +14,7 @@ public class FoldersService(AppDbContext ctx, UsersService usersService)
         if (data.ParentId is null)
         {
             
-            var folder = Folder.CreateRoot(data.Name, userId, data.EncryptionKey!);
+            var folder = Folder.CreateRoot(data.Name, userId, data.EncryptedKey, data.KeyEncryptedByRoot);
 
             ctx.Folders.Add(folder);
             await ctx.SaveChangesAsync();
@@ -29,8 +29,8 @@ public class FoldersService(AppDbContext ctx, UsersService usersService)
             data.Name,
             userId,
             data.ParentId!.Value,
-            data.EncryptionKey,
-            data.RootEncryptionKey);
+            data.EncryptedKey,
+            data.KeyEncryptedByRoot);
 
         ctx.Folders.Add(subFolder);
         await ctx.SaveChangesAsync();

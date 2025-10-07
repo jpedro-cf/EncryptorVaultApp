@@ -17,8 +17,8 @@ public class FilesService(AppDbContext ctx, AmazonS3 amazonS3)
             Size = data.FileSize,
             OwnerId = userId,
             StorageKey = $"{userId}/{Guid.NewGuid()}",
-            EncryptedKey = data.EncryptionKey,
-            KeyEncryptedByRoot = data.RootEncryptionKey,
+            EncryptedKey = data.EncryptedKey,
+            KeyEncryptedByRoot = data.KeyEncryptedByRoot,
         };
         if (data.ParentFolderId != null)
         {

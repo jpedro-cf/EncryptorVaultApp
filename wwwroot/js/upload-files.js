@@ -20,26 +20,26 @@ document.addEventListener("DOMContentLoaded", () => {
             container.appendChild(hiddenElement);
         }
         
-        dragDrop(handleAddFiles)
+        dragDrop(handleItemsSelect)
     })
     
-    form.addEventListener("submit",(e) => {
+    form.addEventListener("submit",async (e) => {
         e.preventDefault()
-        handleFormSubmit(e)
+        await handleFormSubmit(e)
     })
 })
 
-function handleAddFiles(files){
+function handleItemsSelect(files){
     const newFiles = Array.from(files).map((f) => ({
         id: crypto.randomUUID(),
         data: f
     }))
     
     const container = modal.querySelector(".files")
-    const fileInfoItem = container.querySelector(".file-info")
+    const fileItem = container.querySelector(".file-info")
     
     for(const file of newFiles){
-        const newItem = fileInfoItem.cloneNode(true)
+        const newItem = fileItem.cloneNode(true)
         
         newItem.classList.remove("d-none")
         newItem.querySelector(".title").textContent = file.data.name
@@ -57,49 +57,6 @@ function handleAddFiles(files){
         container.appendChild(newItem)
         formState.files.push({id: file.id, data: file.data, element: newItem});
     }
-
-}
-
-async function handleFormSubmit(e){
-    for(const item of formState.files){
-        const file = await encryptFile(item.data)
-        
-        const res = await fetch("/api/files", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                fileName: item.data.name,
-                fileSize: file.encryptedFile.combined.length,
-                encryptionKey: uint8ArrayToBase64(file.encryptedKey.combined),
-                rootEncryptionKey: uint8ArrayToBase64(file.keyEncryptedByRoot.combined)
-            }),
-            credentials: "include"
-        })
-        
-        let partsUploaded = 0
-        
-        if(res.ok){
-            const {uploadId, key: storageKey, urls} = await res.json()
-            const result = await uploadParts(
-                uploadId, 
-                storageKey, 
-                urls,
-                file.encryptedFile.combined,
-                file.encryptedFile.combined.length,
-                (completedPartNumber) => {
-                    partsUploaded += 1
-                    const percentage = (partsUploaded/urls.length) * 100
-                    item.element.querySelector(".loader").style.width = `${percentage}%`
-                }
-            )
-            if(!result.ok){
-                return
-            }
-            
-            await completeUpload(uploadId, storageKey, result.uploadedParts)
-            item.element.style.display = "none"
-        }
-    }
 }
 
 async function encryptFile(file){
@@ -108,25 +65,81 @@ async function encryptFile(file){
 
     const encryptedKey = await Encryption.encrypt(stringToUint8Array(fileKey), rootKey)
     const keyEncryptedByRoot = await Encryption.encrypt(stringToUint8Array(fileKey), rootKey)
-    
-    
+
+
     const encryptedFile = await Encryption.encrypt(await fileToUin8Array(file), fileKey)
-    
+
     return {encryptedKey, keyEncryptedByRoot, encryptedFile}
 }
 
-async function uploadParts(uploadId, storageKey, urls, file, fileSize, onUpdate){
+async function handleFormSubmit(e){
+    for(const item of formState.files){
+        const file = await encryptFile(item.data)
+        
+        const initialUpload = await fetch("/api/files", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                fileName: item.data.name,
+                fileSize: file.encryptedFile.combined.length,
+                encryptedKey: uint8ArrayToBase64(file.encryptedKey.combined),
+                keyEncryptedByRoot: uint8ArrayToBase64(file.keyEncryptedByRoot.combined)
+            }),
+            credentials: "include"
+        })
+        if(!initialUpload.ok){
+            return
+        }
+        
+        const { uploadId, key: storageKey, urls} = await initialUpload.json()
+        
+        let partsUploaded = 0
+        
+        
+        const parts = await uploadParts(
+            uploadId,
+            storageKey,
+            urls,
+            file.encryptedFile.combined,
+            updateInterface
+        )
+        
+        function updateInterface(completedPartNumber){
+            partsUploaded += 1
+            const percentage = (partsUploaded/urls.length) * 100
+            item.element.querySelector(".loader").style.width = `${percentage}%`
+        }
+        
+        if(!parts.ok){
+            item.element.classList.add("failed")
+            return
+        }
+
+        const completed = await completeUpload(uploadId, storageKey, parts.uploadedParts)
+        if(!completed){
+            item.element.classList.add("failed")
+            return
+        }
+        
+        // clear everything
+        item.element.style.display = "none"
+        formState.files = formState.files.filter((f) => f.id !== item.id)
+    }
+}
+
+async function uploadParts(uploadId, storageKey, urls, encryptedFile, onUpdate){
     const uploadedParts = [];
     const uploadPromises = [];
-
-    const chunkSize = Math.ceil(fileSize/urls.length)
-    let offset = 0;
     
+    const fileSize = encryptedFile.length // Uint8Array.length()
+    const chunkSize = Math.ceil(fileSize/urls.length)
+    
+    let offset = 0;
     for (const urlObj of urls) {
-        const chunk = file.slice(offset, offset + chunkSize);
+        const chunk = encryptedFile.slice(offset, offset + chunkSize);
         offset += chunkSize;
 
-        const promise = fetch(urlObj.url, {
+        const partUploadPromise = fetch(urlObj.url, {
             method: "PUT",
             body: chunk
         }).then((response) => {
@@ -141,7 +154,7 @@ async function uploadParts(uploadId, storageKey, urls, file, fileSize, onUpdate)
             onUpdate(urlObj.partNumber)
         });
 
-        uploadPromises.push(promise);
+        uploadPromises.push(partUploadPromise);
     }
     
     await Promise.all(uploadPromises);
@@ -163,4 +176,6 @@ async function completeUpload(uploadId, storageKey, uploadedParts){
         }),
         credentials: "include"
     });
+    
+    return res.ok
 }

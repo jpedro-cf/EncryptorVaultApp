@@ -15,14 +15,14 @@ public class Folder : BaseEncryptedEntity
         return ParentFolderId is null;
     }
 
-    public static Folder CreateRoot(string name, Guid ownerId, string encryptedKey)
+    public static Folder CreateRoot(string name, Guid ownerId, string encryptedKey, string keyEncryptedByRoot)
     {
         return new Folder
         {
             Name = name,
             OwnerId = ownerId,
             EncryptedKey = encryptedKey,
-            KeyEncryptedByRoot = encryptedKey,
+            KeyEncryptedByRoot = keyEncryptedByRoot,
         };
     }
 
