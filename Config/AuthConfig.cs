@@ -9,6 +9,11 @@ public static class AuthConfig
 {
     public static void AddAuthConfig(this WebApplicationBuilder builder, IConfiguration configuration, RSA publicKey)
     {
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            options.LoginPath = "/Auth"; // redirect here if unauthorized
+        });
+        
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

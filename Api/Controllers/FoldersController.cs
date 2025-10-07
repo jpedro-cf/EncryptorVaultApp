@@ -14,28 +14,36 @@ public class FoldersController(FoldersService foldersService) : ControllerBase
 {
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Create([FromBody] CreateFolderRequest data)
+    public async Task<IResult> Create([FromBody] CreateFolderRequest data)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return Results.BadRequest(ModelState);
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await foldersService.Create(Guid.Parse(userId!), data);
+        if (!result.IsSuccess)
+        {
+            return result.Error!.ToHttpResult();
+        }
         
-        return Ok(result);
+        return Results.Ok(result.Data);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetFolder([FromRoute] Guid id, [FromQuery] GetFolderRequest data)
+    public async Task<IResult> GetFolder([FromRoute] Guid id, [FromQuery] GetFolderRequest data)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(data);
+            return Results.BadRequest(data);
         }
         var result = await foldersService.GetFolder(id, null, data);
+        if (!result.IsSuccess)
+        {
+            return result.Error!.ToHttpResult();
+        }
 
-        return Ok(result);
+        return Results.Ok(result.Data);
     }
 }

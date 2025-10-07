@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+    <Folder Include="secrets\" />
     <Folder Include="Web\" />
   </ItemGroup>
 

@@ -17,33 +17,35 @@ public class AuthController(
     SignInManager<User> signInManager) : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterUserRequest data)
+    public async Task<IResult> Register([FromBody] RegisterUserRequest data)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(data);
+            return Results.BadRequest(data);
         }
         
-        await usersService.Create(data);
+        var result = await usersService.Create(data);
+        if (!result.IsSuccess)
+        {
+            return result.Error!.ToHttpResult();
+        }
 
-        return Created();
+        return Results.Created();
 
     }
     
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest data)
+    public async Task<IResult> Login([FromBody] LoginRequest data)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(data);
+            return Results.BadRequest(data);
         }
 
         var result = await authService.Login(data);
-        if (result.RequiresTwoFactor)
+        if (!result.IsSuccess)
         {
-            return Unauthorized(
-                new TwoFactorRequiredException("Two Factor authentication required.")
-                .ToProblemDetail());
+            return result.Error!.ToHttpResult();
         }
 
         var cookieOptions = new CookieOptions
@@ -54,55 +56,67 @@ public class AuthController(
             Secure = true, 
             SameSite = SameSiteMode.Lax 
         };
-        Response.Cookies.Append("accessToken", result.Token, cookieOptions);
+        Response.Cookies.Append("accessToken", result.Data!.Token, cookieOptions);
 
-        return Ok(result);
+        return Results.Ok(result.Data);
 
     }
 
     [HttpPost("logout")]
     [Authorize]
-    public async Task<IActionResult> Logout()
+    public async Task<IResult> Logout()
     {
         Response.Cookies.Delete("accessToken");
         await signInManager.SignOutAsync();
-        return NoContent();
+        return Results.NoContent();
     }
 
     [HttpGet("mfa")]
     [Authorize]
-    public async Task<IActionResult> GetMfaKey()
+    public async Task<IResult> GetMfaKey()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await authService.GetMfaKey(Guid.Parse(userId!));
+        if (!result.IsSuccess)
+        {
+            return result.Error!.ToHttpResult();
+        }
         
-        return Ok(result);
+        return Results.Ok(result.Data!);
     }
     
     [HttpPost("mfa")]
     [Authorize]
-    public async Task<IActionResult> SetupMfa([FromBody] SetupMfaRequest data)
+    public async Task<IResult> SetupMfa([FromBody] SetupMfaRequest data)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(data);
+            return Results.BadRequest(data);
         }
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        await authService.SetupMfa(Guid.Parse(userId!),data.Token);
+        var result = await authService.SetupMfa(Guid.Parse(userId!), data.Token);
+        if (!result.IsSuccess)
+        {
+            return result.Error!.ToHttpResult();
+        }
         
-        return NoContent();
+        return Results.NoContent();
     }
     
     [HttpPost("mfa/login")]
-    public async Task<IActionResult> LoginMfa([FromBody] LoginMfaRequest data)
+    public async Task<IResult> LoginMfa([FromBody] LoginMfaRequest data)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(data);
+            return Results.BadRequest(data);
         }
         
         var result = await authService.LoginMfa(data.Code);
+        if (!result.IsSuccess)
+        {
+            return result.Error!.ToHttpResult();
+        }
         
         var cookieOptions = new CookieOptions
         {
@@ -112,8 +126,8 @@ public class AuthController(
             Secure = true, 
             SameSite = SameSiteMode.Lax 
         };
-        Response.Cookies.Append("accessToken", result.Token, cookieOptions);
+        Response.Cookies.Append("accessToken", result.Data!.Token, cookieOptions);
         
-        return Ok(result);
+        return Results.Ok(result.Data);
     }
 }

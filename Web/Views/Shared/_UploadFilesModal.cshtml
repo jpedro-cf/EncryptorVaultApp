@@ -1,0 +1,42 @@
+<div id="add-file-modal" class="modal" tabindex="-1" aria-labelledby="add-file-modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-neutral-100">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-semibold">Add File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form>
+                <div class="modal-body">
+                    <div id="drag-drop">
+                        <div class="text-center">
+                            <i data-lucide="file-up"></i>
+                            <div>Drag & Drop or <span class="text-purple-600">Choose File</span> to upload</div>
+                        </div>
+                        <input type="file" id="drag-drop-file-input" hidden multiple/>
+                    </div>
+                    <div class="files d-flex flex-column gap-2">
+                        <div class="file-info d-none">
+                            <div class="content">
+                                <div class="icon">
+                                    <i data-lucide="file-spreadsheet" class=""></i>
+                                </div>
+                                <div class="data">
+                                    <span class="title">Title</span>
+                                    <span class="size">Title</span>
+                                </div>
+                                <button type="button" class="close btn btn-sm">
+                                    <i data-lucide="x" width="20" height="20"></i>
+                                </button>
+                            </div>
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-neutral-300" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-purple">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

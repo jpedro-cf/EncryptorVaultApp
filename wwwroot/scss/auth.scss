@@ -1,0 +1,12 @@
+#auth-page{
+  min-height: 100vh;
+  position: relative;
+  background: url('../images/background-2.jpg') center/cover no-repeat;
+  &::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgb(204, 181, 231, 97%), rgba(245, 246, 252, 1));
+    opacity: 1;
+  }
+}

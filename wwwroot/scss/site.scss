@@ -1,0 +1,57 @@
+@import "bootstrap/bootstrap";
+@import "recent-activity";
+@import "upload-files";
+
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+}
+
+.file-card{
+  padding: .675rem;
+  .icon{
+    width: 28px;
+    height: 28px;
+  }
+  .title{
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .size {
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .date,{
+    font-weight: 300;
+    font-size: 12px;
+  }
+}
+
+.folder-card{
+  padding: .675rem;
+  .icon{
+    width: 28px;
+    height: 28px;
+  }
+  .title{
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .date{
+    font-weight: 300;
+    font-size: 12px;
+  }
+}

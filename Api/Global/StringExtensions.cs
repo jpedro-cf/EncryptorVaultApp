@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text;
 using QRCoder;
 
 namespace MyMVCProject.Api.Global;
@@ -26,6 +25,11 @@ public static class StringExtensions
     public static string ToBase64(this string value)
     {
         return Convert.ToBase64String(GetBytes(value));
+    }
+    
+    public static string ToBase64(this byte[] value)
+    {
+        return Convert.ToBase64String(value);
     }
 
     public static string ToMd5Base64(this string value)

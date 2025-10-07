@@ -1,0 +1,15 @@
+#recent-activity {
+  min-width: 240px;
+  .activity {
+    .content {
+      font-size: 14px;
+      .title {
+        font-weight: 600;
+      }
+      .date {
+        font-weight: 300;
+        font-size: 12px;
+      }
+    }
+  }
+}

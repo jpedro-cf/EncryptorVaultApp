@@ -11,7 +11,6 @@ public class File : BaseEncryptedEntity
     [Required]
     public long Size { get; set; }
     
-    [Required]
-    public Guid ParentFolderId { get; set; }
-    public Folder ParentFolder { get; set; }
+    public Guid? ParentFolderId { get; set; }
+    public Folder? ParentFolder { get; set; }
 }

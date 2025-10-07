@@ -1,0 +1,33 @@
+@{
+    var iconLookup = new Dictionary<string, string>
+    {
+        { "UPLOAD", "upload" },
+        { "DELETE", "trash-2" },
+        { "SHARE", "link" },
+    };
+}
+
+<aside id="recent-activity" class="border border-start bg-white border-neutral-200 px-4 py-3">
+    <h3 class="fw-semibold fs-5">Recent Activity</h3>
+    <hr class="border-neutral-400">
+    <div class="d-flex flex-column gap-4">
+        <div class="activity d-flex align-items-center gap-2">
+            <div class="d-flex justify-content-center align-items-center bg-purple-300 text-purple-900 p-2 rounded-circle">
+                <i height="20" width="20" data-lucide="@iconLookup["UPLOAD"]"></i>
+            </div>
+            <div class="content">
+                <span class="title">Uploaded 1 file</span>
+                <span class="date d-block">@DateTime.UtcNow</span>
+            </div>
+        </div>
+        <div class="activity d-flex align-items-center gap-2">
+            <div class="d-flex justify-content-center align-items-center bg-purple-300 text-purple-900 p-2 rounded-circle">
+                <i height="20" width="20" data-lucide="@iconLookup["SHARE"]"></i>
+            </div>
+            <div class="content">
+                <span class="title">Shared 1 file</span>
+                <span class="date d-block">@DateTime.UtcNow</span>
+            </div>
+        </div>
+    </div>
+</aside>

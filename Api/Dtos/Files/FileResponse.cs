@@ -6,11 +6,10 @@ public record FileResponse(
     Guid Id,
     string Name,
     string StorageKey,
-    string EncryptedKey,
-    string KeyEncryptedByRoot,
-    string RootKeySalt,
+    EncryptionKey EncryptedKey,
+    EncryptionKey KeyEncryptedByRoot,
     Guid OwnerId,
-    Guid ParentId,
+    Guid? ParentId,
     DateTime CreatedAt)
 {
     public static FileResponse From(File file)
@@ -19,9 +18,8 @@ public record FileResponse(
             file.Id, 
             file.Name, 
             file.StorageKey,
-            file.EncryptedKey, 
-            file.KeyEncryptedByRoot, 
-            file.RootKeySalt,
+            file.GetEncryptedKey(), 
+            file.GetRootKey(), 
             file.OwnerId, 
             file.ParentFolderId,
             file.CreatedAt);

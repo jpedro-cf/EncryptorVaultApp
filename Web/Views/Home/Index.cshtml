@@ -1,8 +1,52 @@
-﻿@{
+﻿@using MyMVCProject.Web.Views.Utils
+@{
     ViewData["Title"] = "Home Page";
+    Layout = "_LayoutDashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-flex justify-content-between align-items-center gap-2">
+    <div class="d-flex align-items-center gap-1">
+        <i data-lucide="library-big" width="28" height="28"></i>
+        <h2 class="m-0 fw-semibold fs-4">Main Library</h2>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#add-file-modal">Add File</button>
+        <button class="btn btn-neutral-200">Add Folder</button>
+    </div>
+</div>
+<hr class="border-neutral-400"/>
+<div id="library-content">
+    <div class="row g-2">
+        @for (var i = 0; i < 3; i++)
+        {
+            <div class="col-4">
+                <div class="file-card d-flex align-items-start gap-2 bg-purple-200 rounded-2">
+                    <div class="icon bg-purple-600 text-purple-100 rounded-circle d-flex align-items-center justify-content-center">
+                        <i data-lucide="file-spreadsheet" width="18" height="18"></i>
+                    </div>
+                    <div>
+                        <span class="title">Título</span>
+                        <span class="date d-block">@DateTime.UtcNow</span>
+                    </div>
+                    <span class="size ms-auto">@Utils.FormatFileSize(45623678)</span>
+                </div>
+            </div>
+        }
+        @for (var i = 0; i < 3; i++)
+        {
+            <div class="col-4">
+                <div class="folder-card d-flex align-items-start gap-2 bg-yellow-100 rounded-2">
+                    <div class="icon bg-yellow-500 text-yellow-100 rounded-circle d-flex align-items-center justify-content-center">
+                        <i data-lucide="folder-closed" width="18" height="18"></i>
+                    </div>
+                    <div>
+                        <span class="title">Título</span>
+                        <span class="date d-block">@DateTime.UtcNow</span>
+                    </div>
+                    <i data-lucide="external-link" class="ms-auto text-yellow-900"></i>
+                </div>
+            </div>
+        }
+        
+    </div>
 </div>

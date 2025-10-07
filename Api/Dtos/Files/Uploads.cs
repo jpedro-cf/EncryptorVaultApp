@@ -15,17 +15,8 @@ public class UploadFileRequest
     [Required(ErrorMessage = "Root encryption key is requried.")]
     public string RootEncryptionKey { get; set; }
 
-    [Required(ErrorMessage = "The ID of the parent folder is required.")]
-    public Guid ParentFolderId { get; set; }
+    public Guid? ParentFolderId { get; set; }
 }
-
-public record UploadResponse(
-    string UploadId,
-    string Key,
-    List<PresignedPartUrl> Urls,
-    string EncryptionKey,
-    string EncryptionKeyMd5Base64
-) : InitiateUploadResponse(UploadId, Key, Urls);
 
 public record InitiateUploadResponse(string UploadId, string Key, List<PresignedPartUrl> Urls);
 
@@ -50,9 +41,6 @@ public class CompleteUploadRequest
 
     [Required(ErrorMessage = "CompletedParts is required.")]
     public List<CompletedPart> Parts { get; set; }
-    
-    [Required(ErrorMessage = "Encryption key is required.")]
-    public string EncryptionKey { get; set; }
 }
 
 public record UploadCompletedResponse(string Key);

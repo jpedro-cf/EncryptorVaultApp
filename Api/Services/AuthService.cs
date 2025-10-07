@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyMVCProject.Api.Dtos.Users;
 using MyMVCProject.Api.Entities;
-using MyMVCProject.Api.Global.Exceptions;
+using MyMVCProject.Api.Global.Errors;
 using MyMVCProject.Api.Infra.Security;
 using MyMVCProject.Api.Global;
 using MyMVCProject.Config;
@@ -15,48 +15,48 @@ public class AuthService(
     SignInManager<User> signInManager,
     JwtTokenHandler tokenHandler)
 {
-    public async Task<LoginResponse> Login(LoginRequest data)
+    public async Task<Result<LoginResponse>> Login(LoginRequest data)
     {
         var user = await ctx.Users.FirstOrDefaultAsync(u => u.Email == data.Email);
         if (user == null)
         {
-            throw new UnauthorizedException("Incorrect e-mail or password.");
+             return Result<LoginResponse>.Failure(new UnauthorizedError("Incorrect e-mail or password."));
         }
         
         var result = await signInManager.PasswordSignInAsync(user, data.Password, false,false);
         if (!result.Succeeded && !result.RequiresTwoFactor)
         {
-            throw new UnauthorizedException("Incorrect e-mail or password.");
+             return Result<LoginResponse>.Failure(new UnauthorizedError("Incorrect e-mail or password."));
         }
 
         if (result.RequiresTwoFactor)
         {
-            return new LoginResponse(UserResponse.From(user), string.Empty, result.RequiresTwoFactor);
+            return Result<LoginResponse>.Failure(new TwoFactorRequiredError("Two Factor authentication required."));
         }
 
         var jwt = tokenHandler.Encode(user, DateTime.Now.AddDays(5));
 
-        return new LoginResponse(UserResponse.From(user), jwt, false);
+        return Result<LoginResponse>.Success(new LoginResponse(UserResponse.From(user), jwt, false));
     }
 
-    public async Task<LoginResponse> LoginMfa(string code)
+    public async Task<Result<LoginResponse>> LoginMfa(string code)
     {
         var codeDigits = new string(code.Where(char.IsDigit).ToArray());
         var result = await signInManager.TwoFactorAuthenticatorSignInAsync(codeDigits, false,false);
         
         if (!result.Succeeded)
         {
-            throw new UnauthorizedException("Invalid code.");
+            return Result<LoginResponse>.Failure(new UnauthorizedError("Invalid code."));
         }
 
         var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
 
         var jwt = tokenHandler.Encode(user!, DateTime.Now.AddDays(5));
 
-        return new LoginResponse(UserResponse.From(user!), jwt, true);
+        return Result<LoginResponse>.Success(new LoginResponse(UserResponse.From(user!), jwt, true));
     }
 
-    public async Task<MfaKeyResponse> GetMfaKey(Guid userId)
+    public async Task<Result<MfaKeyResponse>> GetMfaKey(Guid userId)
     {
         var user = await ctx.Users.FirstAsync(u => u.Id == userId);
         var key = await userManager.GetAuthenticatorKeyAsync(user);
@@ -68,10 +68,10 @@ public class AuthService(
 
         var totpUri = GetTotpUri(key!, user);
 
-        return new MfaKeyResponse(key!, totpUri.GenerateQrCodeBase64());
+        return Result<MfaKeyResponse>.Success(new MfaKeyResponse(key!, totpUri.GenerateQrCodeBase64()));
     }
 
-    public async Task SetupMfa(Guid userId, string token)
+    public async Task<Result<bool>> SetupMfa(Guid userId, string token)
     {
         var user = await ctx.Users.FirstAsync(u => u.Id == userId);
         var tokenProvider = userManager.Options.Tokens.AuthenticatorTokenProvider;
@@ -80,10 +80,11 @@ public class AuthService(
         var ok = await userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, tokenDigits);
         if (!ok)
         {
-            throw new UnauthorizedException("Token invalid.");
+            return Result<bool>.Failure(new UnauthorizedError("Token invalid."));
         }
         
         await userManager.SetTwoFactorEnabledAsync(user, true);
+        return Result<bool>.Success(true);
     }
 
     private string GetTotpUri(string key, User user)

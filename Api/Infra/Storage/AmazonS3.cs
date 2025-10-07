@@ -42,14 +42,12 @@ public class AmazonS3
         _client = new AmazonS3Client(AwsCredentials, config);
     }
 
-    public async Task<InitiateUploadResponse> InitiateUpload(File file, string encryptionKey)
+    public async Task<InitiateUploadResponse> InitiateUpload(File file)
     {
         var initRequest = new InitiateMultipartUploadRequest
         {
             BucketName = BucketName,
-            Key = file.StorageKey,
-            ServerSideEncryptionCustomerMethod = ServerSideEncryptionCustomerMethod.AES256,
-            ServerSideEncryptionCustomerProvidedKey = encryptionKey
+            Key = file.StorageKey
         };
         
         var initResponse = await _client.InitiateMultipartUploadAsync(initRequest);
@@ -70,7 +68,6 @@ public class AmazonS3
                 UploadId = initResponse.UploadId,
                 Expires = DateTime.UtcNow.AddMinutes(30),
                 ContentType = "application/octet-stream",
-                ServerSideEncryptionCustomerMethod = ServerSideEncryptionCustomerMethod.AES256,
             };
 
             var url = await _client.GetPreSignedURLAsync(urlRequest);
@@ -87,9 +84,7 @@ public class AmazonS3
             BucketName = BucketName,
             Key = data.Key,
             UploadId = data.UploadId,
-            PartETags = data.Parts.Select(p => new PartETag(p.PartNumber, p.ETag)).ToList(),
-            SSECustomerAlgorithm = ServerSideEncryptionCustomerMethod.AES256,
-            SSECustomerKey = data.EncryptionKey
+            PartETags = data.Parts.Select(p => new PartETag(p.PartNumber, p.ETag)).ToList()
         };
         
         var response = await _client.CompleteMultipartUploadAsync(completeRequest);

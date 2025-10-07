@@ -177,12 +177,8 @@ namespace MyMVCProject.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ParentFolderId")
+                    b.Property<Guid?>("ParentFolderId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("RootKeySalt")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<long>("Size")
                         .HasColumnType("bigint");
@@ -228,10 +224,6 @@ namespace MyMVCProject.Migrations
 
                     b.Property<Guid?>("ParentFolderId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("RootKeySalt")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -369,8 +361,7 @@ namespace MyMVCProject.Migrations
                     b.HasOne("MyMVCProject.Api.Entities.Folder", "ParentFolder")
                         .WithMany("Files")
                         .HasForeignKey("ParentFolderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Owner");
 

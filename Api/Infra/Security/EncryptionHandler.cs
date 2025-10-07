@@ -1,38 +1,46 @@
 using System.Security.Cryptography;
-using MyMVCProject.Api.Global.Exceptions;
+using MyMVCProject.Api.Global;
+using MyMVCProject.Api.Global.Errors;
 
 namespace MyMVCProject.Api.Infra.Security;
 
 public class EncryptionHandler
 {
-    public static string Encrypt(string base64Data, string key)
+    public static Result<string> Encrypt(string base64Data, string key)
     {
-        using var aes = Aes.Create();
-
-        aes.Key = Convert.FromBase64String(key);
-        aes.GenerateIV();
-
-        byte[] encryptedData;
-
-        using (var encryptor = aes.CreateEncryptor())
-        using (var msEncrypt = new MemoryStream())
+        try
         {
-            using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-            using (var swEncrypt = new StreamWriter(csEncrypt))
+            using var aes = Aes.Create();
+
+            aes.Key = Convert.FromBase64String(key);
+            aes.GenerateIV();
+
+            byte[] encryptedData;
+
+            using (var encryptor = aes.CreateEncryptor())
+            using (var msEncrypt = new MemoryStream())
             {
-                swEncrypt.Write(base64Data);
+                using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                using (var swEncrypt = new StreamWriter(csEncrypt))
+                {
+                    swEncrypt.Write(base64Data);
+                }
+
+                encryptedData = msEncrypt.ToArray();
             }
 
-            encryptedData = msEncrypt.ToArray();
+            // Combine IV with the encrypted data
+            var combined = aes.IV.Concat(encryptedData).ToArray();
+
+            return Result<string>.Success(Convert.ToBase64String(combined));
         }
-
-        // Combine IV with the encrypted data
-        var combined = aes.IV.Concat(encryptedData).ToArray();
-
-        return Convert.ToBase64String(combined);
+        catch (Exception e)
+        {
+            return Result<string>.Failure(new UnprocessableEntityError(e.Message));
+        }
     }
 
-    public static string Decrypt(string base64Data, string key)
+    public static Result<string> Decrypt(string base64Data, string key)
     {
         var combined = Convert.FromBase64String(base64Data);
 
@@ -51,11 +59,11 @@ public class EncryptionHandler
 
         try
         {
-            return srDecrypt.ReadToEnd();
+            return Result<string>.Success(srDecrypt.ReadToEnd());
         }
         catch (CryptographicException ex)
         {
-            throw new UnprocessableEntityException("Decryption failed.");
+            return Result<string>.Failure(new UnprocessableEntityError("Decryption failed."));
         }
     }
     

@@ -12,29 +12,37 @@ public class FilesController(FilesService filesService): ControllerBase
 {
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Upload([FromBody] UploadFileRequest data)
+    public async Task<IResult> Upload([FromBody] UploadFileRequest data)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(data);
+            return Results.BadRequest(data);
         }
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await filesService.Upload(Guid.Parse(userId!), data);
+        if (!result.IsSuccess)
+        {
+            return result.Error!.ToHttpResult();
+        }
 
-        return Ok(result);
+        return Results.Ok(result.Data);
     }
     [HttpPost("uploads/complete")]
     [Authorize]
-    public async Task<IActionResult> CompleteUpload([FromBody] CompleteUploadRequest data)
+    public async Task<IResult> CompleteUpload([FromBody] CompleteUploadRequest data)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(data);
+            return Results.BadRequest(data);
         }
         
         var result = await filesService.CompleteUpload(data);
+        if (!result.IsSuccess)
+        {
+            return result.Error!.ToHttpResult();
+        }
 
-        return Ok(result);
+        return Results.Ok(result.Data);
     }
 }

@@ -5,9 +5,8 @@ namespace MyMVCProject.Api.Dtos.Folders;
 public record FolderResponse(
     Guid Id,
     string Name,
-    string EncryptedKey,
-    string KeyEncryptedByRoot,
-    string RootKeySalt,
+    EncryptionKey EncryptedKey,
+    EncryptionKey KeyEncryptedByRoot,
     Guid OwnerId,
     Guid? ParentId,
     DateTime CreatedAt)
@@ -17,9 +16,8 @@ public record FolderResponse(
         return new FolderResponse(
             folder.Id, 
             folder.Name, 
-            folder.EncryptedKey, 
-            folder.KeyEncryptedByRoot, 
-            folder.RootKeySalt,
+            folder.GetEncryptedKey(), 
+            folder.GetRootKey(),
             folder.OwnerId, 
             folder.ParentFolderId,
             folder.CreatedAt);

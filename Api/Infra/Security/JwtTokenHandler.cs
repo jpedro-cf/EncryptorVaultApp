@@ -3,6 +3,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using MyMVCProject.Api.Entities;
+using MyMVCProject.Api.Global;
+using MyMVCProject.Api.Global.Errors;
 
 namespace MyMVCProject.Api.Infra.Security;
 
@@ -42,7 +44,7 @@ public class JwtTokenHandler(IConfiguration config, RSA privateKey, RSA publicKe
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public ClaimsPrincipal Decode(string token)
+    public Result<ClaimsPrincipal> Decode(string token)
     {
         var validationParams = new TokenValidationParameters
         {
@@ -56,6 +58,14 @@ public class JwtTokenHandler(IConfiguration config, RSA privateKey, RSA publicKe
             IssuerSigningKey = new RsaSecurityKey(publicKey)
         };
 
-        return new JwtSecurityTokenHandler().ValidateToken(token, validationParams, out _);
+        try
+        {
+            var claims = new JwtSecurityTokenHandler().ValidateToken(token, validationParams, out _);
+            return Result<ClaimsPrincipal>.Success(claims);
+        }
+        catch (Exception e)
+        {
+            return Result<ClaimsPrincipal>.Failure(new UnauthorizedError("Token failed."));
+        }
     }
 }

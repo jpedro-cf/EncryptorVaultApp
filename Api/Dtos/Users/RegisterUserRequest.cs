@@ -12,6 +12,6 @@ public class RegisterUserRequest
     public string Password { get; set; }
     
     [Required(ErrorMessage = "Password confirmation is required.")]
-    [Compare(nameof(Password), ErrorMessage = "Passwords doesn't match.")]
+    [Compare(nameof(Password), ErrorMessage = "The passwords are not the same.")]
     public string PasswordConfirmation { get; set; }
 }

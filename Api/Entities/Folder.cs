@@ -15,7 +15,7 @@ public class Folder : BaseEncryptedEntity
         return ParentFolderId is null;
     }
 
-    public static Folder CreateRoot(string name, Guid ownerId, string encryptedKey, string rootKeySalt)
+    public static Folder CreateRoot(string name, Guid ownerId, string encryptedKey)
     {
         return new Folder
         {
@@ -23,7 +23,6 @@ public class Folder : BaseEncryptedEntity
             OwnerId = ownerId,
             EncryptedKey = encryptedKey,
             KeyEncryptedByRoot = encryptedKey,
-            RootKeySalt = rootKeySalt
         };
     }
 
@@ -32,8 +31,7 @@ public class Folder : BaseEncryptedEntity
         Guid ownerId,
         Guid parentFolderId,
         string encryptedKey, 
-        string keyEncryptedByRoot, 
-        string rootKeySalt)
+        string keyEncryptedByRoot)
     {
         return new Folder
         {
@@ -41,8 +39,7 @@ public class Folder : BaseEncryptedEntity
             OwnerId = ownerId,
             ParentFolderId = parentFolderId,
             EncryptedKey = encryptedKey,
-            KeyEncryptedByRoot = keyEncryptedByRoot,
-            RootKeySalt = rootKeySalt
+            KeyEncryptedByRoot = keyEncryptedByRoot
         };
     }
 }
