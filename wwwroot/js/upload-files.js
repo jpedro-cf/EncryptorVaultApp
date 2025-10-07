@@ -12,21 +12,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = modal.querySelector('form')
 
     modal.addEventListener("show.bs.modal", (e) => {
-        // clear everything
-        formState = {files: []}
-        const hiddenElement = container.querySelector(".d-none");
-        container.innerHTML = '';
-        if (hiddenElement) {
-            container.appendChild(hiddenElement);
-        }
-        
+        cleanUp()
         dragDrop(handleItemsSelect)
     })
     
     form.addEventListener("submit",async (e) => {
         e.preventDefault()
         await handleFormSubmit(e)
+        cleanUp()
     })
+    
+    function cleanUp(){
+        formState = {files: []}
+        const hiddenElement = container.querySelector(".d-none");
+        container.innerHTML = '';
+        if (hiddenElement) {
+            container.appendChild(hiddenElement);
+        }
+    }
 })
 
 function handleItemsSelect(files){
@@ -38,7 +41,7 @@ function handleItemsSelect(files){
     const container = modal.querySelector(".files")
     const fileItem = container.querySelector(".file-info")
     
-    for(const file of newFiles){
+    for (const file of newFiles){
         const newItem = fileItem.cloneNode(true)
         
         newItem.classList.remove("d-none")
@@ -73,7 +76,8 @@ async function encryptFile(file){
 }
 
 async function handleFormSubmit(e){
-    for(const item of formState.files){
+    for (const item of formState.files){
+        
         const file = await encryptFile(item.data)
         
         const initialUpload = await fetch("/api/files", {
@@ -87,14 +91,20 @@ async function handleFormSubmit(e){
             }),
             credentials: "include"
         })
+        
         if(!initialUpload.ok){
-            return
+            item.element.classList.add("failed")
+            continue
         }
         
         const { uploadId, key: storageKey, urls} = await initialUpload.json()
         
         let partsUploaded = 0
-        
+        function updateInterface(completedPartNumber){
+            partsUploaded += 1
+            const percentage = (partsUploaded/urls.length) * 100
+            item.element.querySelector(".loader").style.width = `${percentage}%`
+        }
         
         const parts = await uploadParts(
             uploadId,
@@ -104,21 +114,15 @@ async function handleFormSubmit(e){
             updateInterface
         )
         
-        function updateInterface(completedPartNumber){
-            partsUploaded += 1
-            const percentage = (partsUploaded/urls.length) * 100
-            item.element.querySelector(".loader").style.width = `${percentage}%`
-        }
-        
         if(!parts.ok){
             item.element.classList.add("failed")
-            return
+            continue
         }
 
         const completed = await completeUpload(uploadId, storageKey, parts.uploadedParts)
         if(!completed){
             item.element.classList.add("failed")
-            return
+            continue
         }
         
         // clear everything
