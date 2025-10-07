@@ -64,13 +64,9 @@ function handleItemsSelect(files){
     }
 }
 
-async function encryptFile(file){
-    const rootKey = state.keys["root"]
-    const fileKey = Encryption.generateRandomBase64Key()
-
+async function encryptFile(file, fileKey, rootKey){
     const encryptedKey = await Encryption.encrypt(stringToUint8Array(fileKey), rootKey)
     const keyEncryptedByRoot = await Encryption.encrypt(stringToUint8Array(fileKey), rootKey)
-
 
     const encryptedFile = await Encryption.encrypt(await fileToUin8Array(file), fileKey)
 
@@ -78,15 +74,18 @@ async function encryptFile(file){
 }
 
 async function handleFormSubmit(e){
+    const rootKey = state.keys["root"]
     for (const item of formState.files){
+        const fileKey = Encryption.generateRandomBase64Key()
         
-        const file = await encryptFile(item.data)
+        const file = await encryptFile(item.data, fileKey, rootKey)
+        const encryptedFileName = await Encryption.encrypt(stringToUint8Array(item.data.name), fileKey)
         
         const initialUpload = await fetch("/api/files", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
-                fileName: item.data.name,
+                fileName: uint8ArrayToBase64(encryptedFileName.combined),
                 fileSize: file.encryptedFile.combined.length,
                 encryptedKey: uint8ArrayToBase64(file.encryptedKey.combined),
                 keyEncryptedByRoot: uint8ArrayToBase64(file.keyEncryptedByRoot.combined)
