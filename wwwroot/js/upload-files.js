@@ -8,12 +8,14 @@ let modal = document.getElementById('add-file-modal')
 
 document.addEventListener("DOMContentLoaded", () => {
     modal = document.getElementById('add-file-modal')
+    
+    dragDrop(handleItemsSelect)
+    
     const container = modal.querySelector(".files")
     const form = modal.querySelector('form')
 
     modal.addEventListener("show.bs.modal", (e) => {
         cleanUp()
-        dragDrop(handleItemsSelect)
     })
     
     form.addEventListener("submit",async (e) => {

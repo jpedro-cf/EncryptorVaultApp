@@ -14910,7 +14910,7 @@ textarea.form-control-lg {
 }
 #add-file-modal .files {
   margin-top: 2rem;
-  max-height: 300px;
+  max-height: calc(100vh - 300px);
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -14928,7 +14928,7 @@ textarea.form-control-lg {
 #add-file-modal .file-info .content {
   display: flex;
   align-items: start;
-  padding: 0.5rem;
+  padding: 0.875rem;
   gap: 0.5rem;
 }
 #add-file-modal .file-info .content .data {
