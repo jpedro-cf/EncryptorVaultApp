@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using MyMVCProject.Api.Dtos.Users;
 using MyMVCProject.Api.Entities;
 using MyMVCProject.Api.Global;
@@ -22,6 +23,17 @@ public class UsersService(AppDbContext ctx, UserManager<User> userManager)
         {
             return Result<bool>.Failure(new UnauthorizedError(result.Errors.First().Description));
         }
+        return Result<bool>.Success(true);
+    }
+
+    public async Task<Result<bool>> UpdateVaultKey(Guid userId, string salt)
+    {
+        var user = await ctx.Users.FirstAsync(u => u.Id == userId);
+
+        user.VaultKeySalt = salt;
+
+        await ctx.SaveChangesAsync();
+        
         return Result<bool>.Success(true);
     }
 }

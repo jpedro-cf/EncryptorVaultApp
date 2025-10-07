@@ -1,4 +1,4 @@
-import {base64ToUint8Array, uint8ArrayToBase64} from "./utils.js";
+import {base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64} from "./utils.js";
 
 export class Encryption {
     /**
@@ -56,6 +56,65 @@ export class Encryption {
         );
 
         return new Uint8Array(decryptedData);
+    }
+
+    /**
+     * @param {string} secret - Base64 encoded secret
+     * @returns {Promise<{salt: string, key: string}>} - Salt & Key
+     */
+    static async deriveBase64KeyFromSecret(secret){
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+
+        const keyMaterial = await crypto.subtle.importKey(
+            'raw',
+            stringToUint8Array(secret),
+            { name: 'PBKDF2' },
+            false,
+            ['deriveBits', 'deriveKey']
+        );
+
+        const derivedKey = await crypto.subtle.deriveBits(
+            {
+                name: 'PBKDF2',
+                salt: salt,
+                iterations: 100000,
+                hash: 'SHA-256',
+            },
+            keyMaterial,
+            256
+        );
+
+        return {salt: uint8ArrayToBase64(salt), key: uint8ArrayToBase64(new Uint8Array(derivedKey))};
+    }
+
+    /**
+     * @param {string} salt - Base64 encoded salt
+     * @param {string} secret - Base64 encoded secret     
+     * @returns {Promise<string>} - Salt & Key
+     */
+    static async deriveBase64KeyFromSecret(salt, secret){
+        const saltUint8Array = base64ToUint8Array(salt)
+        
+        const keyMaterial = await crypto.subtle.importKey(
+            'raw',
+            stringToUint8Array(secret),
+            { name: 'PBKDF2' },
+            false,
+            ['deriveBits', 'deriveKey']
+        );
+
+        const derivedKey = await crypto.subtle.deriveBits(
+            {
+                name: 'PBKDF2',
+                salt: saltUint8Array,
+                iterations: 100000,
+                hash: 'SHA-256',
+            },
+            keyMaterial,
+            256
+        );
+        
+        return uint8ArrayToBase64(new Uint8Array(derivedKey))
     }
     
     static generateRandomBase64Key(){
