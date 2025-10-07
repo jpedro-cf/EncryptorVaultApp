@@ -11,7 +11,7 @@ namespace MyMVCProject.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController(
+public class AuthenticationController(
     UsersService usersService, 
     AuthService authService, 
     SignInManager<User> signInManager) : ControllerBase

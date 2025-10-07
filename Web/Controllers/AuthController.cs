@@ -6,7 +6,7 @@ using MyMVCProject.Web.Models.Auth;
 namespace MyMVCProject.Web.Controllers;
 
 [Route("Auth")]
-public class AuthMvcController(AuthService authService, UsersService usersService) : Controller
+public class AuthController(AuthService authService, UsersService usersService) : Controller
 {
     [HttpGet]
     public IActionResult Index()
