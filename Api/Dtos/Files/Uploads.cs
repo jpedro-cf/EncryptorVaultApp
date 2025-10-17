@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MyMVCProject.Api.Dtos.Validations;
 
 namespace MyMVCProject.Api.Dtos.Files;
 
@@ -9,6 +10,10 @@ public class UploadFileRequest
     
     [Required(ErrorMessage = "File size is required")]
     public long FileSize { get; set; }
+    
+    [Required(ErrorMessage = "Content type is required")]
+    [ValidContentType]
+    public string ContentType { get; set; }
     
     [Required(ErrorMessage = "Encrypted key is requried.")]
     public string EncryptedKey { get; set; }

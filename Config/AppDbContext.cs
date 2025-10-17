@@ -48,5 +48,9 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
             .Property(f => f.Name)
             .HasMaxLength(256)
             .IsRequired();
+        
+        builder.Entity<File>()
+            .Property(f => f.Status)
+            .HasConversion<string>();
     }
 }

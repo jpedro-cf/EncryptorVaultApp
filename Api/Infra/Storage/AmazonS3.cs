@@ -9,23 +9,17 @@ namespace MyMVCProject.Api.Infra.Storage;
 
 public class AmazonS3
 {
-    public string AccessKey { get; private set; }
-    public string SecretKey { get; private set; }
     public string BucketName { get; private set; }
-
-    public BasicAWSCredentials AwsCredentials { get; private set; }
 
     private readonly IHostEnvironment Env;
     private readonly AmazonS3Client _client;
 
     public AmazonS3(IConfiguration configuration, IHostEnvironment env)
     {
-        AccessKey = configuration["AWS:AccessKey"] ?? "";
-        SecretKey = configuration["AWS:SecretKey"] ?? "";
         BucketName = configuration["AWS:BucketName"] ?? "";
         Env = env;
         
-        AwsCredentials = new BasicAWSCredentials(AccessKey, SecretKey);
+        var credentials = new BasicAWSCredentials(configuration["AWS:AccessKey"] ?? "", configuration["AWS:SecretKey"] ?? "");
 
         var config = new AmazonS3Config
         {
@@ -39,7 +33,7 @@ public class AmazonS3
             config.UseHttp = true;
         }
         
-        _client = new AmazonS3Client(AwsCredentials, config);
+        _client = new AmazonS3Client(credentials, config);
     }
 
     public async Task<InitiateUploadResponse> InitiateUpload(File file)
@@ -47,8 +41,10 @@ public class AmazonS3
         var initRequest = new InitiateMultipartUploadRequest
         {
             BucketName = BucketName,
-            Key = file.StorageKey
+            Key = file.StorageKey,
         };
+        
+        initRequest.Metadata.Add("fileId", file.Id.ToString());
         
         var initResponse = await _client.InitiateMultipartUploadAsync(initRequest);
         var presignedUrls = new List<PresignedPartUrl>();
@@ -90,5 +86,10 @@ public class AmazonS3
         var response = await _client.CompleteMultipartUploadAsync(completeRequest);
 
         return new UploadCompletedResponse(response.Key);
+    }
+
+    public async Task<GetObjectMetadataResponse> GetObjectMetadata(string key)
+    {
+        return await _client.GetObjectMetadataAsync(BucketName, key);
     }
 }
