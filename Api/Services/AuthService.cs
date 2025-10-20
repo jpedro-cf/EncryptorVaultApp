@@ -5,6 +5,7 @@ using MyMVCProject.Api.Entities;
 using MyMVCProject.Api.Global.Errors;
 using MyMVCProject.Api.Infra.Security;
 using MyMVCProject.Api.Global;
+using MyMVCProject.Api.Global.Helpers;
 using MyMVCProject.Config;
 
 namespace MyMVCProject.Api.Services;

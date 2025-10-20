@@ -2,7 +2,7 @@ using System.Net.Mime;
 using System.Security.Cryptography;
 using QRCoder;
 
-namespace MyMVCProject.Api.Global;
+namespace MyMVCProject.Api.Global.Helpers;
 
 public static class StringExtensions
 {

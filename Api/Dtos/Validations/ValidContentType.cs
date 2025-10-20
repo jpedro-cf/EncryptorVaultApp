@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using MyMVCProject.Api.Global;
+using MyMVCProject.Api.Global.Helpers;
 
 namespace MyMVCProject.Api.Dtos.Validations;
 
