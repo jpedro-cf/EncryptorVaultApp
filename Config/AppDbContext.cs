@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
 {
     public DbSet<Folder> Folders { get; set; }
     public DbSet<File> Files { get; set; }
+    public DbSet<StorageUsage> StorageUsage { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -51,6 +52,16 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
         
         builder.Entity<File>()
             .Property(f => f.Status)
+            .HasConversion<string>();
+
+        builder.Entity<StorageUsage>()
+            .HasOne(s => s.User)
+            .WithMany(u => u.StorageUsages)
+            .HasForeignKey(s => s.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Entity<StorageUsage>()
+            .Property(s => s.ContentType)
             .HasConversion<string>();
     }
 }

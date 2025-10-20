@@ -25,13 +25,8 @@ public class AuthenticationController(
         }
         
         var result = await usersService.Create(data);
-        if (!result.IsSuccess)
-        {
-            return result.Error!.ToHttpResult();
-        }
-
-        return Results.Created();
-
+        
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Created();
     }
     
     [HttpPost("login")]
@@ -59,7 +54,6 @@ public class AuthenticationController(
         Response.Cookies.Append("accessToken", result.Data!.Token, cookieOptions);
 
         return Results.Ok(result.Data);
-
     }
 
     [HttpPost("logout")]
@@ -77,12 +71,8 @@ public class AuthenticationController(
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await authService.GetMfaKey(Guid.Parse(userId!));
-        if (!result.IsSuccess)
-        {
-            return result.Error!.ToHttpResult();
-        }
         
-        return Results.Ok(result.Data!);
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data!);
     }
     
     [HttpPost("mfa")]
@@ -96,12 +86,8 @@ public class AuthenticationController(
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await authService.SetupMfa(Guid.Parse(userId!), data.Token);
-        if (!result.IsSuccess)
-        {
-            return result.Error!.ToHttpResult();
-        }
         
-        return Results.NoContent();
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
     }
     
     [HttpPost("mfa/login")]

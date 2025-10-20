@@ -1,6 +1,4 @@
 using System.Security.Cryptography;
-using Amazon.S3;
-using MyMVCProject.Api.Infra.Messaging;
 using MyMVCProject.Api.Infra.Security;
 using MyMVCProject.Api.Infra.Storage;
 using MyMVCProject.Api.Services;
@@ -12,8 +10,8 @@ public static class ServicesConfig
     public static void AddServicesConfig(this WebApplicationBuilder builder, RSA privateKey, RSA publicKey)
     {
         builder.Services.AddSingleton<AmazonS3>();
-        builder.Services.AddHostedService<AmazonSqs>();
         
+        builder.Services.AddTransient<StorageUsageService>();
         builder.Services.AddTransient<FilesService>();
         builder.Services.AddTransient<UsersService>();
         builder.Services.AddTransient<AuthService>();

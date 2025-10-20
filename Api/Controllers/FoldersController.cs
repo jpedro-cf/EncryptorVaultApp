@@ -21,14 +21,10 @@ public class FoldersController(FoldersService foldersService) : ControllerBase
             return Results.BadRequest(ModelState);
         }
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await foldersService.Create(Guid.Parse(userId!), data);
-        if (!result.IsSuccess)
-        {
-            return result.Error!.ToHttpResult();
-        }
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await foldersService.Create(Guid.Parse(userId), data);
         
-        return Results.Ok(result.Data);
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
     }
 
     [HttpGet("{id}")]
@@ -39,11 +35,7 @@ public class FoldersController(FoldersService foldersService) : ControllerBase
             return Results.BadRequest(data);
         }
         var result = await foldersService.GetFolder(id, null, data);
-        if (!result.IsSuccess)
-        {
-            return result.Error!.ToHttpResult();
-        }
-
-        return Results.Ok(result.Data);
+        
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
     }
 }

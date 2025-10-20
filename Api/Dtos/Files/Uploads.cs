@@ -23,7 +23,7 @@ public class UploadFileRequest
     public Guid? ParentFolderId { get; set; }
 }
 
-public record InitiateUploadResponse(string UploadId, string Key, List<PresignedPartUrl> Urls);
+public record InitiateUploadResponse(string FileId, string UploadId, string Key, List<PresignedPartUrl> Urls);
 
 public record PresignedPartUrl(int PartNumber, string Url);
 
@@ -38,6 +38,9 @@ public class CompletedPart
 
 public class CompleteUploadRequest
 {
+    [Required(ErrorMessage = "File id is required.")]
+    public string FileId { get; set; }
+    
     [Required(ErrorMessage = "Upload id is required.")]
     public string UploadId { get; set; }
     
@@ -49,3 +52,7 @@ public class CompleteUploadRequest
 }
 
 public record UploadCompletedResponse(string Key);
+
+public record UploadPart(DateTime? LastModified, long? Size, int? PartNumber, string? ETag);
+
+public record CancelUploadRequest(string Key, string UploadId);

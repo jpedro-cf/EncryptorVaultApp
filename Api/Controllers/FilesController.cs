@@ -19,14 +19,10 @@ public class FilesController(FilesService filesService): ControllerBase
             return Results.BadRequest(data);
         }
         
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await filesService.Upload(Guid.Parse(userId!), data);
-        if (!result.IsSuccess)
-        {
-            return result.Error!.ToHttpResult();
-        }
-
-        return Results.Ok(result.Data);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await filesService.Upload(Guid.Parse(userId), data);
+        
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
     }
     [HttpPost("uploads/complete")]
     [Authorize]
@@ -37,12 +33,19 @@ public class FilesController(FilesService filesService): ControllerBase
             return Results.BadRequest(data);
         }
         
-        var result = await filesService.CompleteUpload(data);
-        if (!result.IsSuccess)
-        {
-            return result.Error!.ToHttpResult();
-        }
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await filesService.CompleteUpload(Guid.Parse(userId), data);
+        
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
+    }
 
-        return Results.Ok(result.Data);
+    [HttpDelete("{id}")]
+    [Authorize]
+    public async Task<IResult> Delete([FromRoute] string id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await filesService.DeleteFile(Guid.Parse(userId), Guid.Parse(id));
+        
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
     }
 }

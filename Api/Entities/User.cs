@@ -5,6 +5,7 @@ namespace MyMVCProject.Api.Entities;
 public class User: IdentityUser<Guid>
 {
     public string? VaultKeySalt { get; set; }
-    public ICollection<Folder> Folders { get; set; }
-    public ICollection<File> Files { get; set; }
+    public virtual ICollection<Folder> Folders { get; set; }
+    public virtual ICollection<File> Files { get; set; }
+    public virtual ICollection<StorageUsage> StorageUsages { get; set; }
 }

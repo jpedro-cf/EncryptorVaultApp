@@ -6,14 +6,9 @@ namespace MyMVCProject.Api.Entities;
 public class Folder : BaseEncryptedEntity
 {
     public Guid? ParentFolderId { get; set; }
-    public ICollection<Folder> Folders { get; set; }
+    public virtual ICollection<Folder> Folders { get; set; }
     
-    public ICollection<File> Files { get; set; }
-
-    public bool IsRoot()
-    {
-        return ParentFolderId is null;
-    }
+    public virtual ICollection<File> Files { get; set; }
 
     public static Folder CreateRoot(string name, Guid ownerId, string encryptedKey, string keyEncryptedByRoot)
     {

@@ -2,55 +2,197 @@ using Microsoft.EntityFrameworkCore;
 using MyMVCProject.Api.Dtos.Files;
 using MyMVCProject.Api.Entities;
 using MyMVCProject.Api.Global;
+using MyMVCProject.Api.Global.Errors;
+using MyMVCProject.Api.Global.Helpers;
 using MyMVCProject.Api.Infra.Storage;
 using MyMVCProject.Config;
 using File = MyMVCProject.Api.Entities.File;
 
 namespace MyMVCProject.Api.Services;
 
-public class FilesService(AppDbContext ctx, AmazonS3 amazonS3)
+public class FilesService(AppDbContext ctx, StorageUsageService storageUsageService, AmazonS3 amazonS3)
 {
     public async Task<Result<InitiateUploadResponse>> Upload(Guid userId, UploadFileRequest data)
     {
-        var file = new File
+        if (await storageUsageService.StorageLimitExceeded(userId, data.FileSize))
         {
-            Name = data.FileName,
-            Status = FileStatus.Pending,
-            StorageKey = $"{userId}/{Guid.NewGuid()}",
-            OwnerId = userId,
-            ContentType = data.ContentType,
-            Size = data.FileSize,
-            EncryptedKey = data.EncryptedKey,
-            KeyEncryptedByRoot = data.KeyEncryptedByRoot,
-        };
-        
-        if (data.ParentFolderId != null)
-        {
-            var parentFolder = await ctx.Folders.FirstAsync(f => f.Id == data.ParentFolderId);
-            file.ParentFolderId = parentFolder.Id;
+            return Result<InitiateUploadResponse>.Failure(
+                new StorageLimitExceededError("You've reached your storage limit."));
         }
+        
+        try
+        {
+            var file = new File
+            {
+                Name = data.FileName,
+                Status = FileStatus.Pending,
+                StorageKey = $"{userId}/{Guid.NewGuid()}",
+                OwnerId = userId,
+                ContentType = data.ContentType,
+                Size = data.FileSize,
+                EncryptedKey = data.EncryptedKey,
+                KeyEncryptedByRoot = data.KeyEncryptedByRoot,
+            };
+        
+            if (data.ParentFolderId != null)
+            {
+                var parentFolder = await ctx.Folders.FirstOrDefaultAsync(f => f.Id == data.ParentFolderId);
+                if (parentFolder == null)
+                {
+                    return Result<InitiateUploadResponse>.Failure(
+                        new NotFoundError("Parent folder not found."));
+                }
+                file.ParentFolderId = parentFolder.Id;
+            }
 
-        ctx.Files.Add(file);
-        await ctx.SaveChangesAsync();
+            var uploadInitiated = await amazonS3.InitiateMultiPartUpload(file);
+            file.UploadId = uploadInitiated.UploadId;
+            
+            ctx.Files.Add(file);
+            await ctx.SaveChangesAsync();      
 
-        var uploadInitiated = await amazonS3.InitiateUpload(file);
-
-        return Result<InitiateUploadResponse>.Success(
-            new InitiateUploadResponse(uploadInitiated.UploadId,uploadInitiated.Key,uploadInitiated.Urls));
+            return Result<InitiateUploadResponse>.Success(uploadInitiated);
+        }
+        catch (Exception e)
+        {
+            return Result<InitiateUploadResponse>.Failure(
+                new UnprocessableEntityError("An error occured while initiating the upload."));
+        }
     }
 
-    public async Task<Result<UploadCompletedResponse>> CompleteUpload(CompleteUploadRequest data)
+    public async Task<Result<UploadCompletedResponse>> CompleteUpload(Guid userId, CompleteUploadRequest data)
     {
-        return Result<UploadCompletedResponse>.Success(await amazonS3.CompletedUpload(data));
+        var file = await ctx.Files.FirstOrDefaultAsync(f => 
+            f.OwnerId == userId && f.Id == Guid.Parse(data.FileId) && f.UploadId == data.UploadId);
+
+        if (file == null)
+        {
+            return Result<UploadCompletedResponse>.Failure(
+                new NotFoundError("File not found. Check if you provided the correct data."));
+        }
+        
+        var uploadedParts = await amazonS3.ListUploadParts(data.Key, data.UploadId);
+
+        var notUploaded = uploadedParts.Any(p => p.Size == null);
+        var totalSize = uploadedParts.Sum(p => p.Size ?? 0L);
+        var storageExceeded = await storageUsageService.StorageLimitExceeded(userId, totalSize);
+
+        if (notUploaded || storageExceeded)
+        {
+            await CancelUpload(userId, Guid.Parse(data.FileId), 
+                new CancelUploadRequest(data.Key, data.UploadId));
+        }
+        
+        if (notUploaded)
+        {
+            return Result<UploadCompletedResponse>.Failure(
+                new UnprocessableEntityError("You didn't upload one of the parts."));
+        }
+        if (storageExceeded)
+        {
+            return Result<UploadCompletedResponse>.Failure(
+                new StorageLimitExceededError("You've reached your storage limit."));   
+        }
+        
+        await using var transaction = await ctx.Database.BeginTransactionAsync();
+        try
+        {
+            // update actual file size in case the user manipulated the request to look like he uploaded a smaller file
+            file.Status = FileStatus.Completed;
+            file.Size = totalSize;
+            var contentType = file.ContentType.ToStorageContentType();
+
+            var storageUsage = await ctx.StorageUsage
+                .FirstOrDefaultAsync(s => s.UserId == file.OwnerId && s.ContentType == contentType);
+            if (storageUsage == null)
+            {
+                storageUsage = new StorageUsage
+                {
+                    ContentType = contentType,
+                    UserId = file.OwnerId,
+                    TotalSize = 0
+                };
+                ctx.StorageUsage.Add(storageUsage);
+            }
+            // update storage usage
+            storageUsage.TotalSize += totalSize;
+                
+            await ctx.SaveChangesAsync();
+            var response = await amazonS3.CompleteMultiPartUpload(data);
+            await transaction.CommitAsync();
+            
+            return Result<UploadCompletedResponse>.Success(response);
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            return Result<UploadCompletedResponse>.Failure(
+                new UnprocessableEntityError("An error occurred while completing the upload."));
+        }
     }
 
-    public async Task ConfirmUpload(string fileId, long fileSize)
+    public async Task<Result<bool>> CancelUpload(Guid userId, Guid fileId, CancelUploadRequest data)
     {
-        var file = await ctx.Files.FirstAsync(f => f.Id == Guid.Parse(fileId));
+        var transaction = await ctx.Database.BeginTransactionAsync();
+        try
+        {
+            var file = await ctx.Files.FirstOrDefaultAsync(f =>
+                f.Id == fileId && f.OwnerId == userId && f.UploadId == data.UploadId);
 
-        file.Status = FileStatus.Completed;
-        file.Size = fileSize;
+            if (file == null)
+            {
+                return Result<bool>.Failure(
+                    new NotFoundError("File not found. Check if you provided the correct data."));
+            }
 
-        await ctx.SaveChangesAsync();
+            ctx.Files.Remove(file);
+            await ctx.SaveChangesAsync();
+            await amazonS3.AbortMultiPartUpload(data.Key, data.UploadId);
+            await transaction.CommitAsync();
+            
+            return Result<bool>.Success(true);
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            return Result<bool>.Failure(
+                new InternalServerError("An error occured while cancelling upload."));
+        }
+    }
+    
+    public async Task<Result<bool>> DeleteFile(Guid userId, Guid fileId)
+    {
+        await using var transaction = await ctx.Database.BeginTransactionAsync();
+        try
+        {
+            var file = await ctx.Files.FirstOrDefaultAsync(f => 
+                f.Id == fileId && f.OwnerId == userId && f.Status == FileStatus.Completed);
+
+            if (file == null)
+            {
+                return Result<bool>.Failure(
+                    new NotFoundError("File not found or upload was not completed correctly."));
+            }
+
+            var contentType = file.ContentType.ToStorageContentType();
+            var storageUsage = await ctx.StorageUsage.FirstAsync(s => 
+                s.UserId == userId && s.ContentType == contentType);
+
+            storageUsage.TotalSize -= file.Size;
+            
+            ctx.Files.Remove(file);
+            await ctx.SaveChangesAsync();
+
+            await amazonS3.DeleteObject(file.StorageKey);
+            
+            await transaction.CommitAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            return Result<bool>.Failure(
+                new InternalServerError("An error occured while deleting the file."));
+        }
     }
 }

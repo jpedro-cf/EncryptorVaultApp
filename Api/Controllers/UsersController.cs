@@ -10,7 +10,6 @@ namespace MyMVCProject.Api.Controllers;
 [Route("api/users")]
 public class UsersController(UsersService usersService) : ControllerBase
 {
-    
     [HttpPatch("vault")]
     [Authorize]
     public async Task<IResult> UpdateVault([FromBody] string salt)
@@ -18,11 +17,6 @@ public class UsersController(UsersService usersService) : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var result = await usersService.UpdateVaultKey(Guid.Parse(userId), salt);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error!.ToHttpResult();
-        }
-
-        return Results.NoContent();
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
     }
 }

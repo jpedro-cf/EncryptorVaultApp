@@ -36,7 +36,7 @@ public class AmazonS3
         _client = new AmazonS3Client(credentials, config);
     }
 
-    public async Task<InitiateUploadResponse> InitiateUpload(File file)
+    public async Task<InitiateUploadResponse> InitiateMultiPartUpload(File file)
     {
         var initRequest = new InitiateMultipartUploadRequest
         {
@@ -44,7 +44,7 @@ public class AmazonS3
             Key = file.StorageKey,
         };
         
-        initRequest.Metadata.Add("fileId", file.Id.ToString());
+        initRequest.Metadata.Add("file_id", file.Id.ToString());
         
         var initResponse = await _client.InitiateMultipartUploadAsync(initRequest);
         var presignedUrls = new List<PresignedPartUrl>();
@@ -70,10 +70,10 @@ public class AmazonS3
             presignedUrls.Add(new PresignedPartUrl(i, url));
         }
         
-        return new InitiateUploadResponse(initResponse.UploadId, file.StorageKey, presignedUrls);
+        return new InitiateUploadResponse(file.Id.ToString(), initResponse.UploadId, file.StorageKey, presignedUrls);
     }
 
-    public async Task<UploadCompletedResponse> CompletedUpload(CompleteUploadRequest data)
+    public async Task<UploadCompletedResponse> CompleteMultiPartUpload(CompleteUploadRequest data)
     {
         var completeRequest = new CompleteMultipartUploadRequest
         {
@@ -88,8 +88,27 @@ public class AmazonS3
         return new UploadCompletedResponse(response.Key);
     }
 
+    public async Task<List<UploadPart>> ListUploadParts(string key, string uploadId)
+    {
+        var data = await _client.ListPartsAsync(BucketName, key, uploadId);
+        
+        return data.Parts
+            .Select(p => new UploadPart(p.LastModified, p.Size, p.PartNumber, p.ETag))
+            .ToList();
+    }
+
+    public async Task AbortMultiPartUpload(string key, string uploadId)
+    {
+        await _client.AbortMultipartUploadAsync(BucketName, key, uploadId);
+    }
+
     public async Task<GetObjectMetadataResponse> GetObjectMetadata(string key)
     {
         return await _client.GetObjectMetadataAsync(BucketName, key);
+    }
+
+    public async Task DeleteObject(string key)
+    {
+        await _client.DeleteObjectAsync(BucketName, key);
     }
 }
