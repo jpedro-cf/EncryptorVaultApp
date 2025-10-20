@@ -55,3 +55,33 @@ body {
     font-size: 12px;
   }
 }
+
+#sidebar{
+  min-width: 200px;
+  .sidebar-header{
+    .icon {
+      min-width: 34px;
+      min-height: 34px;
+      color: $purple-100
+    }
+    .title{
+      font-size: 14px;
+      line-height: 1;
+    }
+    .subtitle{
+      font-size: 12px;
+    }
+  }
+  .sidebar-footer{
+    .user-icon{
+      min-width: 34px;
+      min-height: 34px;
+    }
+    .username{
+      font-size: 14px;
+    }
+    .email{
+      font-size: 12px;
+    }
+  }
+}

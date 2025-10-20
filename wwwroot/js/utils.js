@@ -24,13 +24,17 @@ export function stringToBase64(string){
 }
 
 export function uint8ArrayToBase64(uint8array){
-    const binaryString = String.fromCharCode(...uint8array);
-    return btoa(binaryString)
+    let binary = '';
+    const len = uint8array.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(uint8array[i]);
+    }
+    return btoa(binary);
 }
 
 export function base64ToUint8Array(base64String){
     const binaryString = atob(base64String);
-
+    
     const keyData = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
         keyData[i] = binaryString.charCodeAt(i);
@@ -39,7 +43,7 @@ export function base64ToUint8Array(base64String){
     return keyData
 }
 
-export async function fileToUin8Array(file){
+export async function fileToUint8Array(file){
     const arrayBuffer = await file.arrayBuffer();
     return new Uint8Array(arrayBuffer);
 }

@@ -12,6 +12,7 @@ export function dragDrop(onChange){
         dragDrop.classList.remove('active');
     });
     
+    
     dragDrop.addEventListener("drop", (e) => {
         e.preventDefault();
         dragDrop.classList.remove("active");
@@ -26,6 +27,12 @@ export function dragDrop(onChange){
     
     dragDrop.addEventListener("click", (e) => {
         fileInput.click()
+    })
+    
+    dragDrop.addEventListener("keydown", (e) => {
+        if (e.key === 'Enter') {
+            fileInput.click()
+        }
     })
     
     fileInput.addEventListener("change", (e) => {

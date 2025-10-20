@@ -8,10 +8,11 @@
     padding: 1rem;
     text-align: center;
     transition: .3s;
-    &.active, &:hover {
+    &.active, &:hover, &:focus-visible {
       border-color: $purple-600;
       background: $purple-100;
       cursor: pointer;
+      outline: none;
     }
   }
   .files {

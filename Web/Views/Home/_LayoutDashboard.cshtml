@@ -1,4 +1,5 @@
-@* Views/Dashboard/_LayoutDashboard.cshtml *@
+@using MyMVCProject.Web.Models.Home
+@* Views/Home/_LayoutDashboard.cshtml *@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -13,11 +14,12 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    @await Html.PartialAsync("_UploadFilesModal")
+    @await Html.PartialAsync("../Shared/_Toast.cshtml")
+    @await Html.PartialAsync("_UploadFilesModal", new UploadFileModalViewModel())
     <div class="d-flex vh-100 bg-neutral-100">
         @await Html.PartialAsync("_Sidebar")
 
-        <main id="content" class="flex-grow-1 overflow-auto bg-white rounded-start-4 shadow-sm py-3 px-5">
+        <main id="content" class="flex-grow-1 overflow-auto bg-white shadow-sm py-3 px-5">
             @RenderBody()
         </main>
         @await Html.PartialAsync("_RecentActivity")
@@ -30,6 +32,8 @@
         lucide.createIcons();
     </script>
     <script type="module" src="~/js/site.js" asp-append-version="true"></script>
+    <script type="module" src="~/js/router.js" asp-append-version="true"></script>
+    <script type="module" src="~/js/upload-files.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
