@@ -10,6 +10,3 @@ variable "AWS_SECRET" {
 variable "DEV_MODE" {
   type = string
 }
-variable "SQS_QUEUE_NAME" {
-    type = string
-}
