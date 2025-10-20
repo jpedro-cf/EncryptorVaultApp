@@ -1,15 +1,16 @@
+using EncryptionApp.Api.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using MyMVCProject.Api.Entities;
-using File = MyMVCProject.Api.Entities.File;
+using Entities_File = EncryptionApp.Api.Entities.File;
+using File = EncryptionApp.Api.Entities.File;
 
-namespace MyMVCProject.Config;
+namespace EncryptionApp.Config;
 
 public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<Folder> Folders { get; set; }
-    public DbSet<File> Files { get; set; }
+    public DbSet<Entities_File> Files { get; set; }
     public DbSet<StorageUsage> StorageUsage { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
@@ -22,7 +23,7 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
             .HasForeignKey(f => f.OwnerId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Entity<File>()
+        builder.Entity<Entities_File>()
             .HasOne(f => f.Owner)
             .WithMany(u => u.Files)
             .HasForeignKey(f => f.OwnerId)
@@ -34,7 +35,7 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
             .HasForeignKey(f => f.ParentFolderId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Entity<File>()
+        builder.Entity<Entities_File>()
             .HasOne(f => f.ParentFolder)
             .WithMany(f => f.Files)
             .HasForeignKey(f => f.ParentFolderId)
@@ -45,12 +46,12 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
             .HasMaxLength(256)
             .IsRequired();
 
-        builder.Entity<File>()
+        builder.Entity<Entities_File>()
             .Property(f => f.Name)
             .HasMaxLength(256)
             .IsRequired();
         
-        builder.Entity<File>()
+        builder.Entity<Entities_File>()
             .Property(f => f.Status)
             .HasConversion<string>();
 

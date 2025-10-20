@@ -1,6 +1,6 @@
-using MyMVCProject.Api.Entities;
+using EncryptionApp.Api.Entities;
 
-namespace MyMVCProject.Api.Global.Helpers;
+namespace EncryptionApp.Api.Global.Helpers;
 
 public static class StorageContentTypeHelper
 {

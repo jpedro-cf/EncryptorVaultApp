@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MyMVCProject.Api.Dtos.Folders;
+namespace EncryptionApp.Api.Dtos.Folders;
 
 public class CreateFolderRequest
 {

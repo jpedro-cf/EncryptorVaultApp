@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using MyMVCProject.Api.Dtos.Validations;
+using EncryptionApp.Api.Dtos.Validations;
 
-namespace MyMVCProject.Api.Dtos.Files;
+namespace EncryptionApp.Api.Dtos.Files;
 
 public class UploadFileRequest
 {

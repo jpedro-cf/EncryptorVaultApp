@@ -1,14 +1,14 @@
+using EncryptionApp.Api.Dtos.Files;
+using EncryptionApp.Api.Entities;
+using EncryptionApp.Api.Global;
+using EncryptionApp.Api.Global.Errors;
+using EncryptionApp.Api.Infra.Storage;
+using EncryptionApp.Config;
 using Microsoft.EntityFrameworkCore;
-using MyMVCProject.Api.Dtos.Files;
-using MyMVCProject.Api.Entities;
-using MyMVCProject.Api.Global;
-using MyMVCProject.Api.Global.Errors;
-using MyMVCProject.Api.Global.Helpers;
-using MyMVCProject.Api.Infra.Storage;
-using MyMVCProject.Config;
-using File = MyMVCProject.Api.Entities.File;
+using EncryptionApp.Api.Global.Helpers;
+using File = EncryptionApp.Api.Entities.File;
 
-namespace MyMVCProject.Api.Services;
+namespace EncryptionApp.Api.Services;
 
 public class FilesService(AppDbContext ctx, StorageUsageService storageUsageService, AmazonS3 amazonS3)
 {

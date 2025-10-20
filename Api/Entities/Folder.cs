@@ -1,7 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace MyMVCProject.Api.Entities;
+namespace EncryptionApp.Api.Entities;
 
 public class Folder : BaseEncryptedEntity
 {

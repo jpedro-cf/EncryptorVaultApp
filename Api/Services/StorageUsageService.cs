@@ -1,8 +1,8 @@
+using EncryptionApp.Config;
 using Microsoft.EntityFrameworkCore;
-using MyMVCProject.Api.Entities;
-using MyMVCProject.Config;
+using EncryptionApp.Api.Entities;
 
-namespace MyMVCProject.Api.Services;
+namespace EncryptionApp.Api.Services;
 
 public class StorageUsageService(AppDbContext ctx)
 {

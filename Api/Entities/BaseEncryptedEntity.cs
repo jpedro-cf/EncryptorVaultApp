@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using MyMVCProject.Api.Dtos;
-using MyMVCProject.Api.Global;
+using EncryptionApp.Api.Dtos;
+using EncryptionApp.Api.Global;
 
-namespace MyMVCProject.Api.Entities;
+namespace EncryptionApp.Api.Entities;
 
 public class BaseEncryptedEntity
 {

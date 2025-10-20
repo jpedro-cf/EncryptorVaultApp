@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace MyMVCProject.Api.Global.Errors;
+namespace EncryptionApp.Api.Global.Errors;
 
 public class AppError(string message, int statusCode, string? title)
 {

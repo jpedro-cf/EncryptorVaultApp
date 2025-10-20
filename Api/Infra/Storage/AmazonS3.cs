@@ -2,10 +2,10 @@ using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
-using MyMVCProject.Api.Dtos.Files;
-using File = MyMVCProject.Api.Entities.File;
+using EncryptionApp.Api.Dtos.Files;
+using File = EncryptionApp.Api.Entities.File;
 
-namespace MyMVCProject.Api.Infra.Storage;
+namespace EncryptionApp.Api.Infra.Storage;
 
 public class AmazonS3
 {

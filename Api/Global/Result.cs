@@ -1,6 +1,6 @@
-using MyMVCProject.Api.Global.Errors;
+using EncryptionApp.Api.Global.Errors;
 
-namespace MyMVCProject.Api.Global;
+namespace EncryptionApp.Api.Global;
 
 public class Result<T>
 {

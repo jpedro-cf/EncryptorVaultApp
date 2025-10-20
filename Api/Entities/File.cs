@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace MyMVCProject.Api.Entities;
+namespace EncryptionApp.Api.Entities;
 
 public class File : BaseEncryptedEntity
 {

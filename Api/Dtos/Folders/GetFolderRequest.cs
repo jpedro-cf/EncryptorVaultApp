@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MyMVCProject.Api.Dtos.Folders;
+namespace EncryptionApp.Api.Dtos.Folders;
 
 public class GetFolderRequest
 {   

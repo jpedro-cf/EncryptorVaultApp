@@ -5,25 +5,24 @@
 namespace EncryptionApp.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFileStatus : Migration
+    public partial class ChangeVaultKeyField : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Status",
-                table: "Files",
-                type: "text",
-                nullable: false,
-                defaultValue: "Failed");
+            migrationBuilder.RenameColumn(
+                name: "VaultKeySalt",
+                table: "AspNetUsers",
+                newName: "VaultKey");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Status",
-                table: "Files");
+            migrationBuilder.RenameColumn(
+                name: "VaultKey",
+                table: "AspNetUsers",
+                newName: "VaultKeySalt");
         }
     }
 }

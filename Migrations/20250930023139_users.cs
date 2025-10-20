@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace MyMVCProject.Migrations
+namespace EncryptionApp.Migrations
 {
     /// <inheritdoc />
     public partial class users : Migration

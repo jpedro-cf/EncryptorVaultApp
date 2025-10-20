@@ -1,10 +1,10 @@
 using System.Security.Claims;
+using EncryptionApp.Api.Dtos.Files;
+using EncryptionApp.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyMVCProject.Api.Dtos.Files;
-using MyMVCProject.Api.Services;
 
-namespace MyMVCProject.Api.Controllers;
+namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
 [Route("api/files")]

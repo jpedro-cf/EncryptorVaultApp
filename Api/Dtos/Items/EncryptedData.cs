@@ -1,8 +1,8 @@
-using MyMVCProject.Api.Global.Helpers;
+using EncryptionApp.Api.Global.Helpers;
 
-namespace MyMVCProject.Api.Dtos;
+namespace EncryptionApp.Api.Dtos.Items;
 
-public record EncryptedData(string Key, string Iv)
+public record EncryptedData(string Data, string Iv)
 {
     public static EncryptedData From(string value)
     {

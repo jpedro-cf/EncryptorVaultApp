@@ -1,12 +1,10 @@
 using System.Security.Claims;
+using EncryptionApp.Api.Dtos.Folders;
+using EncryptionApp.Api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using MyMVCProject.Api.Dtos.Folders;
-using MyMVCProject.Api.Entities;
-using MyMVCProject.Api.Services;
 
-namespace MyMVCProject.Api.Controllers;
+namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
 [Route("api/folders")]

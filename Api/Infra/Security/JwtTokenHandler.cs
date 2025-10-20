@@ -1,12 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using EncryptionApp.Api.Entities;
+using EncryptionApp.Api.Global;
+using EncryptionApp.Api.Global.Errors;
 using Microsoft.IdentityModel.Tokens;
-using MyMVCProject.Api.Entities;
-using MyMVCProject.Api.Global;
-using MyMVCProject.Api.Global.Errors;
 
-namespace MyMVCProject.Api.Infra.Security;
+namespace EncryptionApp.Api.Infra.Security;
 
 public class JwtTokenHandler(IConfiguration config, RSA privateKey, RSA publicKey)
 {

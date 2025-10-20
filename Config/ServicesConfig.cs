@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
-using MyMVCProject.Api.Infra.Security;
-using MyMVCProject.Api.Infra.Storage;
-using MyMVCProject.Api.Services;
+using EncryptionApp.Api.Infra.Security;
+using EncryptionApp.Api.Infra.Storage;
+using EncryptionApp.Api.Services;
 
-namespace MyMVCProject.Config;
+namespace EncryptionApp.Config;
 
 public static class ServicesConfig
 {

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MyMVCProject.Api.Global.Exceptions;
+namespace EncryptionApp.Api.Global.Exceptions;
 
 public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService): IExceptionHandler
 {

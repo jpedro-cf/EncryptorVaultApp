@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using MyMVCProject.Api.Global.Helpers;
+using EncryptionApp.Api.Global.Helpers;
 
-namespace MyMVCProject.Api.Dtos.Validations;
+namespace EncryptionApp.Api.Dtos.Validations;
 
 public class ValidContentType: ValidationAttribute
 {

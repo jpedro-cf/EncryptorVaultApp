@@ -1,14 +1,14 @@
+using EncryptionApp.Api.Dtos.Users;
+using EncryptionApp.Api.Entities;
+using EncryptionApp.Api.Global;
+using EncryptionApp.Api.Global.Errors;
+using EncryptionApp.Api.Infra.Security;
+using EncryptionApp.Config;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MyMVCProject.Api.Dtos.Users;
-using MyMVCProject.Api.Entities;
-using MyMVCProject.Api.Global.Errors;
-using MyMVCProject.Api.Infra.Security;
-using MyMVCProject.Api.Global;
-using MyMVCProject.Api.Global.Helpers;
-using MyMVCProject.Config;
+using EncryptionApp.Api.Global.Helpers;
 
-namespace MyMVCProject.Api.Services;
+namespace EncryptionApp.Api.Services;
 
 public class AuthService(
     AppDbContext ctx,

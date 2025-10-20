@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace MyMVCProject.Migrations
+namespace EncryptionApp.Migrations
 {
     /// <inheritdoc />
     public partial class AddStorageUsage : Migration

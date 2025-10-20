@@ -1,13 +1,13 @@
 using System.Security.Claims;
+using EncryptionApp.Api.Dtos.Users;
+using EncryptionApp.Api.Entities;
+using EncryptionApp.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using MyMVCProject.Api.Dtos.Users;
-using MyMVCProject.Api.Entities;
-using MyMVCProject.Api.Global.Exceptions;
-using MyMVCProject.Api.Services;
+using EncryptionApp.Api.Global.Exceptions;
 
-namespace MyMVCProject.Api.Controllers;
+namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]

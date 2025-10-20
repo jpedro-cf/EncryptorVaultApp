@@ -1,12 +1,12 @@
+using EncryptionApp.Api.Dtos.Users;
+using EncryptionApp.Api.Entities;
+using EncryptionApp.Api.Global;
+using EncryptionApp.Api.Global.Errors;
+using EncryptionApp.Config;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MyMVCProject.Api.Dtos.Users;
-using MyMVCProject.Api.Entities;
-using MyMVCProject.Api.Global;
-using MyMVCProject.Api.Global.Errors;
-using MyMVCProject.Config;
 
-namespace MyMVCProject.Api.Services;
+namespace EncryptionApp.Api.Services;
 
 public class UsersService(AppDbContext ctx, UserManager<User> userManager)
 {
@@ -26,14 +26,27 @@ public class UsersService(AppDbContext ctx, UserManager<User> userManager)
         return Result<bool>.Success(true);
     }
 
-    public async Task<Result<bool>> UpdateVaultKey(Guid userId, string salt)
+    public async Task<Result<bool>> UpdateVaultKey(Guid userId, string newKey)
     {
         var user = await ctx.Users.FirstAsync(u => u.Id == userId);
 
-        user.VaultKeySalt = salt;
+        user.VaultKey = newKey;
 
         await ctx.SaveChangesAsync();
         
         return Result<bool>.Success(true);
+    }
+
+    public async Task<Result<UserResponse>> GetUserById(Guid userId)
+    {
+        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null)
+        {
+            return Result<UserResponse>.Failure(
+                new NotFoundError("User not found."));
+        }
+        
+        return Result<UserResponse>.Success(UserResponse.From(user));
     }
 }

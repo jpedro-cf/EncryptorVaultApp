@@ -1,8 +1,8 @@
-using MyMVCProject.Api.Entities;
+using EncryptionApp.Api.Entities;
 
-namespace MyMVCProject.Api.Dtos.Users;
+namespace EncryptionApp.Api.Dtos.Users;
 
-public record UserResponse(string Id, string Email, string Username, string? VaultKeySalt)
+public record UserResponse(string Id, string Email, string Username, string? VaultKey)
 {
     public static UserResponse From(User user)
     {
@@ -10,7 +10,7 @@ public record UserResponse(string Id, string Email, string Username, string? Vau
             user.Id.ToString(),
             user.Email!,
             user.Email!,
-            user.VaultKeySalt
+            user.VaultKey
         );
     }
 }

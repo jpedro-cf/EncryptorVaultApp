@@ -10,16 +10,6 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
     <Folder Include="secrets\" />
-    <Folder Include="Web\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="Web\Views\Home\Index.cshtml" />
-    <AdditionalFiles Include="Web\Views\Shared\Error.cshtml" />
-    <AdditionalFiles Include="Web\Views\Shared\_Layout.cshtml" />
-    <AdditionalFiles Include="Web\Views\Shared\_ValidationScriptsPartial.cshtml" />
-    <AdditionalFiles Include="Web\Views\_ViewImports.cshtml" />
-    <AdditionalFiles Include="Web\Views\_ViewStart.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

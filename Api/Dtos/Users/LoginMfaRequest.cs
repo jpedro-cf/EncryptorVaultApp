@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MyMVCProject.Api.Dtos.Users;
+namespace EncryptionApp.Api.Dtos.Users;
 
 public class LoginMfaRequest
 {

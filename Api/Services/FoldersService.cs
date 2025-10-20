@@ -1,11 +1,11 @@
+using EncryptionApp.Api.Dtos.Folders;
+using EncryptionApp.Api.Entities;
+using EncryptionApp.Api.Global;
+using EncryptionApp.Api.Global.Errors;
+using EncryptionApp.Config;
 using Microsoft.EntityFrameworkCore;
-using MyMVCProject.Api.Dtos.Folders;
-using MyMVCProject.Api.Entities;
-using MyMVCProject.Api.Global;
-using MyMVCProject.Api.Global.Errors;
-using MyMVCProject.Config;
 
-namespace MyMVCProject.Api.Services;
+namespace EncryptionApp.Api.Services;
 
 public class FoldersService(AppDbContext ctx, UsersService usersService)
 {
@@ -19,23 +19,27 @@ public class FoldersService(AppDbContext ctx, UsersService usersService)
             ctx.Folders.Add(folder);
             await ctx.SaveChangesAsync();
 
-            return Result<FolderResponse>.Success(FolderResponse.From(folder));
+            return Result<FolderResponse>.Success(FolderResponse.From(folder, true));
         }
 
-        var parent = await ctx.Folders.FirstAsync(f => f.Id == data.ParentId!);
-        
+        var parent = await ctx.Folders.FirstOrDefaultAsync(f => f.Id == data.ParentId);
+        if (parent == null)
+        {
+            return Result<FolderResponse>.Failure(
+                new NotFoundError("Parent folder not found."));
+        }        
 
         var subFolder = Folder.CreateSubFolder(
             data.Name,
             userId,
-            data.ParentId!.Value,
+            data.ParentId.Value,
             data.EncryptedKey,
             data.KeyEncryptedByRoot);
 
         ctx.Folders.Add(subFolder);
         await ctx.SaveChangesAsync();
         
-        return Result<FolderResponse>.Success(FolderResponse.From(subFolder));
+        return Result<FolderResponse>.Success(FolderResponse.From(subFolder, true));
     }
 
     public async Task<Result<FolderResponse>> GetFolder(Guid folderId, Guid? userId, GetFolderRequest data)
@@ -45,7 +49,8 @@ public class FoldersService(AppDbContext ctx, UsersService usersService)
         {
             return Result<FolderResponse>.Failure(new ForbiddenError("You're not allowed to view this folder"));
         }
-        
-        return Result<FolderResponse>.Success(FolderResponse.From(folder));
+
+        bool shouldReturnWithRootKey = userId != null && userId == folder.OwnerId;
+        return Result<FolderResponse>.Success(FolderResponse.From(folder, shouldReturnWithRootKey));
     }
 }

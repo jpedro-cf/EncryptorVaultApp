@@ -1,9 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using MyMVCProject.Api.Global;
-using ApplicationException = MyMVCProject.Api.Global.Exceptions.ApplicationException;
 
-namespace MyMVCProject.Api.Entities;
+namespace EncryptionApp.Api.Entities;
 
 public class StorageUsage
 {

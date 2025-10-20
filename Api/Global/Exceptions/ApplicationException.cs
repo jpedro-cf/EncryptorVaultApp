@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace MyMVCProject.Api.Global.Exceptions;
+namespace EncryptionApp.Api.Global.Exceptions;
 
 [Serializable]
 public class ApplicationException(string message, int? statusCode, string? title) : Exception(message)

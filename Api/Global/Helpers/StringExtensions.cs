@@ -1,8 +1,7 @@
 using System.Net.Mime;
-using System.Security.Cryptography;
 using QRCoder;
 
-namespace MyMVCProject.Api.Global.Helpers;
+namespace EncryptionApp.Api.Global.Helpers;
 
 public static class StringExtensions
 {

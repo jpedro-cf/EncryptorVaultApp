@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace MyMVCProject.Config;
+namespace EncryptionApp.Config;
 
 public static class AuthConfig
 {

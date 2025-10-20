@@ -1,7 +1,7 @@
+using EncryptionApp.Api.Entities;
 using Microsoft.AspNetCore.Identity;
-using MyMVCProject.Api.Entities;
 
-namespace MyMVCProject.Config;
+namespace EncryptionApp.Config;
 
 public static class IdentityConfig
 {
