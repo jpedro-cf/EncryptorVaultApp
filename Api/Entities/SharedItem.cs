@@ -17,7 +17,7 @@ public class SharedItem
     
     [Required]
     public Guid OwnerId { get; set; }
-    public User Owner { get; set; }
+    public virtual User Owner { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
