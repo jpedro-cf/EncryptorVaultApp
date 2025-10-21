@@ -2,7 +2,6 @@ using EncryptionApp.Api.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Entities_File = EncryptionApp.Api.Entities.File;
 using File = EncryptionApp.Api.Entities.File;
 
 namespace EncryptionApp.Config;
@@ -10,8 +9,9 @@ namespace EncryptionApp.Config;
 public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<Folder> Folders { get; set; }
-    public DbSet<Entities_File> Files { get; set; }
+    public DbSet<File> Files { get; set; }
     public DbSet<StorageUsage> StorageUsage { get; set; }
+    public DbSet<SharedItem> SharedItems { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -23,7 +23,7 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
             .HasForeignKey(f => f.OwnerId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Entity<Entities_File>()
+        builder.Entity<File>()
             .HasOne(f => f.Owner)
             .WithMany(u => u.Files)
             .HasForeignKey(f => f.OwnerId)
@@ -35,7 +35,7 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
             .HasForeignKey(f => f.ParentFolderId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Entity<Entities_File>()
+        builder.Entity<File>()
             .HasOne(f => f.ParentFolder)
             .WithMany(f => f.Files)
             .HasForeignKey(f => f.ParentFolderId)
@@ -46,12 +46,12 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
             .HasMaxLength(256)
             .IsRequired();
 
-        builder.Entity<Entities_File>()
+        builder.Entity<File>()
             .Property(f => f.Name)
             .HasMaxLength(256)
             .IsRequired();
         
-        builder.Entity<Entities_File>()
+        builder.Entity<File>()
             .Property(f => f.Status)
             .HasConversion<string>();
 
@@ -64,5 +64,11 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
         builder.Entity<StorageUsage>()
             .Property(s => s.ContentType)
             .HasConversion<string>();
+
+        builder.Entity<SharedItem>()
+            .HasOne(s => s.Owner)
+            .WithMany(u => u.SharedItems)
+            .HasForeignKey(s => s.OwnerId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

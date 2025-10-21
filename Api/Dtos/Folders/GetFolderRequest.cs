@@ -1,11 +1,10 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EncryptionApp.Api.Dtos.Folders;
 
 public class GetFolderRequest
 {   
-    [FromHeader(Name = "shareId")]
+    [FromHeader(Name = "X-Share-Id")]
     public string? ShareId { get; set; }
     
 }

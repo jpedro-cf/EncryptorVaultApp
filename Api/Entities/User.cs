@@ -4,11 +4,12 @@ namespace EncryptionApp.Api.Entities;
 
 public class User: IdentityUser<Guid>
 {
-    // VaultKey: [salt | iv | encrypted data for example]
-    // It's used to verify if the user provided a correct key for decryption of the entire vault
-    // Generates an irrelevant random data and encrypt it, client-side will try to decrypt it to validate
+    // VaultKey: [iv | encrypted key]
+    // It's encrypted by a key that's derived by the user's password on account creation
+    // If the user changes it's password, we just encrypt it again with the new key
     public string? VaultKey { get; set; }
     public virtual ICollection<Folder> Folders { get; set; }
     public virtual ICollection<File> Files { get; set; }
     public virtual ICollection<StorageUsage> StorageUsages { get; set; }
+    public virtual ICollection<SharedItem> SharedItems { get; set; }
 }
