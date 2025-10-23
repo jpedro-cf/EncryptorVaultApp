@@ -1,6 +1,5 @@
 using EncryptionApp.Config;
 using Microsoft.EntityFrameworkCore;
-using EncryptionApp.Api.Entities;
 
 namespace EncryptionApp.Api.Services;
 

@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace EncryptionApp.Api.Dtos.Users;
 
-public record UserResponse(string Id, string Email, string Username, EncryptedData? EncryptedVaultKey)
+public record UserResponse(string Id, string Email, string Username, string VaultKey)
 {
     public static UserResponse From(User user)
     {
@@ -12,7 +12,6 @@ public record UserResponse(string Id, string Email, string Username, EncryptedDa
             user.Id.ToString(),
             user.Email!,
             user.Email!,
-            user.VaultKey.IsNullOrEmpty() ? null : EncryptedData.From(user.VaultKey!)
-        );
+            user.VaultKey);
     }
 }

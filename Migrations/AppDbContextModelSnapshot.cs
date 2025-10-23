@@ -79,7 +79,7 @@ namespace EncryptionApp.Migrations
 
                     b.HasIndex("ParentFolderId");
 
-                    b.ToTable("Files");
+                    b.ToTable("Files", (string)null);
                 });
 
             modelBuilder.Entity("EncryptionApp.Api.Entities.Folder", b =>
@@ -116,7 +116,7 @@ namespace EncryptionApp.Migrations
 
                     b.HasIndex("ParentFolderId");
 
-                    b.ToTable("Folders");
+                    b.ToTable("Folders", (string)null);
                 });
 
             modelBuilder.Entity("EncryptionApp.Api.Entities.SharedItem", b =>
@@ -141,7 +141,7 @@ namespace EncryptionApp.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("SharedItems");
+                    b.ToTable("SharedItems", (string)null);
                 });
 
             modelBuilder.Entity("EncryptionApp.Api.Entities.StorageUsage", b =>
@@ -164,7 +164,7 @@ namespace EncryptionApp.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("StorageUsage");
+                    b.ToTable("StorageUsage", (string)null);
                 });
 
             modelBuilder.Entity("EncryptionApp.Api.Entities.User", b =>
@@ -221,7 +221,6 @@ namespace EncryptionApp.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<string>("VaultKey")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");

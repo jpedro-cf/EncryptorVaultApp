@@ -1,4 +1,4 @@
-namespace EncryptionApp.Api.Dtos.Items;
+namespace EncryptionApp.Api.Entities;
 
 public enum ItemType
 {

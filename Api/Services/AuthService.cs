@@ -59,7 +59,11 @@ public class AuthService(
 
     public async Task<Result<MfaKeyResponse>> GetMfaKey(Guid userId)
     {
-        var user = await ctx.Users.FirstAsync(u => u.Id == userId);
+        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+        {
+            return Result<MfaKeyResponse>.Failure(new NotFoundError("User not found."));
+        }
         var key = await userManager.GetAuthenticatorKeyAsync(user);
         if (key == null)
         {
@@ -74,7 +78,11 @@ public class AuthService(
 
     public async Task<Result<bool>> SetupMfa(Guid userId, string token)
     {
-        var user = await ctx.Users.FirstAsync(u => u.Id == userId);
+        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+        {
+            return Result<bool>.Failure(new NotFoundError("User not found."));
+        }
         var tokenProvider = userManager.Options.Tokens.AuthenticatorTokenProvider;
 
         var tokenDigits = new string(token.Where(char.IsDigit).ToArray());

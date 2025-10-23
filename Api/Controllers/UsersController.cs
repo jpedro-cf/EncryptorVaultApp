@@ -22,10 +22,10 @@ public class UsersController(UsersService usersService) : ControllerBase
     
     [HttpPatch("me/vault-key")]
     [Authorize]
-    public async Task<IResult> UpdateVault([FromBody] string newKey)
+    public async Task<IResult> UpdateVault([FromBody] UpdateVaultKeyRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var result = await usersService.UpdateVaultKey(Guid.Parse(userId), newKey);
+        var result = await usersService.UpdateVaultKey(Guid.Parse(userId), request);
 
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
     }

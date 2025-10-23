@@ -34,4 +34,20 @@ public static class StringExtensions
             return false;
         }
     }
+    
+    public static bool IsBase64Encoded(this string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        try
+        {
+            var fromBase64String = Convert.FromBase64String(value);
+            return true;
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
 }

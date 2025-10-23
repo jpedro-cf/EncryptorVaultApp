@@ -15,9 +15,11 @@ public class UploadFileRequest
     [ValidContentType]
     public string ContentType { get; set; }
     
-    [Required(ErrorMessage = "Encrypted key is requried.")]
+    [Required(ErrorMessage = "Encrypted key is required.")]
+    [Base64String]
     public string EncryptedKey { get; set; }
-    [Required(ErrorMessage = "Key encrypted by root is requried.")]
+    [Required(ErrorMessage = "Key encrypted by root is required.")]
+    [Base64String]
     public string KeyEncryptedByRoot { get; set; }
 
     public Guid? ParentFolderId { get; set; }
@@ -38,7 +40,7 @@ public class CompletedPart
 
 public class CompleteUploadRequest
 {
-    [Required(ErrorMessage = "File id is required.")]
+    [Required(ErrorMessage = "File ID is required.")]
     public string FileId { get; set; }
     
     [Required(ErrorMessage = "Upload id is required.")]

@@ -10,8 +10,10 @@ public class CreateFolderRequest
     public Guid? ParentId { get; set; }
     
     [Required(ErrorMessage = "Encrypted key is required.")]
+    [Base64String]
     public string EncryptedKey { get; set; }
     [Required(ErrorMessage = "Key encrypted by root is required.")]
+    [Base64String]
     public string KeyEncryptedByRoot { get; set; }
     
 }

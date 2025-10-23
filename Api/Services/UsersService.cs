@@ -18,6 +18,7 @@ public class UsersService(AppDbContext ctx, UserManager<User> userManager)
             Email = data.Email,
             EmailConfirmed = true
         };
+        
         var result = await userManager.CreateAsync(identityUser, data.Password);
         if (!result.Succeeded)
         {
@@ -26,11 +27,15 @@ public class UsersService(AppDbContext ctx, UserManager<User> userManager)
         return Result<bool>.Success(true);
     }
 
-    public async Task<Result<bool>> UpdateVaultKey(Guid userId, string newKey)
+    public async Task<Result<bool>> UpdateVaultKey(Guid userId, UpdateVaultKeyRequest data)
     {
-        var user = await ctx.Users.FirstAsync(u => u.Id == userId);
+        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+        {
+            return Result<bool>.Failure(new NotFoundError("User not found."));
+        }
 
-        user.VaultKey = newKey;
+        user.VaultKey = data.VaultKey;
 
         await ctx.SaveChangesAsync();
         

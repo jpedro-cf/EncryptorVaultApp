@@ -14,7 +14,6 @@ public class FoldersService(AppDbContext ctx)
     {
         if (data.ParentId is null)
         {
-            
             var folder = Folder.CreateRoot(data.Name, userId, data.EncryptedKey, data.KeyEncryptedByRoot);
 
             ctx.Folders.Add(folder);
