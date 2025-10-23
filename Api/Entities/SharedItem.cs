@@ -14,6 +14,10 @@ public class SharedItem
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ItemType ItemType { get; set; }
     
+    // encrypted with random key generated for share purpose only.
+    [Required]
+    public string EncryptedKey { get; set; }
+    
     [Required]
     public Guid OwnerId { get; set; }
     public virtual User Owner { get; set; }
