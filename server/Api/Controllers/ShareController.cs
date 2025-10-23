@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using EncryptionApp.Api.Dtos.Share;
-using EncryptionApp.Api.Global;
 using EncryptionApp.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
