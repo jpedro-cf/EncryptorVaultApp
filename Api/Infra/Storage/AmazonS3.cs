@@ -102,6 +102,21 @@ public class AmazonS3
         await _client.AbortMultipartUploadAsync(BucketName, key, uploadId);
     }
 
+    public async Task<string> GeneratePresignedUrl(string key)
+    {
+        var request = new GetPreSignedUrlRequest
+        {
+            BucketName = BucketName,
+            Key = key,
+            Verb = HttpVerb.GET,
+            Protocol = Env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
+            Expires = DateTime.UtcNow.AddMinutes(30),
+            ContentType = "application/octet-stream",
+        };
+
+        return await _client.GetPreSignedURLAsync(request);
+    }
+
     public async Task<GetObjectMetadataResponse> GetObjectMetadata(string key)
     {
         return await _client.GetObjectMetadataAsync(BucketName, key);

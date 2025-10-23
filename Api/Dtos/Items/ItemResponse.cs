@@ -11,27 +11,12 @@ public record ItemResponse(
     EncryptedData EncryptedName,
     long? Size,
     string? ContentType,
-    string? StorageKey,
+    string? Url,
     DateTime CreatedAt,
     Guid? ParentId,
     EncryptedData EncryptedKey,
     EncryptedData? KeyEncryptedByRoot)
 {
-    public static ItemResponse From(File file, bool withRootKey)
-    {
-        return new ItemResponse(
-            file.Id,
-            ItemType.File,
-            EncryptedData.From(file.Name), 
-            file.Size,
-            file.ContentType,
-            file.StorageKey,
-            file.CreatedAt,
-            file.ParentFolderId,
-            EncryptedData.From(file.EncryptedKey), 
-            withRootKey ? EncryptedData.From(file.KeyEncryptedByRoot) : null);
-    }
-    
     public static ItemResponse From(Folder folder, bool withRootKey)
     {
         return new ItemResponse(

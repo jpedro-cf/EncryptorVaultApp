@@ -6,5 +6,4 @@ public class GetFolderRequest
 {   
     [FromHeader(Name = "X-Share-Id")]
     public string? ShareId { get; set; }
-    
 }

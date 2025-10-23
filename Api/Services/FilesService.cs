@@ -1,5 +1,7 @@
 using EncryptionApp.Api.Dtos.Files;
+using EncryptionApp.Api.Dtos.Items;
 using EncryptionApp.Api.Entities;
+using EncryptionApp.Api.Factory;
 using EncryptionApp.Api.Global;
 using EncryptionApp.Api.Global.Errors;
 using EncryptionApp.Api.Infra.Storage;
@@ -10,7 +12,11 @@ using File = EncryptionApp.Api.Entities.File;
 
 namespace EncryptionApp.Api.Services;
 
-public class FilesService(AppDbContext ctx, StorageUsageService storageUsageService, AmazonS3 amazonS3)
+public class FilesService(
+    AppDbContext ctx, 
+    StorageUsageService storageUsageService, 
+    AmazonS3 amazonS3,
+    ItemResponseFactory itemResponseFactory)
 {
     public async Task<Result<InitiateUploadResponse>> Upload(Guid userId, UploadFileRequest data)
     {
@@ -60,14 +66,14 @@ public class FilesService(AppDbContext ctx, StorageUsageService storageUsageServ
         }
     }
 
-    public async Task<Result<UploadCompletedResponse>> CompleteUpload(Guid userId, CompleteUploadRequest data)
+    public async Task<Result<ItemResponse>> CompleteUpload(Guid userId, CompleteUploadRequest data)
     {
         var file = await ctx.Files.FirstOrDefaultAsync(f => 
             f.OwnerId == userId && f.Id == Guid.Parse(data.FileId) && f.UploadId == data.UploadId);
 
         if (file == null)
         {
-            return Result<UploadCompletedResponse>.Failure(
+            return Result<ItemResponse>.Failure(
                 new NotFoundError("File not found. Check if you provided the correct data."));
         }
         
@@ -85,12 +91,12 @@ public class FilesService(AppDbContext ctx, StorageUsageService storageUsageServ
         
         if (notUploaded)
         {
-            return Result<UploadCompletedResponse>.Failure(
+            return Result<ItemResponse>.Failure(
                 new UnprocessableEntityError("You didn't upload one of the parts."));
         }
         if (storageExceeded)
         {
-            return Result<UploadCompletedResponse>.Failure(
+            return Result<ItemResponse>.Failure(
                 new StorageLimitExceededError("You've reached your storage limit."));   
         }
         
@@ -118,15 +124,16 @@ public class FilesService(AppDbContext ctx, StorageUsageService storageUsageServ
             storageUsage.TotalSize += totalSize;
                 
             await ctx.SaveChangesAsync();
-            var response = await amazonS3.CompleteMultiPartUpload(data);
+            await amazonS3.CompleteMultiPartUpload(data);
             await transaction.CommitAsync();
             
-            return Result<UploadCompletedResponse>.Success(response);
+            return Result<ItemResponse>.Success(
+                await itemResponseFactory.CreateFrom(file, true));
         }
         catch (Exception e)
         {
             await transaction.RollbackAsync();
-            return Result<UploadCompletedResponse>.Failure(
+            return Result<ItemResponse>.Failure(
                 new UnprocessableEntityError("An error occurred while completing the upload."));
         }
     }
