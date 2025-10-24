@@ -1,25 +1,24 @@
 import { useCurrentUser } from '@/api/account/users'
 import { useAuth } from '@/hooks/use-auth'
 import { LoadingPage } from '@/pages/LoadingPage'
-import { Encryption } from '@/services/encryption'
-import { useEffect } from 'react'
+import { Encryption } from '@/lib/encryption'
+import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router'
 
 export function PersistAuth() {
-    const { account, setAccount } = useAuth()
-    const { data, isLoading, isSuccess } = useCurrentUser()
+    const [loading, setLoading] = useState(true)
+    const { setAccount } = useAuth()
+    const { data, isSuccess, isFetched } = useCurrentUser()
 
     useEffect(() => {
+        if (!isFetched) {
+            return
+        }
         if (isSuccess) {
             setAccount(data)
         }
-    }, [isSuccess])
+        setLoading(false)
+    }, [isFetched])
 
-    if (isLoading) {
-        return <LoadingPage />
-    }
-
-    console.log(account)
-
-    return <Outlet />
+    return loading ? <LoadingPage /> : <Outlet />
 }

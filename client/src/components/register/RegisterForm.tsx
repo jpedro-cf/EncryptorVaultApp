@@ -19,8 +19,7 @@ import { Button } from '../ui/button'
 import { Link, useNavigate } from 'react-router'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { Alert, AlertDescription } from '../ui/alert'
-import { Encryption } from '@/services/encryption'
-import { uint8ArrayToBase64 } from '@/lib/utils'
+import { Encryption } from '@/lib/encryption'
 import {
     useLogin,
     useMfaQrCode,
@@ -29,6 +28,8 @@ import {
 } from '@/api/account/auth'
 import { useUpdateVaultSecret } from '@/api/account/users'
 import { Spinner } from '../ui/spinner'
+import { useAuth } from '@/hooks/use-auth'
+import { Encoding } from '@/lib/encoding'
 
 const createAccountSchema = z
     .object({
@@ -82,6 +83,7 @@ export function RegisterForm() {
 
 export function AccountForm() {
     const { setCurrentStep } = useRegistrationContext()
+    const { setAccount } = useAuth()
     const {
         mutate: register,
         isPending: isRegistering,
@@ -104,7 +106,8 @@ export function AccountForm() {
                 login(
                     { email: data.email, password: data.password },
                     {
-                        onSuccess: () => {
+                        onSuccess: (data) => {
+                            setAccount(data)
                             setCurrentStep(RegistrationStep.VAULT_SECRET)
                         },
                     }
@@ -215,7 +218,9 @@ export function VaultSecretForm() {
     const form = useForm<VaultSecretSchema>({
         resolver: zodResolver(vaultSecretSchema),
         defaultValues: {
-            secret: uint8ArrayToBase64(Encryption.generateRandomSecret(10)),
+            secret: Encoding.uint8ArrayToBase64(
+                Encryption.generateRandomSecret(10)
+            ),
         },
     })
 
@@ -268,7 +273,7 @@ export function VaultSecretForm() {
                         </div>
                         <AlertDescription className="text-blue-300 text-sm">
                             Save this key in a secure location. You'll need it
-                            to recover your account.
+                            to decrypt your vault.
                         </AlertDescription>
                     </Alert>
                     <Button

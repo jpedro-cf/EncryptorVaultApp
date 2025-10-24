@@ -5,22 +5,18 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
-export function uint8ArrayToBase64(data: Uint8Array): string {
-    let binaryString = ''
-    for (let i = 0; i < data.length; i++) {
-        binaryString += String.fromCharCode(data[i])
-    }
-    return btoa(binaryString)
-}
-
-export function base64ToUint8Array(
-    base64String: string
-): Uint8Array<ArrayBuffer> {
-    const binaryString = atob(base64String)
-    const uint8Array = new Uint8Array(binaryString.length)
-    for (let i = 0; i < binaryString.length; i++) {
-        uint8Array[i] = binaryString.charCodeAt(i)
+export function formatFileSize(bytes: number, decimalPoint = 2): string {
+    if (bytes === 0) {
+        return '0 Bytes'
     }
 
-    return uint8Array
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+    return (
+        parseFloat((bytes / Math.pow(k, i)).toFixed(decimalPoint)) +
+        ' ' +
+        sizes[i]
+    )
 }

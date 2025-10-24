@@ -18,18 +18,9 @@ type RegistrationStep = (typeof RegistrationStep)[keyof typeof RegistrationStep]
 export { RegistrationStep }
 
 export function RegisterPage() {
-    const navigate = useNavigate()
-    const { account } = useAuth()
-
     const [currentStep, setCurrentStep] = useState<RegistrationStep>(
         RegistrationStep.ACCOUNT
     )
-
-    useEffect(() => {
-        if (account != null) {
-            navigate('/', { replace: true })
-        }
-    }, [account, navigate])
 
     return (
         <main className="bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen w-full flex items-center justify-center">

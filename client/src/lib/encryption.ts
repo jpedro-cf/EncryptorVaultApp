@@ -1,4 +1,4 @@
-import { base64ToUint8Array } from '@/lib/utils'
+import { Encoding } from './encoding'
 
 interface EncryptData {
     data: Uint8Array<ArrayBuffer>
@@ -71,8 +71,8 @@ export class Encryption {
     public static async decryptVaultKey(
         params: DecryptVaultKey
     ): Promise<Uint8Array<ArrayBuffer> | null> {
-        const secret = base64ToUint8Array(params.base64Secret)
-        const combined = base64ToUint8Array(params.base64Key)
+        const secret = Encoding.base64ToUint8Array(params.base64Secret)
+        const combined = Encoding.base64ToUint8Array(params.base64Key)
 
         const salt = combined.slice(0, 16)
         const iv = combined.slice(16, 28)

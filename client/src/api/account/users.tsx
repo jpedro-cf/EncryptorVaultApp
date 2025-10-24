@@ -4,8 +4,8 @@ import type { AxiosError } from 'axios'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { User } from '@/types/account'
-import { Encryption } from '@/services/encryption'
-import { base64ToUint8Array, uint8ArrayToBase64 } from '@/lib/utils'
+import { Encryption } from '@/lib/encryption'
+import { Encoding } from '@/lib/encoding'
 
 export function useCurrentUser() {
     async function request(): Promise<User> {
@@ -29,7 +29,7 @@ export function useUpdateVaultSecret() {
     async function request(data: VaultSecretSchema): Promise<void> {
         const rootKeyToEncrypt = Encryption.generateRandomSecret()
         const { salt, key } = await Encryption.deriveKeyFromSecret(
-            base64ToUint8Array(data.secret)
+            Encoding.base64ToUint8Array(data.secret)
         )
 
         const { iv, encryptedData: encryptedKey } = await Encryption.encrypt({
@@ -45,7 +45,7 @@ export function useUpdateVaultSecret() {
         combined.set(encryptedKey, salt.byteLength + iv.byteLength)
 
         await api.patch('/users/me/vault-key', {
-            vaultKey: uint8ArrayToBase64(combined),
+            vaultKey: Encoding.uint8ArrayToBase64(combined),
         })
     }
 
