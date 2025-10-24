@@ -85,7 +85,7 @@ public class AuthenticationController(
         }
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await authService.SetupMfa(Guid.Parse(userId!), data.Token);
+        var result = await authService.SetupMfa(Guid.Parse(userId!), data.Code);
         
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
     }

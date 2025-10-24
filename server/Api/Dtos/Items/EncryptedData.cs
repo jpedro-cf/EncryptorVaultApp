@@ -10,8 +10,8 @@ public record EncryptedData(string Data, string Iv)
         var combined = Convert.FromBase64String(value);
 
         // Extract IV and data
-        var iv = combined[..16];
-        var encryptedData = combined[16..];
+        var iv = combined[..12];
+        var encryptedData = combined[12..];
 
         return new EncryptedData(encryptedData.ToBase64(), iv.ToBase64());
     }

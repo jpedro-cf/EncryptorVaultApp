@@ -76,7 +76,7 @@ public class AuthService(
         return Result<MfaKeyResponse>.Success(new MfaKeyResponse(key!, totpUri.GenerateQrCodeBase64()));
     }
 
-    public async Task<Result<bool>> SetupMfa(Guid userId, string token)
+    public async Task<Result<bool>> SetupMfa(Guid userId, string code)
     {
         var user = await ctx.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null)
@@ -85,11 +85,11 @@ public class AuthService(
         }
         var tokenProvider = userManager.Options.Tokens.AuthenticatorTokenProvider;
 
-        var tokenDigits = new string(token.Where(char.IsDigit).ToArray());
+        var tokenDigits = new string(code.Where(char.IsDigit).ToArray());
         var ok = await userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, tokenDigits);
         if (!ok)
         {
-            return Result<bool>.Failure(new UnauthorizedError("Token invalid."));
+            return Result<bool>.Failure(new UnauthorizedError("Invalid Code."));
         }
         
         await userManager.SetTwoFactorEnabledAsync(user, true);

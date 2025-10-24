@@ -21,6 +21,7 @@ var publicKey = RSA.Create();
 privateKey.ImportFromPem(File.ReadAllText(builder.Configuration["Keys:PrivateKeyPath"]!));
 publicKey.ImportFromPem(File.ReadAllText(builder.Configuration["Keys:PublicKeyPath"]!));
 
+builder.AddSecurityConfig(builder.Configuration);
 builder.AddIdentityConfig();
 builder.AddAuthConfig(builder.Configuration, publicKey);
 builder.Services.AddAuthorization();
@@ -41,7 +42,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseExceptionHandler();
-app.UseRouting();
+app.UseRouting();   
+app.UseCors("AllowSpecificOrigin");
 app.UseAuthorization();
+app.MapControllers();
 
 app.Run();
