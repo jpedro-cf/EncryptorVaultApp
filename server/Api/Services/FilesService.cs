@@ -106,7 +106,7 @@ public class FilesService(
             // update actual file size in case the user manipulated the request to look like he uploaded a smaller file
             file.Status = FileStatus.Completed;
             file.Size = totalSize;
-            var contentType = file.ContentType.ToStorageContentType();
+            var contentType = file.ContentType.ToContentTypeEnum();
 
             var storageUsage = await ctx.StorageUsage
                 .FirstOrDefaultAsync(s => s.UserId == file.OwnerId && s.ContentType == contentType);
@@ -181,7 +181,7 @@ public class FilesService(
                     new NotFoundError("File not found or upload was not completed correctly."));
             }
 
-            var contentType = file.ContentType.ToStorageContentType();
+            var contentType = file.ContentType.ToContentTypeEnum();
             var storageUsage = await ctx.StorageUsage.FirstAsync(s => 
                 s.UserId == userId && s.ContentType == contentType);
 

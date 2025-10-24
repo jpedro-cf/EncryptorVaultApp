@@ -6,6 +6,7 @@ namespace EncryptionApp.Api.Dtos.Files;
 public class UploadFileRequest
 {
     [Required(ErrorMessage = "File name is required.")]
+    [Base64String]
     public string FileName { get; set; }
     
     [Required(ErrorMessage = "File size is required")]

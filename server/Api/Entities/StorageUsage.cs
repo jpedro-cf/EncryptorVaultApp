@@ -13,18 +13,10 @@ public class StorageUsage
     
     [Required]
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public StorageContentType ContentType { get; set; }
+    public ContentType ContentType { get; set; }
     
     [Required]
     public long TotalSize { get; set; }
 
 }
 
-public enum StorageContentType
-{
-    Text,
-    Image,
-    Video,
-    Audio,
-    Application
-}

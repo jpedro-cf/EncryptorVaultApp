@@ -22,19 +22,6 @@ public static class StringExtensions
         return Convert.ToBase64String(value);
     }
 
-    public static bool IsValidContentType(this string value)
-    {
-        try
-        {
-            var contentType = new ContentType(value);
-            return true;
-        }
-        catch (FormatException)
-        {
-            return false;
-        }
-    }
-    
     public static bool IsBase64Encoded(this string value)
     {
         if (string.IsNullOrWhiteSpace(value))

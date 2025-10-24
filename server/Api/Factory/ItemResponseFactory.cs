@@ -1,6 +1,7 @@
 using EncryptionApp.Api.Dtos.Folders;
 using EncryptionApp.Api.Dtos.Items;
 using EncryptionApp.Api.Entities;
+using EncryptionApp.Api.Global.Helpers;
 using EncryptionApp.Api.Infra.Storage;
 using File = EncryptionApp.Api.Entities.File;
 
@@ -15,9 +16,9 @@ public class ItemResponseFactory(AmazonS3 amazonS3)
         return new ItemResponse(
             file.Id,
             ItemType.File,
-            EncryptedData.From(file.Name), 
+            file.Name, 
             file.Size,
-            file.ContentType,
+            file.ContentType.ToContentTypeEnum(),
             presignedUrl,
             file.CreatedAt,
             file.ParentFolderId,

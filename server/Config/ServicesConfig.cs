@@ -19,6 +19,7 @@ public static class ServicesConfig
         builder.Services.AddTransient<AuthService>();
         builder.Services.AddTransient<FoldersService>();
         builder.Services.AddTransient<ShareService>();
+        builder.Services.AddTransient<ItemsService>();
 
         builder.Services.AddSingleton(privateKey);
         builder.Services.AddSingleton(publicKey);

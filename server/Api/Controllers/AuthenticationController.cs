@@ -5,7 +5,6 @@ using EncryptionApp.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using EncryptionApp.Api.Global.Exceptions;
 
 namespace EncryptionApp.Api.Controllers;
 

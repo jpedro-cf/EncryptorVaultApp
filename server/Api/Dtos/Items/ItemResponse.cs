@@ -8,9 +8,9 @@ public record ItemResponse(
     Guid Id,
     [property: JsonConverter(typeof(JsonStringEnumConverter))]
     ItemType Type,
-    EncryptedData EncryptedName,
+    string EncryptedName,
     long? Size,
-    string? ContentType,
+    ContentType? ContentType,
     string? Url,
     DateTime CreatedAt,
     Guid? ParentId,
@@ -22,7 +22,7 @@ public record ItemResponse(
         return new ItemResponse(
             folder.Id,
             ItemType.Folder,
-            EncryptedData.From(folder.Name), 
+            folder.Name, 
             null,
             null,
             null,

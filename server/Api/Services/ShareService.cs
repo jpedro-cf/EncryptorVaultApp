@@ -9,11 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EncryptionApp.Api.Services;
 
-public class ShareService(
-    AppDbContext ctx, 
-    ItemResponseFactory itemResponseFactory, 
-    FoldersService foldersService, 
-    FilesService filesService)
+public class ShareService(AppDbContext ctx,  ItemResponseFactory itemResponseFactory)
 {
     public async Task<Result<SharedItemResponse>> CreateShare(Guid userId, CreateSharedItemRequest data)
     {
