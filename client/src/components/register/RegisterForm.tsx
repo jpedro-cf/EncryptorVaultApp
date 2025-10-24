@@ -356,7 +356,7 @@ export function SetupMfaForm() {
                                         </FormItem>
                                     )}
                                 />
-                                <Button type="submit" variant={'outline'}>
+                                <Button type="submit" variant={'secondary'}>
                                     Confirm
                                 </Button>
                             </div>

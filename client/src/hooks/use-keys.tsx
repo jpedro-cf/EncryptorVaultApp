@@ -9,7 +9,7 @@ interface KeyState {
     setFolderKey: (id: string, key: Uint8Array<ArrayBuffer>) => void
 }
 
-export const useAuth = create<KeyState>()((set) => ({
+export const useKeys = create<KeyState>()((set) => ({
     rootKey: null,
     folderKeys: {},
     fileKeys: {},
