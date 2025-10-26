@@ -16,7 +16,7 @@ public class ItemResponseFactory(AmazonS3 amazonS3)
         return new ItemResponse(
             file.Id,
             ItemType.File,
-            file.Name, 
+            EncryptedData.From(file.Name), 
             file.Size,
             file.ContentType.ToContentTypeEnum(),
             presignedUrl,

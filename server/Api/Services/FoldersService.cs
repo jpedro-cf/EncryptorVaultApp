@@ -81,4 +81,26 @@ public class FoldersService(AppDbContext ctx, ItemResponseFactory itemResponseFa
         return Result<FolderResponse>.Success(
             await itemResponseFactory.CreateFolderResponse(folder, true));
     }
+
+    // public async Task<Result<bool>> DeleteFolder(Guid userId, Guid folderId)
+    // {
+    //     var folder = await ctx.Folders.FirstOrDefaultAsync(f => f.Id == folderId && f.OwnerId == userId);
+    //     if (folder == null)
+    //     {
+    //         return Result<bool>.Failure(new NotFoundError("Folder not found."));
+    //     }
+    //
+    //     var transaction = await ctx.Database.BeginTransactionAsync();
+    //     try
+    //     {
+    //
+    //         await transaction.CommitAsync();
+    //         return Result<bool>.Success(true);
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         await transaction.RollbackAsync();
+    //         return Result<bool>.Failure(new InternalServerError("An error occured while deleting this folder."));
+    //     }
+    // }
 }

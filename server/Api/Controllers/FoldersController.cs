@@ -32,7 +32,9 @@ public class FoldersController(FoldersService foldersService) : ControllerBase
         {
             return Results.BadRequest(data);
         }
-        var result = await foldersService.GetFolder(id, null, data);
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var result = await foldersService.GetFolder(id, userId != null ? Guid.Parse(userId): null, data);
         
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
     }
