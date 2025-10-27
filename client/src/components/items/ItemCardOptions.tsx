@@ -6,16 +6,24 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
-import type { ItemType } from '@/types/items'
+import type { FileItem, FolderItem } from '@/types/items'
+import { useFileDeletion } from '@/api/files/files'
 
 interface Props {
-    type: ItemType
-    id: string
+    item: FileItem | FolderItem
 }
-export function ItemCardOptions({ type, id }: Props) {
-    function handleDelete() {}
+export function ItemCardOptions({ item }: Props) {
+    const { mutate: deleteFile, isPending: deletingFile } = useFileDeletion()
+
+    function handleDelete() {
+        if ('contentType' in item) {
+            deleteFile({ file: item })
+        }
+    }
 
     function handleShare() {}
+
+    const isDeleting = deletingFile
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -67,6 +75,7 @@ export function ItemCardOptions({ type, id }: Props) {
                         className="w-full justify-start cursor-pointer"
                         type="button"
                         onClick={handleDelete}
+                        disabled={isDeleting}
                     >
                         Delete
                     </Button>

@@ -15,6 +15,7 @@ export interface FileItem {
     id: string
     name: string
     size: number
+    parentId?: string
     contentType: ContentType
     url: string
     createdAt: Date

@@ -52,8 +52,9 @@ interface CompleteUpload {
 interface Props {
     onPartUpload: (id: string, newProgress: number) => void
     onError: (id: string) => void
+    onSuccess: (id: string) => void
 }
-export function useFilesUpload({ onPartUpload, onError }: Props) {
+export function useFilesUpload({ onPartUpload, onError, onSuccess }: Props) {
     const queryClient = useQueryClient()
     const { rootKey, folderKeys, setFileKey } = useKeys()
     const { storageUsage, updateStorageUsage } = useAuth()
@@ -72,84 +73,81 @@ export function useFilesUpload({ onPartUpload, onError }: Props) {
 
         const res: (FileItem | FolderItem)[] = []
 
-        await Promise.all(
-            data.files.map(async (file) => {
-                try {
-                    if (usedStorage >= config.TOTAL_STORAGE) {
-                        onError(file.id)
-                        return
-                    }
-
-                    const fileEncryptionKey = Encryption.generateRandomSecret()
-                    const parentKey = data.parentId
-                        ? folderKeys[data.parentId]
-                        : rootKey
-
-                    const { combined: encryptedName } =
-                        await Encryption.encrypt({
-                            data: Encoding.textToUint8Array(file.content.name),
-                            key: fileEncryptionKey,
-                        })
-
-                    const { combined: encryptedKey } = await Encryption.encrypt(
-                        {
-                            data: fileEncryptionKey,
-                            key: parentKey,
-                        }
-                    )
-
-                    const { combined: keyEncryptedByRoot } =
-                        await Encryption.encrypt({
-                            data: fileEncryptionKey,
-                            key: rootKey,
-                        })
-
-                    const { combined: encryptedFileContent } =
-                        await Encryption.encrypt({
-                            data: new Uint8Array(
-                                await file.content.arrayBuffer()
-                            ),
-                            key: fileEncryptionKey,
-                        })
-
-                    const initial = await initiateUpload({
-                        contentType: file.content.type,
-                        fileName: Encoding.uint8ArrayToBase64(encryptedName),
-                        fileSize: file.content.size,
-                        parentFolderId: data.parentId,
-                        encryptedKey: Encoding.uint8ArrayToBase64(encryptedKey),
-                        keyEncryptedByRoot:
-                            Encoding.uint8ArrayToBase64(keyEncryptedByRoot),
-                    })
-
-                    const uploadedParts = await uploadParts(
-                        { ...initial, fileContent: encryptedFileContent },
-                        (progress) => onPartUpload(file.id, progress)
-                    )
-
-                    const uploadedFile = await completeUpload({
-                        fileId: initial.fileId,
-                        key: initial.key,
-                        parts: uploadedParts,
-                        uploadId: initial.uploadId,
-                    })
-
-                    setFileKey(uploadedFile.id, fileEncryptionKey)
-
-                    const item = await decryptItem({
-                        key: { root: true, value: rootKey },
-                        item: uploadedFile,
-                    })
-                    res.push(item)
-                    updateStorageUsage(
-                        uploadedFile.contentType!,
-                        encryptedFileContent.byteLength
-                    )
-                } catch (error) {
+        for (const file of data.files) {
+            try {
+                if (usedStorage >= config.TOTAL_STORAGE) {
                     onError(file.id)
+                    return res
                 }
-            })
-        )
+
+                const fileEncryptionKey = Encryption.generateRandomSecret()
+                const parentKey = data.parentId
+                    ? folderKeys[data.parentId]
+                    : rootKey
+
+                const { combined: encryptedName } = await Encryption.encrypt({
+                    data: Encoding.textToUint8Array(file.content.name),
+                    key: fileEncryptionKey,
+                })
+
+                const { combined: encryptedKey } = await Encryption.encrypt({
+                    data: fileEncryptionKey,
+                    key: parentKey,
+                })
+
+                const { combined: keyEncryptedByRoot } =
+                    await Encryption.encrypt({
+                        data: fileEncryptionKey,
+                        key: rootKey,
+                    })
+
+                const { combined: encryptedFileContent } =
+                    await Encryption.encrypt({
+                        data: new Uint8Array(await file.content.arrayBuffer()),
+                        key: fileEncryptionKey,
+                    })
+
+                const initial = await initiateUpload({
+                    contentType: file.content.type,
+                    fileName: Encoding.uint8ArrayToBase64(encryptedName),
+                    fileSize: file.content.size,
+                    parentFolderId: data.parentId,
+                    encryptedKey: Encoding.uint8ArrayToBase64(encryptedKey),
+                    keyEncryptedByRoot:
+                        Encoding.uint8ArrayToBase64(keyEncryptedByRoot),
+                })
+
+                const uploadedParts = await uploadParts(
+                    { ...initial, fileContent: encryptedFileContent },
+                    (progress) => onPartUpload(file.id, progress)
+                )
+
+                const uploadedFile = await completeUpload({
+                    fileId: initial.fileId,
+                    key: initial.key,
+                    parts: uploadedParts,
+                    uploadId: initial.uploadId,
+                })
+
+                setFileKey(uploadedFile.id, fileEncryptionKey)
+
+                const item = await decryptItem({
+                    key: { root: true, value: rootKey },
+                    item: uploadedFile,
+                })
+
+                res.push(item)
+
+                updateStorageUsage(
+                    uploadedFile.contentType!,
+                    encryptedFileContent.byteLength
+                )
+                onSuccess(file.id)
+            } catch (error) {
+                onError(file.id)
+            }
+        }
+
         return res
     }
 

@@ -67,10 +67,17 @@ export function UploadFilesForm({ parentId, onComplete }: Props) {
                 }
             })
         },
+        onSuccess: handleDelete,
     })
 
     function handleSubmit(data: UploadFilesSchema) {
-        mutate(data, { onSuccess: onComplete })
+        mutate(data, {
+            onSuccess: () => {
+                if (form.getValues('files').length == 0) {
+                    onComplete()
+                }
+            },
+        })
     }
 
     function handleDrop(files: File[]) {

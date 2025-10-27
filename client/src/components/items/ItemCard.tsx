@@ -1,4 +1,4 @@
-import type { ContentType, FileItem, FolderItem, ItemType } from '@/types/items'
+import type { ContentType, FileItem, FolderItem } from '@/types/items'
 import {
     File,
     FileAudio,
@@ -39,7 +39,7 @@ export function ItemCard({ data }: ItemCardProps) {
             </div>
         )
     }
-    return <Link to={`${!isFile ? `/folders/${data.id}` : '#'}`}>{card}</Link>
+    return isFile ? card : <Link to={`/folders/${data.id}`}>{card}</Link>
 }
 
 export function FolderCard({ folder }: { folder: FolderItem }) {
@@ -50,7 +50,7 @@ export function FolderCard({ folder }: { folder: FolderItem }) {
                 <div className="p-2 bg-yellow-900 rounded-lg group-hover:bg-yellow-600 transition-colors">
                     <Folder className="w-6 h-6 text-yellow-400 group-hover:text-white" />
                 </div>
-                {!shareId && <ItemCardOptions type="Folder" id={folder.id} />}
+                {!shareId && <ItemCardOptions item={folder} />}
             </div>
             <h3 className="font-semibold text-white truncate mb-1">
                 {folder.name}
@@ -81,7 +81,7 @@ export function FileCard({ file }: { file: FileItem }) {
         >
             <div className="flex items-start justify-between mb-3">
                 <FileIcon type={file.contentType} />
-                {!shareId && <ItemCardOptions type="File" id={file.id} />}
+                {!shareId && <ItemCardOptions item={file} />}
             </div>
             <h3 className="font-semibold text-white truncate mb-1">
                 {file.name}

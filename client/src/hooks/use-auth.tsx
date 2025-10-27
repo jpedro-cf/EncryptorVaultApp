@@ -23,13 +23,11 @@ export const useAuth = create<AuthState>()((set) => ({
         Video: 0,
     },
     setStorageUsage: (data) => set((state) => ({ storageUsage: data })),
-    updateStorageUsage: (contentType, value) =>
-        set((state) => {
-            return {
-                storageUsage: {
-                    ...state.storageUsage,
-                    [contentType]: state.storageUsage[contentType] + value,
-                },
-            }
-        }),
+    updateStorageUsage: (contentType, delta) =>
+        set((state) => ({
+            storageUsage: {
+                ...state.storageUsage,
+                [contentType]: (state.storageUsage[contentType] ?? 0) + delta,
+            },
+        })),
 }))
