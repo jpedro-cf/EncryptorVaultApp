@@ -3,13 +3,13 @@ import { api } from '../axios'
 import type { AxiosError } from 'axios'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { User } from '@/types/account'
+import type { CurrentUserData, User } from '@/types/account'
 import { Encryption } from '@/lib/encryption'
 import { Encoding } from '@/lib/encoding'
 import { useKeys } from '@/hooks/use-keys'
 
 export function useCurrentUser() {
-    async function request(): Promise<User> {
+    async function request(): Promise<CurrentUserData> {
         const res = await api.get('/users/me')
         const user = res.data
 

@@ -2,18 +2,34 @@ import { HardDrive, Lock, Share2 } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router'
+import { useAuth } from '@/hooks/use-auth'
+import type { ContentType } from '@/types/items'
+import { formatFileSize } from '@/lib/utils'
+import { config } from '@/config/config'
 
-const storageBreakdown = [
-    { label: 'Text', size: 12.5, color: 'bg-blue-500' },
-    { label: 'Images', size: 3.2, color: 'bg-purple-500' },
-    { label: 'Videos', size: 2.5, color: 'bg-pink-500' },
-    { label: 'Audios', size: 2.5, color: 'bg-green-500' },
-    { label: 'Others', size: 2.5, color: 'bg-slate-500' },
-]
-const usedStorage = 18.2
-const totalStorage = 100
-const percentage = (usedStorage / totalStorage) * 100
+const colors: Record<ContentType, string> = {
+    Text: 'bg-blue-500',
+    Image: 'bg-purple-500',
+    Video: 'bg-pink-500',
+    Audio: 'bg-green-500',
+    Application: 'bg-slate-500',
+}
+
+const totalStorage = config.TOTAL_STORAGE
+
 export function StorageUsage() {
+    const { storageUsage } = useAuth()
+
+    if (!storageUsage) {
+        return <></>
+    }
+
+    const usedStorage = Object.values(storageUsage).reduce(
+        (prev, curr) => curr + prev,
+        0
+    )
+    const percentage = (usedStorage / totalStorage) * 100
+
     return (
         <aside className="w-80 border-l border-slate-700 bg-slate-800 p-6 overflow-y-auto hidden lg:block">
             <div className="space-y-6">
@@ -26,7 +42,8 @@ export function StorageUsage() {
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm text-slate-300">
-                                    {usedStorage} GB of {totalStorage} GB
+                                    {formatFileSize(usedStorage)} of{' '}
+                                    {formatFileSize(totalStorage)}
                                 </span>
                                 <span className="text-sm font-semibold text-blue-400">
                                     {Math.round(percentage)}%
@@ -45,21 +62,23 @@ export function StorageUsage() {
                         Breakdown
                     </h4>
                     <div className="space-y-2">
-                        {storageBreakdown.map((item) => (
+                        {Object.entries(storageUsage).map(([type, value]) => (
                             <div
-                                key={item.label}
+                                key={type}
                                 className="flex items-center justify-between"
                             >
                                 <div className="flex items-center gap-2">
                                     <div
-                                        className={`w-2 h-2 rounded-full ${item.color}`}
+                                        className={`w-2 h-2 rounded-full ${
+                                            colors[type as ContentType]
+                                        }`}
                                     />
                                     <span className="text-sm text-slate-300">
-                                        {item.label}
+                                        {type}
                                     </span>
                                 </div>
                                 <span className="text-sm font-medium text-slate-200">
-                                    {item.size} GB
+                                    {formatFileSize(value)}
                                 </span>
                             </div>
                         ))}

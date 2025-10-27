@@ -7,7 +7,8 @@
     background: transparent;
 }
 ::-webkit-scrollbar-track {
-    display: none;
+    background: transparent;
+    /* background-color: var(--color-slate-900); */
 }
 
 ::-webkit-scrollbar-thumb {

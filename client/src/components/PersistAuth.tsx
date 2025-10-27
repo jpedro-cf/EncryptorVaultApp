@@ -1,13 +1,12 @@
 import { useCurrentUser } from '@/api/account/users'
 import { useAuth } from '@/hooks/use-auth'
 import { LoadingPage } from '@/pages/LoadingPage'
-import { Encryption } from '@/lib/encryption'
 import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router'
 
 export function PersistAuth() {
     const [loading, setLoading] = useState(true)
-    const { setAccount } = useAuth()
+    const { setAccount, setStorageUsage } = useAuth()
     const { data, isSuccess, isFetched } = useCurrentUser()
 
     useEffect(() => {
@@ -15,7 +14,8 @@ export function PersistAuth() {
             return
         }
         if (isSuccess) {
-            setAccount(data)
+            setAccount(data.user)
+            setStorageUsage(data.storageUsage)
         }
         setLoading(false)
     }, [isFetched])

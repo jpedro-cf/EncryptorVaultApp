@@ -9,6 +9,8 @@ import { toast } from 'sonner'
 import { api } from '../axios'
 import { decryptItem } from '../items/items'
 import type { Folder } from '@/types/folders'
+import { useAuth } from '@/hooks/use-auth'
+import { config } from '@/config/config'
 
 interface InitiateUpload {
     fileName: string
@@ -54,6 +56,12 @@ interface Props {
 export function useFilesUpload({ onPartUpload, onError }: Props) {
     const queryClient = useQueryClient()
     const { rootKey, folderKeys, setFileKey } = useKeys()
+    const { storageUsage, updateStorageUsage } = useAuth()
+
+    const usedStorage = Object.values(storageUsage!).reduce(
+        (prev, curr) => curr + prev,
+        0
+    )
 
     async function request(data: UploadFilesSchema) {
         if (!rootKey || (data.parentId && !folderKeys[data.parentId])) {
@@ -67,6 +75,11 @@ export function useFilesUpload({ onPartUpload, onError }: Props) {
         await Promise.all(
             data.files.map(async (file) => {
                 try {
+                    if (usedStorage >= config.TOTAL_STORAGE) {
+                        onError(file.id)
+                        return
+                    }
+
                     const fileEncryptionKey = Encryption.generateRandomSecret()
                     const parentKey = data.parentId
                         ? folderKeys[data.parentId]
@@ -128,6 +141,10 @@ export function useFilesUpload({ onPartUpload, onError }: Props) {
                         item: uploadedFile,
                     })
                     res.push(item)
+                    updateStorageUsage(
+                        uploadedFile.contentType!,
+                        encryptedFileContent.byteLength
+                    )
                 } catch (error) {
                     onError(file.id)
                 }
