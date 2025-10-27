@@ -33,7 +33,9 @@ public class ItemResponseFactory(AmazonS3 amazonS3)
             .ToList() ?? [];
         
         var subItems = await Task.WhenAll(
-            folder.Files.Select(f => CreateFrom(f, withRootKey))
+            folder.Files
+                .Where(f => f.Status == FileStatus.Completed)
+                .Select(f => CreateFrom(f, withRootKey))
         );
         
         children.AddRange(subItems);
