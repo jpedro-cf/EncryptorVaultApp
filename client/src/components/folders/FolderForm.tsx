@@ -26,8 +26,9 @@ export type FolderFormSchema = z.infer<typeof folderFormSchema>
 interface Props {
     parentId?: string
     id?: string
+    onComplete: () => void
 }
-export function FolderForm({ parentId, id }: Props) {
+export function FolderForm({ parentId, id, onComplete }: Props) {
     const form = useForm<FolderFormSchema>({
         resolver: zodResolver(folderFormSchema),
         defaultValues: {
@@ -39,7 +40,12 @@ export function FolderForm({ parentId, id }: Props) {
     const { mutate, isPending } = useFolderMutation()
 
     function handleSubmit(data: FolderFormSchema) {
-        mutate(data, { onSuccess: () => toast.success('Folder created!') })
+        mutate(data, {
+            onSuccess: () => {
+                toast.success('Folder created!')
+                onComplete()
+            },
+        })
     }
 
     return (

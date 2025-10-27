@@ -1,7 +1,7 @@
 import type { Folder, FolderResponse } from '@/types/folders'
 import { api } from '../axios'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import type { FolderItem } from '@/types/items'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { FileItem, FolderItem } from '@/types/items'
 import { useKeys } from '@/hooks/use-keys'
 import type { FolderFormSchema } from '@/components/folders/FolderForm'
 import { Encryption } from '@/lib/encryption'
@@ -94,9 +94,10 @@ export function useFolder({ folderId, shareId, enabled }: UseFolderProps) {
 }
 
 export function useFolderMutation() {
+    const queryClient = useQueryClient()
     const { rootKey, folderKeys, setFolderKey } = useKeys()
 
-    async function request(data: FolderFormSchema): Promise<void> {
+    async function request(data: FolderFormSchema): Promise<FolderItem> {
         const folderEncryptionKey = Encryption.generateRandomSecret()
         const parentEncryptionKey = data.parentId
             ? folderKeys[data.parentId]
@@ -133,7 +134,13 @@ export function useFolderMutation() {
 
         setFolderKey(folder.id, folderEncryptionKey)
 
-        return
+        return {
+            id: folder.id,
+            createdAt: folder.createdAt,
+            key: folderEncryptionKey,
+            name: data.name,
+            parentId: folder.parentId,
+        }
     }
 
     return useMutation({
@@ -143,6 +150,23 @@ export function useFolderMutation() {
                 e.response?.data.detail ??
                     'An error occured while performing this operation.'
             )
+        },
+        onSuccess: (data, variables) => {
+            const queryKey = variables.parentId
+                ? ['folder', { id: variables.parentId }]
+                : ['items']
+
+            const previous = queryClient.getQueryData(queryKey)
+            if (!variables.parentId) {
+                const previousItems = previous as (FolderItem | FileItem)[]
+                queryClient.setQueryData(queryKey, [data, ...previousItems])
+            } else {
+                const previousFolder = previous as Folder
+                queryClient.setQueryData(queryKey, {
+                    ...previousFolder,
+                    children: [data, ...previousFolder.children],
+                })
+            }
         },
     })
 }
