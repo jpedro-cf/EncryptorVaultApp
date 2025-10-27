@@ -39,7 +39,16 @@ export function ExplorerHeader() {
                         <BreadcrumbList>
                             <BreadcrumbItem>
                                 <BreadcrumbLink asChild>
-                                    <Link to="/">Home</Link>
+                                    <Link
+                                        to={`${
+                                            shareId
+                                                ? `/${shareId}#${window.location.hash}`
+                                                : '/'
+                                        }`}
+                                        className="hover:underline"
+                                    >
+                                        Home
+                                    </Link>
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                             {folderTree.length >= 3 && (
@@ -58,11 +67,17 @@ export function ExplorerHeader() {
                                             {!shareId ? (
                                                 <Link
                                                     to={`/folders/${folder.id}`}
+                                                    className="hover:underline"
                                                 >
                                                     {folder.name}
                                                 </Link>
                                             ) : (
-                                                <span>{folder.name}</span>
+                                                <Button
+                                                    variant={'link'}
+                                                    className="px-0"
+                                                >
+                                                    {folder.name}
+                                                </Button>
                                             )}
                                         </BreadcrumbLink>
                                     </BreadcrumbItem>
