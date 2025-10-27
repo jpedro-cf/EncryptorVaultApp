@@ -4,6 +4,7 @@ import { LoginPage } from './pages/LoginPage'
 import { PersistAuth } from './components/PersistAuth'
 import { DashboardPage } from './pages/DashboardPage'
 import { DashboardLayout } from './components/dashboard/layout/DashboardLayout'
+import { FolderPage } from './pages/FolderPage'
 function App() {
     return (
         <Router>
@@ -14,6 +15,14 @@ function App() {
                         element={
                             <DashboardLayout>
                                 <DashboardPage />
+                            </DashboardLayout>
+                        }
+                    />
+                    <Route
+                        path="/folders/:id"
+                        element={
+                            <DashboardLayout>
+                                <FolderPage />
                             </DashboardLayout>
                         }
                     />

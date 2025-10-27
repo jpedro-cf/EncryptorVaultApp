@@ -1,3 +1,4 @@
+import { useLogout } from '@/api/account/auth'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,8 +14,9 @@ import { Link } from 'react-router'
 
 export function Header() {
     const { account } = useAuth()
+    const { mutate, isPending } = useLogout()
     return (
-        <header className="border-b border-slate-700 bg-slate-800 px-6 py-4 flex items-center justify-between text-slate-100">
+        <header className="border-b border-slate-700 bg-slate-800 px-6 py-2 flex items-center justify-between text-slate-100">
             <Button variant="ghost" size="icon" className="lg:hidden">
                 <Menu className="w-5 h-5" />
             </Button>
@@ -60,6 +62,8 @@ export function Header() {
                             <Button
                                 variant={'ghost'}
                                 className="w-full cursor-pointer"
+                                disabled={isPending}
+                                onClick={() => mutate()}
                             >
                                 Sign Out
                             </Button>

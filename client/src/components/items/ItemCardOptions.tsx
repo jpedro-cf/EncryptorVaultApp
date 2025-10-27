@@ -13,11 +13,15 @@ interface Props {
     id: string
 }
 export function ItemCardOptions({ type, id }: Props) {
+    function handleDelete() {}
+
+    function handleShare() {}
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="ghost"
+                    type="button"
                     size="icon"
                     className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-white"
                 >
@@ -36,19 +40,20 @@ export function ItemCardOptions({ type, id }: Props) {
                     <Button
                         variant={'ghost'}
                         className="w-full justify-start cursor-pointer"
-                        disabled={false}
+                        disabled={true}
                     >
                         Download
                     </Button>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    className="text-slate-200 focus:bg-slate-700 focus-visible:text-slate-200"
+                    className="text-slate-200 focus:bg-slate-700 focus:text-slate-200"
                     asChild
                 >
                     <Button
                         variant={'ghost'}
                         className="w-full justify-start cursor-pointer"
-                        disabled={false}
+                        type="button"
+                        onClick={handleShare}
                     >
                         Share
                     </Button>
@@ -60,6 +65,8 @@ export function ItemCardOptions({ type, id }: Props) {
                     <Button
                         variant={'ghost'}
                         className="w-full justify-start cursor-pointer"
+                        type="button"
+                        onClick={handleDelete}
                     >
                         Delete
                     </Button>

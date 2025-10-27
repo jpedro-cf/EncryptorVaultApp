@@ -1,7 +1,7 @@
-export interface Item {
+export interface ItemResponse {
     id: string
     type: ItemType
-    encryptedName: string
+    encryptedName: EncryptedData
     size?: number
     contentType?: ContentType
     url?: string
@@ -24,6 +24,7 @@ export interface FileItem {
 export interface FolderItem {
     id: string
     name: string
+    parentId?: string
     createdAt: Date
     key: Uint8Array<ArrayBuffer>
 }

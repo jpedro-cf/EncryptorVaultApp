@@ -30,6 +30,7 @@ import { useUpdateVaultSecret } from '@/api/account/users'
 import { Spinner } from '../ui/spinner'
 import { useAuth } from '@/hooks/use-auth'
 import { Encoding } from '@/lib/encoding'
+import { useKeys } from '@/hooks/use-keys'
 
 const createAccountSchema = z
     .object({
@@ -212,6 +213,7 @@ export function AccountForm() {
 }
 
 export function VaultSecretForm() {
+    const { setRootKey } = useKeys()
     const { setCurrentStep } = useRegistrationContext()
     const { mutate, isPending, isError } = useUpdateVaultSecret()
 
@@ -227,6 +229,7 @@ export function VaultSecretForm() {
     function handleSubmit(data: VaultSecretSchema) {
         mutate(data, {
             onSuccess: () => {
+                setRootKey(Encoding.textToUint8Array(data.secret))
                 setCurrentStep(RegistrationStep.MFA)
             },
         })

@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button'
 import { Link } from 'react-router'
 
 const storageBreakdown = [
-    { label: 'Files', size: 12.5, color: 'bg-blue-500' },
-    { label: 'Photos', size: 3.2, color: 'bg-purple-500' },
+    { label: 'Text', size: 12.5, color: 'bg-blue-500' },
+    { label: 'Images', size: 3.2, color: 'bg-purple-500' },
     { label: 'Videos', size: 2.5, color: 'bg-pink-500' },
+    { label: 'Audios', size: 2.5, color: 'bg-green-500' },
+    { label: 'Others', size: 2.5, color: 'bg-slate-500' },
 ]
 const usedStorage = 18.2
 const totalStorage = 100

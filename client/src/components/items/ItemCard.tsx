@@ -10,37 +10,61 @@ import {
 import type { ReactElement } from 'react'
 import { ItemCardOptions } from './ItemCardOptions'
 import { cn, formatFileSize } from '@/lib/utils'
+import { useExplorerContext } from '../dashboard/explorer/ExplorerContext'
+import { Link } from 'react-router'
 
 interface ItemCardProps {
     data: FolderItem | FileItem
 }
 export function ItemCard({ data }: ItemCardProps) {
-    if ('contentType' in data) {
-        return <FileCard file={data} />
+    const { setCurrentFolderId, shareId } = useExplorerContext()
+    const isFile = 'contentType' in data
+
+    const card = isFile ? (
+        <FileCard file={data} />
+    ) : (
+        <FolderCard folder={data} />
+    )
+
+    if (shareId) {
+        return (
+            <div
+                onClick={() => !isFile && setCurrentFolderId(data.id)}
+                tabIndex={0}
+                role="button"
+                aria-label="Perform an action"
+                className="rounded-lg focus-visible:outline-none focus-visible:border-slate-400 focus-visible:ring-slate-100/30 focus-visible:ring-[3px]"
+            >
+                {card}
+            </div>
+        )
     }
-    return <FolderCard folder={data} />
+    return <Link to={`/folders/${data.id}`}>{card}</Link>
 }
 
 export function FolderCard({ folder }: { folder: FolderItem }) {
+    const { shareId } = useExplorerContext()
     return (
-        <div className="group p-4 bg-slate-800 border border-yellow-800/80 rounded-lg hover:border-yellow-700 transition-colors cursor-pointer">
+        <div className="group p-4 bg-slate-800 border border-yellow-800/80 rounded-lg hover:border-yellow-700 transition-colors cursor-pointer focus-visible:outline-none">
             <div className="flex items-start justify-between mb-3">
                 <div className="p-2 bg-yellow-900 rounded-lg group-hover:bg-yellow-600 transition-colors">
                     <Folder className="w-6 h-6 text-yellow-400 group-hover:text-white" />
                 </div>
-                <ItemCardOptions type="folder" id={folder.id} />
+                {!shareId && <ItemCardOptions type="folder" id={folder.id} />}
             </div>
             <h3 className="font-semibold text-white truncate mb-1">
                 {folder.name}
             </h3>
             <p className="text-xs text-slate-500">
-                {folder.createdAt.toDateString()}
+                {new Date(folder.createdAt).toDateString()}
             </p>
         </div>
     )
 }
 
 export function FileCard({ file }: { file: FileItem }) {
+    const { shareId } = useExplorerContext()
+
     const styles: Record<ContentType, string> = {
         application: 'border-slate-700 hover:border-slate-600',
         audio: 'border-green-900/60 hover:border-green-800',
@@ -57,7 +81,7 @@ export function FileCard({ file }: { file: FileItem }) {
         >
             <div className="flex items-start justify-between mb-3">
                 <FileIcon type={file.contentType} />
-                <ItemCardOptions type="file" id={file.id} />
+                {!shareId && <ItemCardOptions type="file" id={file.id} />}
             </div>
             <h3 className="font-semibold text-white truncate mb-1">
                 {file.name}
@@ -66,7 +90,7 @@ export function FileCard({ file }: { file: FileItem }) {
                 {formatFileSize(file.size)}
             </p>
             <p className="text-xs text-slate-500">
-                {file.createdAt.toDateString()}
+                {new Date(file.createdAt).toDateString()}
             </p>
         </div>
     )

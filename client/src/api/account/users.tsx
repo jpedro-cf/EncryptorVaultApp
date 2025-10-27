@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import type { User } from '@/types/account'
 import { Encryption } from '@/lib/encryption'
 import { Encoding } from '@/lib/encoding'
+import { useKeys } from '@/hooks/use-keys'
 
 export function useCurrentUser() {
     async function request(): Promise<User> {
@@ -26,10 +27,13 @@ export function useCurrentUser() {
 }
 
 export function useUpdateVaultSecret() {
+    const { rootKey } = useKeys()
+
     async function request(data: VaultSecretSchema): Promise<void> {
-        const rootKeyToEncrypt = Encryption.generateRandomSecret()
+        const rootKeyToEncrypt = rootKey ?? Encryption.generateRandomSecret()
+
         const { salt, key } = await Encryption.deriveKeyFromSecret(
-            Encoding.base64ToUint8Array(data.secret)
+            Encoding.textToUint8Array(data.secret)
         )
 
         const { iv, encryptedData: encryptedKey } = await Encryption.encrypt({
@@ -54,7 +58,7 @@ export function useUpdateVaultSecret() {
         onError: (e: AxiosError<{ detail?: string }>) =>
             toast.warning(
                 e.response?.data.detail ??
-                    'An error occured while creating your account.'
+                    'An error occured while performing this operation.'
             ),
     })
 }

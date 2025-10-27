@@ -8,6 +8,7 @@ import type { AxiosError } from 'axios'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { LoginSchema, TwoFactorSchema } from '@/components/login/LoginForm'
+import { useAuth } from '@/hooks/use-auth'
 
 export function useRegister() {
     async function request(data: CreateAccountSchema): Promise<void> {
@@ -19,7 +20,7 @@ export function useRegister() {
         onError: (e: AxiosError<{ detail?: string }>) =>
             toast.warning(
                 e.response?.data.detail ??
-                    'An error occured while creating your account.'
+                    'An error occured while performing this operation.'
             ),
     })
 }
@@ -37,7 +38,7 @@ export function useLogin() {
             if (e.response?.data.title != 'TwoFactorAuthenticationRequired') {
                 toast.warning(
                     e.response?.data.detail ??
-                        'An error occured while creating your account.'
+                        'An error occured while performing this operation.'
                 )
             }
         },
@@ -56,7 +57,7 @@ export function useLoginMfa() {
         onError: (e: AxiosError<{ detail?: string }>) => {
             toast.warning(
                 e.response?.data.detail ??
-                    'An error occured while creating your account.'
+                    'An error occured while performing this operation.'
             )
         },
     })
@@ -72,8 +73,26 @@ export function useSetupMfa() {
         onError: (e: AxiosError<{ detail?: string }>) =>
             toast.warning(
                 e.response?.data.detail ??
-                    'An error occured while creating your account.'
+                    'An error occured while performing this operation.'
             ),
+    })
+}
+
+export function useLogout() {
+    const { setAccount } = useAuth()
+    async function request(): Promise<void> {
+        await api.post('/auth/logout')
+    }
+
+    return useMutation({
+        mutationFn: request,
+        onSuccess: () => setAccount(null),
+        onError: (e: AxiosError<{ detail?: string }>) => {
+            toast.warning(
+                e.response?.data.detail ??
+                    'An error occured while performing this operation.'
+            )
+        },
     })
 }
 

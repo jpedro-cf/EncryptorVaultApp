@@ -1,4 +1,4 @@
-import type { FileItem, FolderItem, Item } from '@/types/items'
+import type { FileItem, FolderItem, ItemResponse } from '@/types/items'
 import { api } from '../axios'
 import { useQuery } from '@tanstack/react-query'
 import { useKeys } from '@/hooks/use-keys'
@@ -7,8 +7,10 @@ import { Encoding } from '@/lib/encoding'
 
 interface UseItems {
     enabled: boolean
+    shareId?: string
+    folderId?: string
 }
-export function useItems({ enabled }: UseItems) {
+export function useItems({ enabled, shareId, folderId }: UseItems) {
     const { rootKey, setFileKey, setFolderKey } = useKeys()
 
     async function request(): Promise<(FileItem | FolderItem)[]> {
@@ -18,7 +20,7 @@ export function useItems({ enabled }: UseItems) {
             )
         }
 
-        const items: Item[] = (await api.get('/items')).data
+        const items: ItemResponse[] = (await api.get('/items')).data
 
         const decryptionPromise = items.map((item) =>
             decryptItem({ item, key: { root: true, value: rootKey! } }).then(
@@ -49,7 +51,7 @@ export function useItems({ enabled }: UseItems) {
 
 interface DecryptItem {
     key: { root: boolean; value: Uint8Array<ArrayBuffer> }
-    item: Item
+    item: ItemResponse
 }
 export async function decryptItem(
     params: DecryptItem
@@ -67,8 +69,8 @@ export async function decryptItem(
     })
 
     const decryptedName = await Encryption.decrypt({
-        encryptedData: Encoding.base64ToUint8Array(data),
-        iv: Encoding.base64ToUint8Array(iv),
+        encryptedData: Encoding.base64ToUint8Array(item.encryptedName.data),
+        iv: Encoding.base64ToUint8Array(item.encryptedName.iv),
         key: decryptedKey,
     })
 
@@ -80,6 +82,7 @@ export async function decryptItem(
             contentType: item.contentType!,
             url: item.url!,
             createdAt: item.createdAt,
+            parentId: item.parentId,
             key: decryptedKey,
         }
     }
@@ -88,6 +91,7 @@ export async function decryptItem(
         id: item.id,
         name: Encoding.uint8ArrayToText(decryptedName),
         createdAt: item.createdAt,
+        parentId: item.parentId,
         key: decryptedKey,
     }
 }

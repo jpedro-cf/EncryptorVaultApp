@@ -23,7 +23,7 @@ interface DerivedKey {
 }
 
 interface DecryptVaultKey {
-    base64Secret: string
+    secret: string
     base64Key: string // salt + iv + data
 }
 
@@ -71,7 +71,7 @@ export class Encryption {
     public static async decryptVaultKey(
         params: DecryptVaultKey
     ): Promise<Uint8Array<ArrayBuffer> | null> {
-        const secret = Encoding.base64ToUint8Array(params.base64Secret)
+        const secret = Encoding.textToUint8Array(params.secret)
         const combined = Encoding.base64ToUint8Array(params.base64Key)
 
         const salt = combined.slice(0, 16)

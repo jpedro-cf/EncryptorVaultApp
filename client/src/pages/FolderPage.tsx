@@ -1,10 +1,11 @@
-import { StorageUsage } from '@/components/dashboard/StorageUsage'
 import { Explorer } from '@/components/dashboard/explorer/Explorer'
+import { StorageUsage } from '@/components/dashboard/StorageUsage'
 import { useAuth } from '@/hooks/use-auth'
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
-export function DashboardPage() {
+export function FolderPage() {
+    const { id } = useParams()
     const navigate = useNavigate()
     const { account } = useAuth()
 
@@ -12,12 +13,15 @@ export function DashboardPage() {
         if (!account) {
             navigate('/register', { replace: true })
         }
-    }, [account, navigate])
+        if (!id) {
+            navigate('/', { replace: true })
+        }
+    }, [id, account, navigate])
 
     return (
         <div className="flex h-full">
             <div className="flex-1 overflow-auto p-6 space-y-6 relative">
-                <Explorer folderId={null} />
+                <Explorer folderId={id!} />
             </div>
             <StorageUsage />
         </div>
