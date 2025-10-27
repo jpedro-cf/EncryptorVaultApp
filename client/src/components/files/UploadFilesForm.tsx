@@ -27,7 +27,7 @@ export function UploadFilesForm({ parentId }: Props) {
     }
 
     function handleDrop(files: File[]) {
-        console.log(files)
+        form.setValue('files', [...form.getValues('files'), ...files])
     }
     return (
         <Form {...form}>
@@ -36,6 +36,9 @@ export function UploadFilesForm({ parentId }: Props) {
                     <DropZoneContent />
                 </DropZone>
             </form>
+            {form.watch('files').map((file) => (
+                <>{file.name}</>
+            ))}
         </Form>
     )
 }

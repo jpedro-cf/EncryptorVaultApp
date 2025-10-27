@@ -28,7 +28,12 @@ export function Explorer({ folderId }: Props) {
 
     function pushFolder(folder: Folder) {
         setFolderTree((prev) => {
-            if (prev.some((f) => f.id === folder.id)) return prev
+            const index = prev.findIndex((f) => f.id === folder.id)
+
+            if (index !== -1) {
+                return prev.slice(0, index + 1)
+            }
+
             return [...prev, folder]
         })
     }
@@ -52,6 +57,7 @@ export function Explorer({ folderId }: Props) {
     })
 
     useEffect(() => {
+        console.log(folderQuery.data)
         if (folderQuery.data) {
             pushFolder(folderQuery.data)
         }

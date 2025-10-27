@@ -26,10 +26,15 @@ export function ExplorerHeader() {
         return <></>
     }
 
+    const slicedTree =
+        folderTree.length > 2
+            ? folderTree.slice(1, -1)
+            : folderTree.slice(0, -1)
+
     return (
         <div className="flex items-end justify-between mb-8">
             <div>
-                {/* {currentFolder && (
+                {currentFolder && (
                     <Breadcrumb className="mb-3">
                         <BreadcrumbList>
                             <BreadcrumbItem>
@@ -37,18 +42,48 @@ export function ExplorerHeader() {
                                     <Link to="/">Home</Link>
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
+                            {folderTree.length >= 3 && (
+                                <>
+                                    <BreadcrumbSeparator />
+                                    <BreadcrumbItem className="text-slate-100">
+                                        <BreadcrumbEllipsis />
+                                    </BreadcrumbItem>
+                                </>
+                            )}
                             <BreadcrumbSeparator />
+                            {slicedTree.map((folder) => (
+                                <>
+                                    <BreadcrumbItem key={folder.id}>
+                                        <BreadcrumbLink asChild>
+                                            {!shareId ? (
+                                                <Link
+                                                    to={`/folders/${folder.id}`}
+                                                >
+                                                    {folder.name}
+                                                </Link>
+                                            ) : (
+                                                <span>{folder.name}</span>
+                                            )}
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
+                                    <BreadcrumbSeparator />
+                                </>
+                            ))}
                             <BreadcrumbItem>
-                                <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+                                <BreadcrumbPage>
+                                    {currentFolder.name}
+                                </BreadcrumbPage>
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
-                )} */}
+                )}
                 <h1 className="text-3xl font-bold text-white mb-1">
-                    {currentFolder ? currentFolder.name : 'My files'}
+                    {currentFolder ? currentFolder.name : 'Explore'}
                 </h1>
                 <p className="text-slate-400">
-                    Manage your encrypted files and folders
+                    {shareId
+                        ? 'Explore the files and folders shared with you'
+                        : 'Manage your encrypted files and folders'}
                 </p>
             </div>
             {!shareId && (
