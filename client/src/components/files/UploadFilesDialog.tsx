@@ -7,18 +7,19 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import type { PropsWithChildren } from 'react'
+import { useState, type PropsWithChildren } from 'react'
 import { useExplorerContext } from '../dashboard/explorer/ExplorerContext'
 import { UploadFilesForm } from './UploadFilesForm'
 
 export function UploadFilesDialog({ children }: PropsWithChildren) {
+    const [open, setOpen] = useState(false)
     const { folderTree } = useExplorerContext()
 
     const currentFolder =
         folderTree.length > 0 ? folderTree[folderTree.length - 1] : null
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent className="sm:max-w-[650px]">
                 <DialogHeader>
@@ -28,7 +29,10 @@ export function UploadFilesDialog({ children }: PropsWithChildren) {
                         before uploading.
                     </DialogDescription>
                 </DialogHeader>
-                <UploadFilesForm parentId={currentFolder?.id} />
+                <UploadFilesForm
+                    parentId={currentFolder?.id}
+                    onComplete={() => setOpen(false)}
+                />
             </DialogContent>
         </Dialog>
     )

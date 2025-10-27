@@ -74,7 +74,7 @@ export async function decryptItem(
         key: decryptedKey,
     })
 
-    if (item.type == 'file') {
+    if (item.type == 'File') {
         return {
             id: item.id,
             name: Encoding.uint8ArrayToText(decryptedName),

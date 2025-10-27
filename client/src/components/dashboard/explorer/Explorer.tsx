@@ -57,7 +57,6 @@ export function Explorer({ folderId }: Props) {
     })
 
     useEffect(() => {
-        console.log(folderQuery.data)
         if (folderQuery.data) {
             pushFolder(folderQuery.data)
         }

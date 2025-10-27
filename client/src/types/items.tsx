@@ -29,9 +29,9 @@ export interface FolderItem {
     key: Uint8Array<ArrayBuffer>
 }
 
-export type ItemType = 'folder' | 'file'
+export type ItemType = 'Folder' | 'File'
 
-export type ContentType = 'application' | 'text' | 'image' | 'video' | 'audio'
+export type ContentType = 'Application' | 'Text' | 'Image' | 'Video' | 'Audio'
 
 export interface EncryptedData {
     iv: string

@@ -84,7 +84,7 @@ export function useFolder({ folderId, shareId, enabled }: UseFolderProps) {
 
     return useQuery({
         queryFn: request,
-        queryKey: ['folder', folderId],
+        queryKey: ['folder', { id: folderId }],
         retry: 0,
         enabled: enabled != undefined ? enabled : true,
         refetchOnWindowFocus: false,
@@ -146,5 +146,3 @@ export function useFolderMutation() {
         },
     })
 }
-
-async function decryptFolder() {}
