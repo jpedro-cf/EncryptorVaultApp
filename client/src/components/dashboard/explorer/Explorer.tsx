@@ -77,7 +77,7 @@ export function Explorer({ folderId }: Props) {
             </div>
         )
     }
-    console.log(rootItems.error)
+
     if (rootItems.isError || folderQuery.isError) {
         return (
             <Alert className="border-blue-500/50 bg-blue-500/10 flex items-start gap-2 mt-5">
@@ -123,7 +123,7 @@ export function Explorer({ folderId }: Props) {
             }}
         >
             <ExplorerHeader />
-            <ItemsGrid />
+            {rootKey != null && <ItemsGrid />}
             <VaultSecret />
         </ExplorerContext.Provider>
     )

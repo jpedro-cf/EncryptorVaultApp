@@ -9,6 +9,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { LoginSchema, TwoFactorSchema } from '@/components/login/LoginForm'
 import { useAuth } from '@/hooks/use-auth'
+import { useKeys } from '@/hooks/use-keys'
 
 export function useRegister() {
     async function request(data: CreateAccountSchema): Promise<void> {
@@ -80,8 +81,10 @@ export function useSetupMfa() {
 
 export function useLogout() {
     const { setAccount } = useAuth()
+    const { setRootKey } = useKeys()
     async function request(): Promise<void> {
         await api.post('/auth/logout')
+        setRootKey(null)
     }
 
     return useMutation({
