@@ -64,11 +64,19 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
         builder.Entity<StorageUsage>()
             .Property(s => s.ContentType)
             .HasConversion<string>();
-
+        
+        builder.Entity<StorageUsage>()
+            .HasIndex(s =>new { s.ContentType, s.UserId })
+            .IsUnique();
+        
         builder.Entity<SharedItem>()
             .HasOne(s => s.Owner)
             .WithMany(u => u.SharedItems)
             .HasForeignKey(s => s.OwnerId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Entity<SharedItem>()
+            .Property(s => s.ItemType)
+            .HasConversion<string>();
     }
 }

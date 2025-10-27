@@ -12,19 +12,46 @@ public class UsersService(AppDbContext ctx, UserManager<User> userManager)
 {
     public async Task<Result<bool>> Create(RegisterUserRequest data)
     {
-        var identityUser = new User
+        await using var transaction = await ctx.Database.BeginTransactionAsync();
+        try
         {
-            UserName = data.Email,
-            Email = data.Email,
-            EmailConfirmed = true
-        };
+            var identityUser = new User
+            {
+                UserName = data.Email,
+                Email = data.Email,
+                EmailConfirmed = true
+            };
         
-        var result = await userManager.CreateAsync(identityUser, data.Password);
-        if (!result.Succeeded)
-        {
-            return Result<bool>.Failure(new UnauthorizedError(result.Errors.First().Description));
+            var result = await userManager.CreateAsync(identityUser, data.Password);
+            if (!result.Succeeded)
+            {
+                return Result<bool>.Failure(new UnauthorizedError(result.Errors.First().Description));
+            }
+
+            foreach (ContentType contentType in Enum.GetValues(typeof(ContentType)))
+            {
+                var storageUsage = new StorageUsage
+                {
+                    UserId = identityUser.Id,
+                    ContentType = contentType,
+                    TotalSize = 0
+                };
+
+                ctx.StorageUsage.Add(storageUsage);
+            }
+
+
+            await ctx.SaveChangesAsync();
+            await transaction.CommitAsync();
+            
+            return Result<bool>.Success(true);
         }
-        return Result<bool>.Success(true);
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            return Result<bool>.Failure(
+                new InternalServerError("An error occured while creation your account."));
+        }
     }
 
     public async Task<Result<bool>> UpdateVaultKey(Guid userId, UpdateVaultKeyRequest data)

@@ -91,7 +91,7 @@ public class FoldersService(AppDbContext ctx, ItemResponseFactory itemResponseFa
             return Result<bool>.Failure(new NotFoundError("Folder not found."));
         }
 
-        var transaction = await ctx.Database.BeginTransactionAsync();
+        await using var transaction = await ctx.Database.BeginTransactionAsync();
         try
         {
             // get all files recursively

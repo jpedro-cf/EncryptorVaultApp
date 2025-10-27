@@ -8,6 +8,7 @@ using EncryptionApp.Api.Infra.Storage;
 using EncryptionApp.Config;
 using Microsoft.EntityFrameworkCore;
 using EncryptionApp.Api.Global.Helpers;
+using QRCoder.Extensions;
 using File = EncryptionApp.Api.Entities.File;
 
 namespace EncryptionApp.Api.Services;
@@ -89,7 +90,6 @@ public class FilesService(
                 new CancelUploadRequest(data.Key, data.UploadId));
         }
         
-        await using var transaction = await ctx.Database.BeginTransactionAsync();
         if (notUploaded)
         {
             return Result<ItemResponse>.Failure(
@@ -101,25 +101,22 @@ public class FilesService(
                 new StorageLimitExceededError("You've reached your storage limit."));   
         }
         
+        await using var transaction = await ctx.Database.BeginTransactionAsync();
         try
         {
             // update actual file size in case the user manipulated the request to look like he uploaded a smaller file
             file.Status = FileStatus.Completed;
             file.Size = totalSize;
             var contentType = file.ContentType.ToContentTypeEnum();
-
+            
+            // Pessimistic Lock
             var storageUsage = await ctx.StorageUsage
-                .FirstOrDefaultAsync(s => s.UserId == file.OwnerId && s.ContentType == contentType);
-            if (storageUsage == null)
-            {
-                storageUsage = new StorageUsage
-                {
-                    ContentType = contentType,
-                    UserId = file.OwnerId,
-                    TotalSize = 0
-                };
-                ctx.StorageUsage.Add(storageUsage);
-            }
+                .FromSqlInterpolated($@"
+                    SELECT * FROM ""StorageUsage""
+                    WHERE ""UserId"" = {userId} AND ""ContentType"" = {contentType.ToString()}
+                    FOR UPDATE")
+                .SingleAsync();
+            
             // update storage usage
             storageUsage.TotalSize += totalSize;
                 
@@ -138,9 +135,9 @@ public class FilesService(
         }
     }
 
-    public async Task<Result<bool>> CancelUpload(Guid userId, Guid fileId, CancelUploadRequest data)
+    private async Task<Result<bool>> CancelUpload(Guid userId, Guid fileId, CancelUploadRequest data)
     {
-        var transaction = await ctx.Database.BeginTransactionAsync();
+        await using var transaction = await ctx.Database.BeginTransactionAsync();
         try
         {
             var file = await ctx.Files.FirstOrDefaultAsync(f =>
