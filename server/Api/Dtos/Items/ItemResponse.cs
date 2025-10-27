@@ -10,6 +10,7 @@ public record ItemResponse(
     ItemType Type,
     EncryptedData EncryptedName,
     long? Size,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
     ContentType? ContentType,
     string? Url,
     DateTime CreatedAt,

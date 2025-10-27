@@ -89,6 +89,7 @@ public class FilesService(
                 new CancelUploadRequest(data.Key, data.UploadId));
         }
         
+        await using var transaction = await ctx.Database.BeginTransactionAsync();
         if (notUploaded)
         {
             return Result<ItemResponse>.Failure(
@@ -100,7 +101,6 @@ public class FilesService(
                 new StorageLimitExceededError("You've reached your storage limit."));   
         }
         
-        await using var transaction = await ctx.Database.BeginTransactionAsync();
         try
         {
             // update actual file size in case the user manipulated the request to look like he uploaded a smaller file

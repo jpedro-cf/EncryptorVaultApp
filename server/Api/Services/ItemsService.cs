@@ -1,4 +1,5 @@
 using EncryptionApp.Api.Dtos.Items;
+using EncryptionApp.Api.Entities;
 using EncryptionApp.Api.Factory;
 using EncryptionApp.Api.Global;
 using EncryptionApp.Config;
@@ -16,7 +17,7 @@ public class ItemsService(AppDbContext ctx, ItemResponseFactory responseFactory)
             .ToListAsync();
 
         var files = await Task.WhenAll(
-            ctx.Files.Where(f => f.ParentFolderId == null && f.OwnerId == userId)
+            ctx.Files.Where(f => f.ParentFolderId == null && f.OwnerId == userId && f.Status == FileStatus.Completed)
                 .Select(f => responseFactory.CreateFrom(f, true)));
         
         items.AddRange(files);
