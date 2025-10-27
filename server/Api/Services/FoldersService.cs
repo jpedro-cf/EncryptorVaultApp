@@ -3,6 +3,7 @@ using EncryptionApp.Api.Entities;
 using EncryptionApp.Api.Factory;
 using EncryptionApp.Api.Global;
 using EncryptionApp.Api.Global.Errors;
+using EncryptionApp.Api.Global.Helpers;
 using EncryptionApp.Config;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -82,25 +83,53 @@ public class FoldersService(AppDbContext ctx, ItemResponseFactory itemResponseFa
             await itemResponseFactory.CreateFolderResponse(folder, true));
     }
 
-    // public async Task<Result<bool>> DeleteFolder(Guid userId, Guid folderId)
-    // {
-    //     var folder = await ctx.Folders.FirstOrDefaultAsync(f => f.Id == folderId && f.OwnerId == userId);
-    //     if (folder == null)
-    //     {
-    //         return Result<bool>.Failure(new NotFoundError("Folder not found."));
-    //     }
-    //
-    //     var transaction = await ctx.Database.BeginTransactionAsync();
-    //     try
-    //     {
-    //
-    //         await transaction.CommitAsync();
-    //         return Result<bool>.Success(true);
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         await transaction.RollbackAsync();
-    //         return Result<bool>.Failure(new InternalServerError("An error occured while deleting this folder."));
-    //     }
-    // }
+    public async Task<Result<bool>> DeleteFolder(Guid userId, Guid folderId)
+    {
+        var folder = await ctx.Folders.FirstOrDefaultAsync(f => f.Id == folderId && f.OwnerId == userId);
+        if (folder == null)
+        {
+            return Result<bool>.Failure(new NotFoundError("Folder not found."));
+        }
+
+        var transaction = await ctx.Database.BeginTransactionAsync();
+        try
+        {
+            // get all files recursively
+            var filesToDelete = await ctx.Files
+                .FromSqlInterpolated($@"
+                    WITH RECURSIVE RecursiveFolders AS (
+                        SELECT Id FROM Folders WHERE Id = {folderId}
+                        UNION ALL
+                        SELECT f.Id FROM Folders f
+                        INNER JOIN RecursiveFolders rf ON f.ParentFolderId = rf.Id
+                    )
+                    SELECT f.* FROM Files f
+                    INNER JOIN RecursiveFolders rf ON f.ParentFolderId = rf.Id
+                ")
+                .ToListAsync();
+
+            var fileSizeGroupedByContentType = filesToDelete
+                .GroupBy(f => f.ContentType.ToContentTypeEnum())
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Sum(f => f.Size)
+                );
+
+            // update storage usage
+            foreach (var group in fileSizeGroupedByContentType)
+            {
+                var storageUsage = await ctx.StorageUsage.FirstAsync(s => s.ContentType == group.Key);
+                storageUsage.TotalSize -= group.Value;
+            }
+
+            ctx.Folders.Remove(folder);
+            await transaction.CommitAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            return Result<bool>.Failure(new InternalServerError("An error occured while deleting this folder."));
+        }
+    }
 }

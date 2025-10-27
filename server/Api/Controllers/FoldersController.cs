@@ -38,4 +38,14 @@ public class FoldersController(FoldersService foldersService) : ControllerBase
         
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
     }
+    
+    [HttpDelete("{id}")]
+    [Authorize]
+    public async Task<IResult> Delete([FromRoute] Guid id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await foldersService.DeleteFolder(Guid.Parse(userId), id);
+        
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
+    }
 }
