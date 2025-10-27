@@ -8,16 +8,19 @@ namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
 [Route("api/users")]
-public class UsersController(UsersService usersService) : ControllerBase
+public class UsersController(UsersService usersService, StorageUsageService storageUsageService) : ControllerBase
 {
     [HttpGet("me")]
     [Authorize]
     public async Task<IResult> GetAccountData()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var result = await usersService.GetUserById(Guid.Parse(userId));
+        
+        var user = await usersService.GetUserById(Guid.Parse(userId));
+        var summary = await storageUsageService
+            .GetStorageSummary(Guid.Parse(userId));
 
-        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
+        return !user.IsSuccess ? user.Error!.ToHttpResult() : Results.Ok(new CurrentUserResponse(user.Data!, summary));
     }
     
     [HttpPatch("me/vault-key")]

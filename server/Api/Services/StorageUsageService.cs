@@ -1,3 +1,4 @@
+using EncryptionApp.Api.Entities;
 using EncryptionApp.Config;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,5 +15,18 @@ public class StorageUsageService(AppDbContext ctx)
             .SumAsync(s => (long?)s.TotalSize) ?? 0L;
 
         return totalUsed + newFileSize > _storageLimit;
+    }
+    
+    public async Task<Dictionary<ContentType, long>> GetStorageSummary(Guid userId)
+    {
+        var summary = await ctx.StorageUsage
+            .Where(s => s.UserId == userId)
+            .GroupBy(s => s.ContentType)
+            .ToDictionaryAsync(
+                g => g.Key,
+                g => g.Sum(x => x.TotalSize)
+            );
+
+        return summary;
     }
 }
