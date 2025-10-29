@@ -8,9 +8,9 @@ namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
 [Route("api/files")]
-public class FilesController(FilesService filesService): ControllerBase
+public class FilesController(FilesService filesService, UploadsService uploadsService): ControllerBase
 {
-    [HttpPost]
+    [HttpPost("upload")]
     [Authorize]
     public async Task<IResult> Upload([FromBody] UploadFileRequest data)
     {
@@ -20,13 +20,13 @@ public class FilesController(FilesService filesService): ControllerBase
         }
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var result = await filesService.Upload(Guid.Parse(userId), data);
+        var result = await uploadsService.Upload(Guid.Parse(userId), data);
         
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
     }
-    [HttpPost("uploads/complete")]
+    [HttpPost("{id}/complete-upload")]
     [Authorize]
-    public async Task<IResult> CompleteUpload([FromBody] CompleteUploadRequest data)
+    public async Task<IResult> CompleteUpload([FromRoute] Guid fileId, [FromBody] CompleteUploadRequest data)
     {
         if (!ModelState.IsValid)
         {
@@ -34,9 +34,24 @@ public class FilesController(FilesService filesService): ControllerBase
         }
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var result = await filesService.CompleteUpload(Guid.Parse(userId), data);
+        var result = await uploadsService.CompleteUpload(Guid.Parse(userId), fileId, data);
         
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
+    }
+    
+    [HttpPost("{id}/cancel-upload")]
+    [Authorize]
+    public async Task<IResult> CancelUpload([FromRoute] Guid fileId, [FromBody] CancelUploadRequest data)
+    {
+        if (!ModelState.IsValid)
+        {
+            return Results.BadRequest(data);
+        }
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await uploadsService.CancelUploadWithTransaction(Guid.Parse(userId), fileId, data);
+        
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
     }
 
     [HttpDelete("{id}")]

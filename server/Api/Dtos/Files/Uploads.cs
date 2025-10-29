@@ -41,9 +41,6 @@ public class CompletedPart
 
 public class CompleteUploadRequest
 {
-    [Required(ErrorMessage = "File ID is required.")]
-    public string FileId { get; set; }
-    
     [Required(ErrorMessage = "Upload id is required.")]
     public string UploadId { get; set; }
     

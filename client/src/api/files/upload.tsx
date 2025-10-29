@@ -186,7 +186,7 @@ export function useFilesUpload({ onPartUpload, onError, onSuccess }: Props) {
 async function initiateUpload(
     fileData: InitiateUpload
 ): Promise<InitiateUploadResponse> {
-    return (await api.post(`/files`, fileData)).data
+    return (await api.post(`/files/upload`, fileData)).data
 }
 
 async function uploadParts(
@@ -219,5 +219,5 @@ async function uploadParts(
 }
 
 async function completeUpload(data: CompleteUpload): Promise<ItemResponse> {
-    return (await api.post('/files/uploads/complete', data)).data
+    return (await api.post(`/files/${data.fileId}/complete-upload`, data)).data
 }

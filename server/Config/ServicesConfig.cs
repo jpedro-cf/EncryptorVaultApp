@@ -15,6 +15,7 @@ public static class ServicesConfig
         
         builder.Services.AddTransient<StorageUsageService>();
         builder.Services.AddTransient<FilesService>();
+        builder.Services.AddTransient<UploadsService>();
         builder.Services.AddTransient<UsersService>();
         builder.Services.AddTransient<AuthService>();
         builder.Services.AddTransient<FoldersService>();
