@@ -1,4 +1,5 @@
+const mb256 = 256 * 1024 * 1024
 export const config = {
-    TOTAL_STORAGE: 10 * 1024 * 1024 * 1024,
+    TOTAL_STORAGE: mb256,
     APP_URL: 'http://localhost:5173',
 }

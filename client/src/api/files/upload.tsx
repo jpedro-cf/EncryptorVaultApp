@@ -7,7 +7,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { api } from '../axios'
-import { decryptItem } from '../items/items'
 import type { Folder } from '@/types/folders'
 import { useAuth } from '@/hooks/use-auth'
 import { config } from '@/config/config'
@@ -71,7 +70,7 @@ export function useFilesUpload({ onPartUpload, onError, onSuccess }: Props) {
             )
         }
 
-        const res: (FileItem | FolderItem)[] = []
+        const res: FileItem[] = []
 
         for (const file of data.files) {
             try {
