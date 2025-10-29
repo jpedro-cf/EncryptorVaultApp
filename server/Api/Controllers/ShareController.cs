@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
-[Route("api/share")]
+[Route("api/shared-links")]
 public class ShareController(ShareService shareService): ControllerBase
 {
     [HttpPost]
@@ -23,6 +23,16 @@ public class ShareController(ShareService shareService): ControllerBase
         var result = await shareService.CreateShare(Guid.Parse(userId), request);
 
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
+    }
+    
+    [HttpGet]
+    [Authorize]
+    public async Task<IResult> GetALl()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await shareService.GetSharedLinks(Guid.Parse(userId));
+        
+        return Results.Ok(result);
     }
     
     [HttpGet("{id}")]

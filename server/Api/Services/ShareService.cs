@@ -79,6 +79,14 @@ public class ShareService(AppDbContext ctx)
             new SharedContentResponse(children, ItemType.Folder, EncryptedData.From(sharedItem.EncryptedKey)));
     }
 
+    public async Task<List<SharedItemResponse>> GetSharedLinks(Guid userId)
+    {
+        return await ctx.SharedItems
+            .Where(s => s.OwnerId == userId)
+            .Select(x => SharedItemResponse.From(x))
+            .ToListAsync();
+    }
+
     public async Task<Result<bool>> DeleteShare(Guid userId, Guid shareId)
     {
         var share = await ctx.SharedItems.FirstOrDefaultAsync(s => 
@@ -87,7 +95,7 @@ public class ShareService(AppDbContext ctx)
         if (share == null)
         {
             return Result<bool>.Failure(
-                new NotFoundError("Shared item not found."));
+                new NotFoundError("Share link not found."));
         }
 
         ctx.SharedItems.Remove(share);

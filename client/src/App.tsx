@@ -7,6 +7,7 @@ import { DashboardLayout } from './components/dashboard/layout/DashboardLayout'
 import { FolderPage } from './pages/FolderPage'
 import { SharePage } from './pages/SharePage'
 import { ProfilePage } from './pages/ProfilePage'
+import { SharedLinksPage } from './pages/SharedLinksPage'
 function App() {
     return (
         <Router>
@@ -25,6 +26,14 @@ function App() {
                         element={
                             <DashboardLayout>
                                 <FolderPage />
+                            </DashboardLayout>
+                        }
+                    />
+                    <Route
+                        path="/shared-links"
+                        element={
+                            <DashboardLayout>
+                                <SharedLinksPage />
                             </DashboardLayout>
                         }
                     />

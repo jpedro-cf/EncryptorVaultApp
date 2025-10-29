@@ -13,10 +13,8 @@ export function SharePage() {
     }, [id, navigate])
 
     return (
-        <div className="flex min-h-screen bg-slate-900">
-            <div className="flex-1 overflow-auto p-6 space-y-6 relative">
-                <SharedExplorer sharedLinkId={id!} />
-            </div>
+        <div className="flex-1 overflow-auto p-6 space-y-6 relative">
+            <SharedExplorer sharedLinkId={id!} />
         </div>
     )
 }

@@ -9,7 +9,7 @@ import type {
 import { api } from '../axios'
 import { Encoding } from '@/lib/encoding'
 import type { SharedContentResponse, SharedItemResponse } from '@/types/share'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { AxiosError } from 'axios'
 import { decryptItem } from '../items/items'
@@ -19,7 +19,15 @@ interface CreateSharedLink {
     itemId: string
     itemType: ItemType
 }
+
+interface UseSharedLink {
+    shareId: string
+    enabled?: boolean
+}
+
 export function useCreateSharedLink() {
+    const queryClient = useQueryClient()
+
     const { folderKeys, fileKeys } = useKeys()
 
     async function request(data: CreateSharedLink) {
@@ -43,13 +51,13 @@ export function useCreateSharedLink() {
         })
 
         const sharedItem: SharedItemResponse = (
-            await api.post('/share', {
+            await api.post('/shared-links', {
                 ...data,
                 encryptedKey: Encoding.uint8ArrayToBase64(encryptedKey),
             })
         ).data
 
-        return { id: sharedItem.id, key: encryptionKey }
+        return { item: sharedItem, id: sharedItem.id, key: encryptionKey }
     }
 
     async function handleFolder(data: CreateSharedLink) {
@@ -67,13 +75,13 @@ export function useCreateSharedLink() {
         })
 
         const sharedItem: SharedItemResponse = (
-            await api.post('/share', {
+            await api.post('/shared-links', {
                 ...data,
                 encryptedKey: Encoding.uint8ArrayToBase64(encryptedKey),
             })
         ).data
 
-        return { id: sharedItem.id, key: encryptionKey }
+        return { item: sharedItem, id: sharedItem.id, key: encryptionKey }
     }
 
     return useMutation({
@@ -83,13 +91,15 @@ export function useCreateSharedLink() {
                 e.response?.data.detail ??
                     'An error occured while performing this operation.'
             ),
+        onSuccess: (data) => {
+            const links: SharedItemResponse[] =
+                queryClient.getQueryData(['shared-links']) ?? []
+
+            queryClient.setQueryData(['shared-links'], [data.item, ...links])
+        },
     })
 }
 
-interface UseSharedLink {
-    shareId: string
-    enabled?: boolean
-}
 export function useSharedLink({ shareId, enabled }: UseSharedLink) {
     const { setFileKey, setFolderKey } = useKeys()
 
@@ -132,12 +142,55 @@ export function useSharedLink({ shareId, enabled }: UseSharedLink) {
 
     return useQuery({
         queryFn: request,
-        queryKey: ['shared'],
+        queryKey: ['shared-link'],
         retry: 0,
         enabled: enabled != undefined ? enabled : true,
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         refetchOnReconnect: false,
+    })
+}
+
+export function useSharedLinks() {
+    async function request(): Promise<SharedItemResponse[]> {
+        return (await api.get('/shared-links')).data
+    }
+
+    return useQuery({
+        queryKey: ['shared-links'],
+        queryFn: request,
+        retry: 0,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+    })
+}
+
+export function useDeleteSharedLink() {
+    const queryClient = useQueryClient()
+
+    async function request(id: string): Promise<void> {
+        await api.delete(`/shared-links/${id}`)
+    }
+
+    return useMutation({
+        mutationFn: request,
+        onError: (e: AxiosError<{ detail?: string }>) =>
+            toast.warning(
+                e.response?.data.detail ??
+                    'An error occured while performing this operation.'
+            ),
+        onSuccess: (_, variables) => {
+            const links: SharedItemResponse[] =
+                queryClient.getQueryData(['shared-links']) ?? []
+
+            const id = variables
+
+            queryClient.setQueryData(
+                ['shared-links'],
+                links.filter((l) => l.id !== id)
+            )
+        },
     })
 }
 

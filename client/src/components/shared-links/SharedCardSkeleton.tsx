@@ -1,0 +1,14 @@
+import { Skeleton } from '@/components/ui/skeleton'
+
+export function SharedCardSkeleton() {
+    return (
+        <div className="flex flex-col space-y-3 bg-slate-800 p-4 rounded-md">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-2/3" />
+            </div>
+        </div>
+    )
+}
