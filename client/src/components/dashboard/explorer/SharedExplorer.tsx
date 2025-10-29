@@ -33,9 +33,6 @@ export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
         enabled: !isInFolderPage,
     })
 
-    console.log(sharedItems.data)
-    console.log(sharedItems.error)
-
     const folderQuery = useFolder({
         enabled: isInFolderPage,
         folderId: currentFolderId ?? '',
@@ -81,7 +78,6 @@ export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
                 items: folderQuery.data?.children ?? sharedItems.data ?? [],
             }}
         >
-            <span className="text-slate-100">{window.location.hash}</span>
             <ExplorerHeader />
             <ItemsGrid />
         </ExplorerContext.Provider>

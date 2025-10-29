@@ -19,7 +19,6 @@ export function useFolder({ folderId, shareId, enabled }: UseFolderProps) {
     const { rootKey, folderKeys, setFileKey, setFolderKey } = useKeys()
 
     async function request(): Promise<Folder> {
-        const shareKey = window.location.hash
         const res: FolderResponse = (
             await api.get(`/folders/${folderId}`, {
                 headers: {
