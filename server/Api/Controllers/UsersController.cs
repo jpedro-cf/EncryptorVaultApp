@@ -32,4 +32,14 @@ public class UsersController(UsersService usersService, StorageUsageService stor
 
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
     }
+    
+    [HttpPut("me")]
+    [Authorize]
+    public async Task<IResult> Update([FromBody] UpdateAccountRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await usersService.UpdateAccount(Guid.Parse(userId), request);
+
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
+    }
 }

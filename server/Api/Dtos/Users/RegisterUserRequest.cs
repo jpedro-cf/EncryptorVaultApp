@@ -9,6 +9,13 @@ public class RegisterUserRequest
     public string Email { get; set; }
     
     [Required(ErrorMessage = "Password is required.")]
+    [PasswordValidation(
+        MinimumLength = 8,
+        RequireDigit = true,
+        RequireLowercase = true,
+        RequireUppercase = true,
+        RequireNonAlphanumeric = true,
+        RequiredUniqueChars = 1)]
     public string Password { get; set; }
     
     [Required(ErrorMessage = "Password confirmation is required.")]

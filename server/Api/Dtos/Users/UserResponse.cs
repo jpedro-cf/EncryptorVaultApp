@@ -4,13 +4,14 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace EncryptionApp.Api.Dtos.Users;
 
-public record UserResponse(string Id, string Email, string? VaultKey)
+public record UserResponse(string Id, string Email, bool TwoFactorEnabled, string? VaultKey)
 {
     public static UserResponse From(User user)
     {
         return new UserResponse(
             user.Id.ToString(),
             user.Email!,
+            user.TwoFactorEnabled,
             user.VaultKey);
     }
 }
