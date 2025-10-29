@@ -1,7 +1,7 @@
 import { RegisterForm } from '@/components/register/RegisterForm'
 import { RegistrationContext } from '@/components/register/RegistrationContext'
 import { RegistrationSteps } from '@/components/register/RegistrationSteps'
-import { Card, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useAuth } from '@/hooks/use-auth'
 import { Lock } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -40,13 +40,15 @@ export function RegisterPage() {
                                 </p>
                             </div>
                         </div>
+                    </CardHeader>
+                    <CardContent>
                         <RegistrationContext.Provider
                             value={{ currentStep, setCurrentStep }}
                         >
                             <RegistrationSteps />
                             <RegisterForm />
                         </RegistrationContext.Provider>
-                    </CardHeader>
+                    </CardContent>
                 </Card>
             </div>
         </main>

@@ -1,7 +1,4 @@
-import type {
-    CreateAccountSchema,
-    TotpSchema,
-} from '@/components/register/RegisterForm'
+import type { CreateAccountSchema } from '@/components/register/RegisterForm'
 import { api } from '../axios'
 import type { User } from '@/types/account'
 import type { AxiosError } from 'axios'
@@ -10,6 +7,7 @@ import { toast } from 'sonner'
 import type { LoginSchema, TwoFactorSchema } from '@/components/login/LoginForm'
 import { useAuth } from '@/hooks/use-auth'
 import { useKeys } from '@/hooks/use-keys'
+import type { TotpSchema } from '@/components/account/MfaForm'
 
 export function useRegister() {
     async function request(data: CreateAccountSchema): Promise<void> {
@@ -47,6 +45,7 @@ export function useLogin() {
 }
 
 export function useLoginMfa() {
+    const { setAccount } = useAuth()
     async function request(data: TwoFactorSchema): Promise<User> {
         const res = await api.post('/auth/mfa/login', data)
         const { user } = res.data
@@ -61,6 +60,7 @@ export function useLoginMfa() {
                     'An error occured while performing this operation.'
             )
         },
+        onSuccess: (data) => setAccount(data),
     })
 }
 
@@ -76,6 +76,9 @@ export function useSetupMfa() {
                 e.response?.data.detail ??
                     'An error occured while performing this operation.'
             ),
+        onSuccess: () => {
+            toast.success('Success!')
+        },
     })
 }
 

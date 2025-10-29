@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { DashboardLayout } from './components/dashboard/layout/DashboardLayout'
 import { FolderPage } from './pages/FolderPage'
 import { SharePage } from './pages/SharePage'
+import { ProfilePage } from './pages/ProfilePage'
 function App() {
     return (
         <Router>
@@ -28,6 +29,14 @@ function App() {
                         }
                     />
                     <Route path="/s/:id" element={<SharePage />} />
+                    <Route
+                        path="/profile"
+                        element={
+                            <DashboardLayout>
+                                <ProfilePage />
+                            </DashboardLayout>
+                        }
+                    />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
                 </Route>

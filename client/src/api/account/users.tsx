@@ -7,6 +7,8 @@ import type { CurrentUserData, User } from '@/types/account'
 import { Encryption } from '@/lib/encryption'
 import { Encoding } from '@/lib/encoding'
 import { useKeys } from '@/hooks/use-keys'
+import type { ProfileFormSchema } from '@/components/account/ProfileForm'
+import { useAuth } from '@/hooks/use-auth'
 
 export function useCurrentUser() {
     async function request(): Promise<CurrentUserData> {
@@ -23,6 +25,27 @@ export function useCurrentUser() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         refetchOnReconnect: false,
+    })
+}
+
+export function useAccountMutation() {
+    const { setAccount } = useAuth()
+    async function request(data: ProfileFormSchema): Promise<User> {
+        return (await api.put('/users/me', data)).data
+    }
+
+    return useMutation({
+        mutationFn: request,
+        mutationKey: ['account'],
+        onError: (e: AxiosError<{ detail?: string }>) =>
+            toast.warning(
+                e.response?.data.detail ??
+                    'An error occured while performing this operation.'
+            ),
+        onSuccess: (data) => {
+            setAccount(data)
+            toast.success('Profile updated!')
+        },
     })
 }
 

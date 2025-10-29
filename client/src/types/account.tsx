@@ -3,6 +3,7 @@ import type { ContentType } from './items'
 export interface User {
     id: string
     email: string
+    twoFactorEnabled: boolean
     vaultKey: string
 }
 

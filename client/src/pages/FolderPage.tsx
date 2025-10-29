@@ -19,11 +19,8 @@ export function FolderPage() {
     }, [id, account, navigate])
 
     return (
-        <div className="flex h-full">
-            <div className="flex-1 overflow-auto p-6 space-y-6 relative">
-                <Explorer folderId={id!} />
-            </div>
-            <StorageUsage />
+        <div className="flex-1 overflow-auto p-6 space-y-6 relative">
+            <Explorer folderId={id!} />
         </div>
     )
 }

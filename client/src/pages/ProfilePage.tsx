@@ -1,12 +1,11 @@
-import { StorageUsage } from '@/components/dashboard/StorageUsage'
-import { Explorer } from '@/components/dashboard/explorer/Explorer'
+import { ProfileInformation } from '@/components/account/ProfileInformation'
 import { useAuth } from '@/hooks/use-auth'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
-export function DashboardPage() {
-    const navigate = useNavigate()
+export function ProfilePage() {
     const { account } = useAuth()
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (!account) {
@@ -16,7 +15,7 @@ export function DashboardPage() {
 
     return (
         <div className="flex-1 overflow-auto p-6 space-y-6 relative">
-            <Explorer folderId={null} />
+            <ProfileInformation />
         </div>
     )
 }

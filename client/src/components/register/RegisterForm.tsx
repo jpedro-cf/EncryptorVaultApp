@@ -20,17 +20,12 @@ import { Link, useNavigate } from 'react-router'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { Alert, AlertDescription } from '../ui/alert'
 import { Encryption } from '@/lib/encryption'
-import {
-    useLogin,
-    useMfaQrCode,
-    useRegister,
-    useSetupMfa,
-} from '@/api/account/auth'
+import { useLogin, useRegister } from '@/api/account/auth'
 import { useUpdateVaultSecret } from '@/api/account/users'
-import { Spinner } from '../ui/spinner'
 import { useAuth } from '@/hooks/use-auth'
 import { Encoding } from '@/lib/encoding'
 import { useKeys } from '@/hooks/use-keys'
+import { MfaForm } from '../account/MfaForm'
 
 const createAccountSchema = z
     .object({
@@ -62,13 +57,8 @@ const vaultSecretSchema = z.object({
     secret: z.string().min(12, 'Vault secret must be at least 12 characters'),
 })
 
-const totpSchema = z.object({
-    code: z.string().min(6).max(6),
-})
-
 export type CreateAccountSchema = z.infer<typeof createAccountSchema>
 export type VaultSecretSchema = z.infer<typeof vaultSecretSchema>
-export type TotpSchema = z.infer<typeof totpSchema>
 
 export function RegisterForm() {
     const { currentStep } = useRegistrationContext()
@@ -294,17 +284,12 @@ export function VaultSecretForm() {
 }
 
 export function SetupMfaForm() {
+    const { account, setAccount } = useAuth()
     const navigate = useNavigate()
 
-    const { data, isLoading } = useMfaQrCode()
-    const { mutate, isPending, isError } = useSetupMfa()
-
-    const form = useForm<TotpSchema>({
-        resolver: zodResolver(totpSchema),
-    })
-
-    function handleSubmit(data: TotpSchema) {
-        mutate(data, { onSuccess: () => navigate('/', { replace: true }) })
+    function onSuccess() {
+        setAccount({ ...account!, twoFactorEnabled: true })
+        navigate('/', { replace: true })
     }
 
     return (
@@ -319,87 +304,27 @@ export function SetupMfaForm() {
             <CardDescription className="text-slate-400">
                 Enable optional two-factor authentication.
             </CardDescription>
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(handleSubmit)}
-                    className="space-y-4 mt-5"
-                >
-                    <div className="space-y-4">
-                        <div className="p-4 bg-slate-700/50 rounded-lg border border-slate-600 space-y-3 text-slate-300">
-                            <p className="text-sm">
-                                Scan this QR code with your Authenticator App
-                                and verify the code in the input below:
-                            </p>
-                            <div className="bg-white p-4 rounded-lg flex items-center justify-center">
-                                <div className="w-32 h-32 bg-slate-200 rounded flex items-center justify-center text-xs text-slate-600 overflow-hidden">
-                                    {isLoading ? (
-                                        <Spinner size={24} color="#000" />
-                                    ) : (
-                                        <img
-                                            src={data?.qrCodeBase64}
-                                            alt="QR Code"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                            {!isLoading && (
-                                <p>
-                                    Or use this key inside the authenticator
-                                    app:{' '}
-                                    <span className="tracking-widest font-mono text-xs text-slate-400">
-                                        {data?.key}
-                                    </span>
-                                </p>
-                            )}
-                            <div className="flex items-end gap-3">
-                                <FormField
-                                    control={form.control}
-                                    name="code"
-                                    render={({ field }) => (
-                                        <FormItem className="w-full">
-                                            <FormLabel className="text-slate-200">
-                                                Verification Code
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="000000"
-                                                    maxLength={6}
-                                                    className="bg-slate-600 border-slate-500 text-white placeholder:text-slate-400 text-center text-2xl tracking-widest font-mono"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <Button type="submit" variant={'secondary'}>
-                                    Confirm
-                                </Button>
-                            </div>
-                        </div>
+            <div className="space-y-4">
+                <MfaForm onSuccess={onSuccess} />
+                <Alert className="border-green-500/50 bg-green-500/10 flex items-start gap-2">
+                    <div className="text-green-400">
+                        <CheckCircle2 className="h-4 w-4" />
                     </div>
+                    <AlertDescription className="text-green-300 text-sm">
+                        Your account is ready to be created! You can choose to
+                        skip this setup and set it up later.
+                    </AlertDescription>
+                </Alert>
 
-                    <Alert className="border-green-500/50 bg-green-500/10 flex items-start gap-2">
-                        <div className="text-green-400">
-                            <CheckCircle2 className="h-4 w-4" />
-                        </div>
-                        <AlertDescription className="text-green-300 text-sm">
-                            Your account is ready to be created! You can choose
-                            to skip this setup and set it up later.
-                        </AlertDescription>
-                    </Alert>
-
-                    <Button
-                        type="button"
-                        variant={'primary'}
-                        className="w-full"
-                        onClick={() => navigate('/', { replace: true })}
-                    >
-                        Skip
-                    </Button>
-                </form>
-            </Form>
+                <Button
+                    type="button"
+                    variant={'primary'}
+                    className="w-full"
+                    onClick={() => navigate('/', { replace: true })}
+                >
+                    Skip
+                </Button>
+            </div>
         </motion.div>
     )
 }
