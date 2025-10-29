@@ -26,6 +26,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { Encoding } from '@/lib/encoding'
 import { useKeys } from '@/hooks/use-keys'
 import { MfaForm } from '../account/MfaForm'
+import { CopyToClipboard } from '../ui/copy-to-clipboard'
 
 const createAccountSchema = z
     .object({
@@ -55,6 +56,7 @@ const createAccountSchema = z
 
 const vaultSecretSchema = z.object({
     secret: z.string().min(12, 'Vault secret must be at least 12 characters'),
+    twoFactorCode: z.string().optional(),
 })
 
 export type CreateAccountSchema = z.infer<typeof createAccountSchema>
@@ -253,7 +255,13 @@ export function VaultSecretForm() {
                                         Secret Key
                                     </FormLabel>
                                     <FormControl>
-                                        <Input {...field} />
+                                        <div className="flex items-center justify-center relative">
+                                            <Input {...field} />
+                                            <CopyToClipboard
+                                                className="absolute right-1"
+                                                content={field.value ?? ''}
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

@@ -35,6 +35,7 @@ export function CopyToClipboard({ content, className }: Props) {
     return (
         <motion.button
             data-slot="copy-button"
+            type="button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={cn(

@@ -102,6 +102,18 @@ public class UsersService(AppDbContext ctx, UserManager<User> userManager)
             return Result<bool>.Failure(new NotFoundError("User not found."));
         }
 
+        if (user.TwoFactorEnabled)
+        {
+            var tokenProvider = userManager.Options.Tokens.AuthenticatorTokenProvider;
+            
+            var code = data.TwoFactorCode;
+            var validCode = await userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, code ?? "");
+            
+            if (code.IsNullOrEmpty() || !validCode)
+            {
+                return Result<bool>.Failure(new ForbiddenError("Invalid two factor code."));
+            }
+        }
         user.VaultKey = data.VaultKey;
 
         await ctx.SaveChangesAsync();

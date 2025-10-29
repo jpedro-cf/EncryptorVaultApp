@@ -73,6 +73,7 @@ export function useUpdateVaultSecret() {
 
         await api.patch('/users/me/vault-key', {
             vaultKey: Encoding.uint8ArrayToBase64(combined),
+            twoFactorCode: data.twoFactorCode,
         })
     }
 

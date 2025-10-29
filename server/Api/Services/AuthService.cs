@@ -42,8 +42,7 @@ public class AuthService(
 
     public async Task<Result<LoginResponse>> LoginMfa(string code)
     {
-        var codeDigits = new string(code.Where(char.IsDigit).ToArray());
-        var result = await signInManager.TwoFactorAuthenticatorSignInAsync(codeDigits, false,false);
+        var result = await signInManager.TwoFactorAuthenticatorSignInAsync(code, false,false);
         
         if (!result.Succeeded)
         {
@@ -85,8 +84,7 @@ public class AuthService(
         }
         var tokenProvider = userManager.Options.Tokens.AuthenticatorTokenProvider;
 
-        var tokenDigits = new string(code.Where(char.IsDigit).ToArray());
-        var ok = await userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, tokenDigits);
+        var ok = await userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, code);
         if (!ok)
         {
             return Result<bool>.Failure(new UnauthorizedError("Invalid Code."));
