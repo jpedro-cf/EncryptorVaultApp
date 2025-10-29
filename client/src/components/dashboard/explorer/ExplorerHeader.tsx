@@ -14,11 +14,11 @@ import {
 import { Link } from 'react-router'
 import { FolderDialog } from '@/components/folders/FolderDialog'
 import { UploadFilesDialog } from '@/components/files/UploadFilesDialog'
+import React from 'react'
 
 export function ExplorerHeader() {
     const { rootKey } = useKeys()
-    const { folderTree, shareId } = useExplorerContext()
-
+    const { folderTree, shareId, setCurrentFolderId } = useExplorerContext()
     const currentFolder =
         folderTree.length > 0 ? folderTree[folderTree.length - 1] : null
 
@@ -39,16 +39,24 @@ export function ExplorerHeader() {
                         <BreadcrumbList>
                             <BreadcrumbItem>
                                 <BreadcrumbLink asChild>
-                                    <Link
-                                        to={`${
-                                            shareId
-                                                ? `/${shareId}#${window.location.hash}`
-                                                : '/'
-                                        }`}
-                                        className="hover:underline"
-                                    >
-                                        Home
-                                    </Link>
+                                    {!shareId ? (
+                                        <Link
+                                            to={'/'}
+                                            className="hover:underline"
+                                        >
+                                            Home
+                                        </Link>
+                                    ) : (
+                                        <Button
+                                            variant={'link'}
+                                            className="px-0"
+                                            onClick={() =>
+                                                setCurrentFolderId(null)
+                                            }
+                                        >
+                                            Home
+                                        </Button>
+                                    )}
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                             {folderTree.length >= 3 && (
@@ -61,7 +69,7 @@ export function ExplorerHeader() {
                             )}
                             <BreadcrumbSeparator />
                             {slicedTree.map((folder) => (
-                                <>
+                                <React.Fragment key={folder.id}>
                                     <BreadcrumbItem key={folder.id}>
                                         <BreadcrumbLink asChild>
                                             {!shareId ? (
@@ -75,6 +83,11 @@ export function ExplorerHeader() {
                                                 <Button
                                                     variant={'link'}
                                                     className="px-0"
+                                                    onClick={() =>
+                                                        setCurrentFolderId(
+                                                            folder.id
+                                                        )
+                                                    }
                                                 >
                                                     {folder.name}
                                                 </Button>
@@ -82,7 +95,7 @@ export function ExplorerHeader() {
                                         </BreadcrumbLink>
                                     </BreadcrumbItem>
                                     <BreadcrumbSeparator />
-                                </>
+                                </React.Fragment>
                             ))}
                             <BreadcrumbItem>
                                 <BreadcrumbPage>

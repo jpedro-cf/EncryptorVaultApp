@@ -1,5 +1,5 @@
 import type { Folder } from '@/types/folders'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ExplorerContext } from './ExplorerContext'
 import { useKeys } from '@/hooks/use-keys'
 import { useFolder } from '@/api/folders/folders'
@@ -21,7 +21,9 @@ export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
 
     function pushFolder(folder: Folder) {
         setFolderTree((prev) => {
-            if (prev.some((f) => f.id === folder.id)) return prev
+            const idx = prev.findIndex((x) => x.id === folder.id)
+
+            if (idx !== -1) return prev.slice(0, idx + 1)
             return [...prev, folder]
         })
     }
@@ -38,6 +40,18 @@ export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
         folderId: currentFolderId ?? '',
         shareId: sharedLinkId,
     })
+
+    useEffect(() => {
+        if (folderQuery.data) {
+            pushFolder(folderQuery.data)
+        }
+    }, [folderQuery.data])
+
+    useEffect(() => {
+        if (currentFolderId == null) {
+            setFolderTree([])
+        }
+    }, [currentFolderId])
 
     if (sharedItems.isError || folderQuery.isError) {
         return (

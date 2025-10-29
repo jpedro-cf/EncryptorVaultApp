@@ -7,7 +7,7 @@ type ExplorerContext = {
     pushFolder: (folder: Folder) => void
 
     currentFolderId: string | null
-    setCurrentFolderId: (id: string) => void
+    setCurrentFolderId: (id: string | null) => void
 
     items: (FileItem | FolderItem)[]
 
