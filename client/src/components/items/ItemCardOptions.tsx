@@ -15,6 +15,7 @@ import { Encoding } from '@/lib/encoding'
 import { config } from '@/config/config'
 import { Input } from '../ui/input'
 import { CopyToClipboard } from '../ui/copy-to-clipboard'
+import { useDeleteFolder } from '@/api/folders/folders'
 
 interface Props {
     item: FileItem | FolderItem
@@ -24,11 +25,15 @@ export function ItemCardOptions({ item }: Props) {
     const [dialogOpen, setDialogOpen] = useState(false)
 
     const { mutate: deleteFile, isPending: deletingFile } = useFileDeletion()
+    const { mutate: deleteFolder, isPending: deletingFolder } =
+        useDeleteFolder()
     const { mutate: share, isPending: isSharing } = useCreateSharedLink()
 
     function handleDelete() {
         if ('contentType' in item) {
-            deleteFile({ file: item })
+            deleteFile(item)
+        } else {
+            deleteFolder(item)
         }
     }
 
@@ -50,7 +55,7 @@ export function ItemCardOptions({ item }: Props) {
         )
     }
 
-    const isDeleting = deletingFile
+    const isDeleting = deletingFile || deletingFolder
     return (
         <>
             <ItemSharedDialog open={dialogOpen} setOpen={setDialogOpen}>

@@ -18,7 +18,7 @@ export function PersistAuth() {
             setStorageUsage(data.storageUsage)
         }
         setLoading(false)
-    }, [isFetched])
+    }, [data, isFetched])
 
     return loading ? <LoadingPage /> : <Outlet />
 }

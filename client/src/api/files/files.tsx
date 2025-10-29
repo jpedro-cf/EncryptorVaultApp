@@ -10,7 +10,7 @@ export function useFileDeletion() {
     const queryClient = useQueryClient()
     const { updateStorageUsage } = useAuth()
 
-    async function request({ file }: { file: FileItem }) {
+    async function request(file: FileItem) {
         await api.delete(`/files/${file.id}`)
         updateStorageUsage(file.contentType, -file.size)
     }
@@ -23,7 +23,7 @@ export function useFileDeletion() {
                     'An error occured while performing this operation.'
             ),
         onSuccess: (_, variables) => {
-            const { file } = variables
+            const file = variables
 
             const queryKey = file.parentId
                 ? ['folder', { id: file.parentId }]

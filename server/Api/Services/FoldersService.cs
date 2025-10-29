@@ -93,13 +93,13 @@ public class FoldersService(AppDbContext ctx)
             var filesToDelete = await ctx.Files
                 .FromSqlInterpolated($@"
                     WITH RECURSIVE RecursiveFolders AS (
-                        SELECT Id FROM Folders WHERE Id = {folderId}
+                        SELECT ""Id"" FROM ""Folders"" WHERE ""Id"" = {folderId}
                         UNION ALL
-                        SELECT f.Id FROM Folders f
-                        INNER JOIN RecursiveFolders rf ON f.ParentFolderId = rf.Id
+                        SELECT f.""Id"" FROM ""Folders"" f
+                        INNER JOIN RecursiveFolders rf ON f.""ParentFolderId"" = rf.""Id""
                     )
-                    SELECT f.* FROM Files f
-                    INNER JOIN RecursiveFolders rf ON f.ParentFolderId = rf.Id
+                    SELECT f.* FROM ""Files"" f
+                    JOIN RecursiveFolders rf ON f.""ParentFolderId"" = rf.""Id""
                 ")
                 .ToListAsync();
 
@@ -113,12 +113,16 @@ public class FoldersService(AppDbContext ctx)
             // update storage usage
             foreach (var group in fileSizeGroupedByContentType)
             {
-                var storageUsage = await ctx.StorageUsage.FirstAsync(s => s.ContentType == group.Key);
+                var storageUsage = await ctx.StorageUsage.FirstAsync(s => 
+                    s.ContentType == group.Key && s.UserId == userId);
+                
                 storageUsage.TotalSize -= group.Value;
             }
 
             ctx.Folders.Remove(folder);
+            await ctx.SaveChangesAsync();
             await transaction.CommitAsync();
+            
             return Result<bool>.Success(true);
         }
         catch (Exception e)

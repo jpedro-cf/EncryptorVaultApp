@@ -169,3 +169,46 @@ export function useFolderMutation() {
         },
     })
 }
+
+export function useDeleteFolder() {
+    const queryClient = useQueryClient()
+
+    async function request(folder: FolderItem) {
+        await api.delete(`/folders/${folder.id}`)
+    }
+
+    return useMutation({
+        mutationFn: request,
+        onError: (e: AxiosError<{ detail?: string }>) => {
+            toast.warning(
+                e.response?.data.detail ??
+                    'An error occured while performing this operation.'
+            )
+        },
+        onSuccess: (_, variables) => {
+            const queryKey = variables.parentId
+                ? ['folder', { id: variables.parentId }]
+                : ['items']
+
+            queryClient.invalidateQueries({ queryKey: ['account'] })
+
+            const previous = queryClient.getQueryData(queryKey)
+
+            if (!variables.parentId) {
+                const previousItems = previous as (FolderItem | FileItem)[]
+                queryClient.setQueryData(
+                    queryKey,
+                    previousItems.filter((item) => item.id !== variables.id)
+                )
+            } else {
+                const previousFolder = previous as Folder
+                queryClient.setQueryData(queryKey, {
+                    ...previousFolder,
+                    children: previousFolder.children.filter(
+                        (item) => item.id !== variables.id
+                    ),
+                })
+            }
+        },
+    })
+}

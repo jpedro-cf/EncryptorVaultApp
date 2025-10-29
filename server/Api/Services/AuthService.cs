@@ -98,7 +98,7 @@ public class AuthService(
 
     private string GetTotpUri(string key, User user)
     {
-        var provider = "EncryptionApp";
+        var provider = "SecureVault";
 
         return $"otpauth://totp/{user.Id}:{user.Email}?secret={key}&issuer={provider}";
     }

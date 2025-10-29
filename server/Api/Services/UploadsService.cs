@@ -1,7 +1,6 @@
 using EncryptionApp.Api.Dtos.Files;
 using EncryptionApp.Api.Dtos.Items;
 using EncryptionApp.Api.Entities;
-using EncryptionApp.Api.Factory;
 using EncryptionApp.Api.Global;
 using EncryptionApp.Api.Global.Errors;
 using EncryptionApp.Api.Global.Helpers;
@@ -15,8 +14,7 @@ namespace EncryptionApp.Api.Services;
 public class UploadsService(
     AppDbContext ctx, 
     StorageUsageService storageUsageService, 
-    AmazonS3 amazonS3,
-    ResponseFactory responseFactory)
+    AmazonS3 amazonS3)
 {
     public async Task<Result<InitiateUploadResponse>> Upload(Guid userId, UploadFileRequest data)
     {

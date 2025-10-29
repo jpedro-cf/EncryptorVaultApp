@@ -26,7 +26,7 @@ public class FilesController(FilesService filesService, UploadsService uploadsSe
     }
     [HttpPost("{id}/complete-upload")]
     [Authorize]
-    public async Task<IResult> CompleteUpload([FromRoute] Guid fileId, [FromBody] CompleteUploadRequest data)
+    public async Task<IResult> CompleteUpload([FromRoute] Guid id, [FromBody] CompleteUploadRequest data)
     {
         if (!ModelState.IsValid)
         {
@@ -34,7 +34,7 @@ public class FilesController(FilesService filesService, UploadsService uploadsSe
         }
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var result = await uploadsService.CompleteUpload(Guid.Parse(userId), fileId, data);
+        var result = await uploadsService.CompleteUpload(Guid.Parse(userId), id, data);
         
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
     }
