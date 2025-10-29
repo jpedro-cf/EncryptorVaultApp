@@ -325,9 +325,9 @@ export function SetupMfaForm() {
                     className="space-y-4 mt-5"
                 >
                     <div className="space-y-4">
-                        <div className="p-4 bg-slate-700/50 rounded-lg border border-slate-600 space-y-3">
-                            <p className="text-sm text-slate-300">
-                                Scan this QR code with your authenticator app
+                        <div className="p-4 bg-slate-700/50 rounded-lg border border-slate-600 space-y-3 text-slate-300">
+                            <p className="text-sm">
+                                Scan this QR code with your Authenticator App
                                 and verify the code in the input below:
                             </p>
                             <div className="bg-white p-4 rounded-lg flex items-center justify-center">
@@ -343,6 +343,15 @@ export function SetupMfaForm() {
                                     )}
                                 </div>
                             </div>
+                            {!isLoading && (
+                                <p>
+                                    Or use this key inside the authenticator
+                                    app:{' '}
+                                    <span className="tracking-widest font-mono text-xs text-slate-400">
+                                        {data?.key}
+                                    </span>
+                                </p>
+                            )}
                             <div className="flex items-end gap-3">
                                 <FormField
                                     control={form.control}
