@@ -38,10 +38,6 @@ export function Explorer({ folderId }: Props) {
         })
     }
 
-    function popFolder() {
-        setFolderTree((prev) => prev.slice(0, -1))
-    }
-
     const isInRootPage = account != null && rootKey != null && !folderId
     const isInFolderPage =
         !isInRootPage && (folderTree.length > 0 || folderId != null)
@@ -116,7 +112,6 @@ export function Explorer({ folderId }: Props) {
                 shareId: null,
                 folderTree,
                 pushFolder,
-                popFolder,
                 currentFolderId,
                 setCurrentFolderId,
                 items: folderQuery.data?.children ?? rootItems.data ?? [],

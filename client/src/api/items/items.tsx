@@ -80,7 +80,6 @@ export async function decryptItem(
             name: Encoding.uint8ArrayToText(decryptedName),
             size: item.size!,
             contentType: item.contentType!,
-            url: item.url!,
             createdAt: item.createdAt,
             parentId: item.parentId,
             key: decryptedKey,

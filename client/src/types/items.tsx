@@ -4,7 +4,6 @@ export interface ItemResponse {
     encryptedName: EncryptedData
     size?: number
     contentType?: ContentType
-    url?: string
     createdAt: Date
     parentId?: string
     encryptedKey: EncryptedData
@@ -17,7 +16,6 @@ export interface FileItem {
     size: number
     parentId?: string
     contentType: ContentType
-    url: string
     createdAt: Date
     key: Uint8Array<ArrayBuffer>
 }

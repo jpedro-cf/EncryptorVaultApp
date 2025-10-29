@@ -8,12 +8,23 @@ import {
 } from '../ui/dropdown-menu'
 import type { FileItem, FolderItem } from '@/types/items'
 import { useFileDeletion } from '@/api/files/files'
+import { useCreateSharedLink } from '@/api/share/share'
+import { useState } from 'react'
+import { ItemSharedDialog } from './ItemSharedDialog'
+import { Encoding } from '@/lib/encoding'
+import { config } from '@/config/config'
+import { Input } from '../ui/input'
+import { CopyToClipboard } from '../ui/copy-to-clipboard'
 
 interface Props {
     item: FileItem | FolderItem
 }
 export function ItemCardOptions({ item }: Props) {
+    const [sharedLink, setSharedLink] = useState('')
+    const [dialogOpen, setDialogOpen] = useState(false)
+
     const { mutate: deleteFile, isPending: deletingFile } = useFileDeletion()
+    const { mutate: share, isPending: isSharing } = useCreateSharedLink()
 
     function handleDelete() {
         if ('contentType' in item) {
@@ -21,66 +32,106 @@ export function ItemCardOptions({ item }: Props) {
         }
     }
 
-    function handleShare() {}
+    function handleShare() {
+        share(
+            {
+                itemId: item.id,
+                itemType: 'contentType' in item ? 'File' : 'Folder',
+            },
+            {
+                onSuccess: (data) => {
+                    const urlSafeKey = Encoding.encodeUrlSafeBase64(data.key)
+                    const link = `${config.APP_URL}/s/${data.id}#${urlSafeKey}`
+
+                    setSharedLink(link)
+                    setDialogOpen(true)
+                },
+            }
+        )
+    }
 
     const isDeleting = deletingFile
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant="ghost"
-                    type="button"
-                    size="icon"
-                    className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-white"
-                >
-                    <MoreVertical className="w-4 h-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-                align="end"
-                className="bg-slate-800 border-slate-700"
-            >
-                <DropdownMenuItem
-                    className="text-slate-200 focus:bg-slate-700 focus-visible:text-slate-200"
-                    asChild
-                    disabled
-                >
-                    <Button
-                        variant={'ghost'}
-                        className="w-full justify-start cursor-pointer"
+        <>
+            <ItemSharedDialog open={dialogOpen} setOpen={setDialogOpen}>
+                <div className="relative flex items-center justify-center">
+                    <Input
+                        placeholder={`${config.APP_URL}/{id}#{key}`}
+                        value={sharedLink}
                         disabled={true}
-                    >
-                        Download
-                    </Button>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    className="text-slate-200 focus:bg-slate-700 focus:text-slate-200"
-                    asChild
-                >
+                        className="bg-slate-600 border-slate-500 text-white placeholder:text-slate-400 text-center placeholder:text-xs tracking-widest font-mono"
+                    />
+                    <CopyToClipboard
+                        className="absolute right-1"
+                        content={sharedLink}
+                    />
+                </div>
+            </ItemSharedDialog>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                     <Button
-                        variant={'ghost'}
-                        className="w-full justify-start cursor-pointer"
+                        onClick={(e) => e.stopPropagation()}
+                        variant="ghost"
                         type="button"
-                        onClick={handleShare}
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-white"
                     >
-                        Share
+                        <MoreVertical className="w-4 h-4" />
                     </Button>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    className="text-red-400 focus:bg-slate-700 focus:text-red-300"
-                    asChild
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                    align="end"
+                    className="bg-slate-800 border-slate-700"
                 >
-                    <Button
-                        variant={'ghost'}
-                        className="w-full justify-start cursor-pointer"
-                        type="button"
-                        onClick={handleDelete}
-                        disabled={isDeleting}
+                    <DropdownMenuItem
+                        className="text-slate-200 focus:bg-slate-700 focus-visible:text-slate-200"
+                        asChild
+                        disabled
                     >
-                        Delete
-                    </Button>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                        <Button
+                            variant={'ghost'}
+                            className="w-full justify-start cursor-pointer"
+                            disabled={true}
+                        >
+                            Download
+                        </Button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        className="text-slate-200 focus:bg-slate-700 focus:text-slate-200"
+                        asChild
+                    >
+                        <Button
+                            variant={'ghost'}
+                            className="w-full justify-start cursor-pointer"
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleShare()
+                            }}
+                            disabled={isSharing}
+                        >
+                            Share
+                        </Button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        className="text-red-400 focus:bg-slate-700 focus:text-red-300"
+                        asChild
+                    >
+                        <Button
+                            variant={'ghost'}
+                            className="w-full justify-start cursor-pointer"
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDelete()
+                            }}
+                            disabled={isDeleting}
+                        >
+                            Delete
+                        </Button>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </>
     )
 }

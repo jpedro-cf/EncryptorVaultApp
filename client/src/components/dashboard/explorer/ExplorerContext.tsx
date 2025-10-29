@@ -5,7 +5,6 @@ import { createContext, useContext } from 'react'
 type ExplorerContext = {
     folderTree: Folder[]
     pushFolder: (folder: Folder) => void
-    popFolder: () => void
 
     currentFolderId: string | null
     setCurrentFolderId: (id: string) => void

@@ -4,7 +4,7 @@ import { Header } from './Header'
 
 export function DashboardLayout({ children }: PropsWithChildren) {
     return (
-        <div className="flex h-screen bg-slate-900">
+        <div className="flex h-screen bg-slate-900 text-slate-100">
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header />

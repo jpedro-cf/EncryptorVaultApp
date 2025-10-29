@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, ArrowLeftSquare } from 'lucide-react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
+import { useSharedLink } from '@/api/share/share'
 
 interface SharedExplorerProps {
     sharedLinkId: string
@@ -18,8 +19,6 @@ export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
     const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
     const [folderTree, setFolderTree] = useState<Folder[]>([])
 
-    const { folderKeys } = useKeys()
-
     function pushFolder(folder: Folder) {
         setFolderTree((prev) => {
             if (prev.some((f) => f.id === folder.id)) return prev
@@ -27,16 +26,15 @@ export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
         })
     }
 
-    function popFolder() {
-        setFolderTree((prev) => prev.slice(0, -1))
-    }
-
     const isInFolderPage = currentFolderId != null
 
-    const itemsQuery = {
-        data: [],
-        isError: false,
-    }
+    const sharedItems = useSharedLink({
+        shareId: sharedLinkId,
+        enabled: !isInFolderPage,
+    })
+
+    console.log(sharedItems.data)
+    console.log(sharedItems.error)
 
     const folderQuery = useFolder({
         enabled: isInFolderPage,
@@ -44,7 +42,7 @@ export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
         shareId: sharedLinkId,
     })
 
-    if (itemsQuery.isError || folderQuery.isError) {
+    if (sharedItems.isError || folderQuery.isError) {
         return (
             <Alert className="border-blue-500/50 bg-blue-500/10 flex items-start gap-2 mt-5">
                 <div className="text-blue-400">
@@ -78,12 +76,12 @@ export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
                 shareId: sharedLinkId,
                 folderTree,
                 pushFolder,
-                popFolder,
                 currentFolderId,
                 setCurrentFolderId,
-                items: folderQuery.data?.children ?? itemsQuery.data ?? [],
+                items: folderQuery.data?.children ?? sharedItems.data ?? [],
             }}
         >
+            <span className="text-slate-100">{window.location.hash}</span>
             <ExplorerHeader />
             <ItemsGrid />
         </ExplorerContext.Provider>

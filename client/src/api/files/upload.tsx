@@ -131,10 +131,15 @@ export function useFilesUpload({ onPartUpload, onError, onSuccess }: Props) {
 
                 setFileKey(uploadedFile.id, fileEncryptionKey)
 
-                const item = await decryptItem({
-                    key: { root: true, value: rootKey },
-                    item: uploadedFile,
-                })
+                const item: FileItem = {
+                    id: uploadedFile.id,
+                    name: file.content.name,
+                    size: uploadedFile.size!,
+                    contentType: uploadedFile.contentType!,
+                    createdAt: uploadedFile.createdAt,
+                    parentId: data.parentId,
+                    key: fileEncryptionKey,
+                }
 
                 res.push(item)
 
@@ -165,16 +170,17 @@ export function useFilesUpload({ onPartUpload, onError, onSuccess }: Props) {
                 : ['items']
 
             const previous = queryClient.getQueryData(queryKey)
+
             if (!variables.parentId) {
                 const previousItems = previous as (FolderItem | FileItem)[]
                 queryClient.setQueryData(queryKey, [...previousItems, ...data])
-            } else {
-                const previousFolder = previous as Folder
-                queryClient.setQueryData(queryKey, {
-                    ...previousFolder,
-                    children: [...previousFolder.children, ...data],
-                })
+                return
             }
+            const previousFolder = previous as Folder
+            queryClient.setQueryData(queryKey, {
+                ...previousFolder,
+                children: [...previousFolder.children, ...data],
+            })
         },
     })
 }

@@ -5,6 +5,7 @@ import { PersistAuth } from './components/PersistAuth'
 import { DashboardPage } from './pages/DashboardPage'
 import { DashboardLayout } from './components/dashboard/layout/DashboardLayout'
 import { FolderPage } from './pages/FolderPage'
+import { SharePage } from './pages/SharePage'
 function App() {
     return (
         <Router>
@@ -26,6 +27,7 @@ function App() {
                             </DashboardLayout>
                         }
                     />
+                    <Route path="/s/:id" element={<SharePage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
                 </Route>

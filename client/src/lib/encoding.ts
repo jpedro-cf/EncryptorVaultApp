@@ -30,4 +30,18 @@ export class Encoding {
         const decoder = new TextDecoder()
         return decoder.decode(uint8Array)
     }
+
+    public static encodeUrlSafeBase64(uint8Array: Uint8Array<ArrayBuffer>) {
+        const value = this.uint8ArrayToBase64(uint8Array)
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '')
+
+        return value
+    }
+
+    public static decodeUrlSafeBase64(base64String: string) {
+        const decodedBase64 = base64String.replace(/-/g, '+').replace(/_/g, '/')
+        return this.base64ToUint8Array(decodedBase64)
+    }
 }
