@@ -6,7 +6,7 @@ namespace EncryptionApp.Api.Services;
 
 public class StorageUsageService(AppDbContext ctx)
 {
-    private readonly long _storageLimit = 10L * 1024 * 1024 * 1024; // 10gb
+    private readonly long _storageLimit = 256L * 1024 * 1024; // 256MB
 
     public async Task<bool> StorageLimitExceededWithLock(Guid userId, long newFileSize)
     {

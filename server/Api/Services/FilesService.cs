@@ -89,7 +89,8 @@ public class FilesService(
                 AppError error = notUploaded
                     ? new UnprocessableEntityError("You didn't upload one of the parts.")
                     : new StorageLimitExceededError("You've reached your storage limit.");
-                
+
+                await transaction.CommitAsync();
                 return Result<ItemResponse>.Failure(error);
             }
             
@@ -106,7 +107,6 @@ public class FilesService(
                     FOR UPDATE")
                 .SingleAsync();
             
-            // update storage usage
             storageUsage.TotalSize += totalSize;
                 
             await ctx.SaveChangesAsync();
