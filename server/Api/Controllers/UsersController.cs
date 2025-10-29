@@ -42,4 +42,14 @@ public class UsersController(UsersService usersService, StorageUsageService stor
 
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
     }
+    
+    [HttpDelete("me")]
+    [Authorize]
+    public async Task<IResult> Delete()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await usersService.DeleteAccount(Guid.Parse(userId));
+
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
+    }
 }

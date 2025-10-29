@@ -12,7 +12,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '@/hooks/use-auth'
 import { Input } from '@/components/ui/input'
 import { Button } from '../ui/button'
-import { useAccountMutation } from '@/api/account/users'
+import { useAccountDeletion, useAccountMutation } from '@/api/account/users'
+import { ConfirmationDialog } from '../ui/confirmation-dialog'
 
 const profileFormSchema = z.object({
     id: z.string().min(1),
@@ -41,7 +42,10 @@ export type ProfileFormSchema = z.infer<typeof profileFormSchema>
 export function ProfileForm() {
     const { account } = useAuth()
 
-    const { mutate, isPending } = useAccountMutation()
+    const { mutate: updateAccount, isPending: isUpdating } =
+        useAccountMutation()
+    const { mutate: deleteAccount, isPending: isDeleting } =
+        useAccountDeletion()
 
     const form = useForm<ProfileFormSchema>({
         resolver: zodResolver(profileFormSchema),
@@ -51,8 +55,14 @@ export function ProfileForm() {
     })
 
     function handleSubmit(data: ProfileFormSchema) {
-        mutate(data, { onSuccess: () => form.reset() })
+        updateAccount(data, { onSuccess: () => form.reset() })
     }
+
+    function onDeletionConfirmation() {
+        deleteAccount()
+    }
+
+    const isPending = isUpdating || isDeleting
     return (
         <Form {...form}>
             <form
@@ -117,13 +127,24 @@ export function ProfileForm() {
                         </FormItem>
                     )}
                 />
-                <Button
-                    variant={'primary'}
-                    className="col-span-full"
-                    disabled={isPending}
-                >
-                    Submit
-                </Button>
+                <div className="flex gap-3 col-span-full">
+                    <ConfirmationDialog onConfirm={onDeletionConfirmation}>
+                        <Button
+                            variant={'destructive'}
+                            className="bg-red-800"
+                            disabled={isPending}
+                        >
+                            Delete Account
+                        </Button>
+                    </ConfirmationDialog>
+                    <Button
+                        variant={'primary'}
+                        className="flex-1"
+                        disabled={isPending}
+                    >
+                        Submit
+                    </Button>
+                </div>
             </form>
         </Form>
     )

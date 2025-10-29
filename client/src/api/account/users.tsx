@@ -49,6 +49,27 @@ export function useAccountMutation() {
     })
 }
 
+export function useAccountDeletion() {
+    const { setAccount } = useAuth()
+    async function request(): Promise<void> {
+        await api.delete('/users/me')
+    }
+
+    return useMutation({
+        mutationFn: request,
+        mutationKey: ['account'],
+        onError: (e: AxiosError<{ detail?: string }>) =>
+            toast.warning(
+                e.response?.data.detail ??
+                    'An error occured while performing this operation.'
+            ),
+        onSuccess: () => {
+            setAccount(null)
+            toast.success('Account Deleted!')
+        },
+    })
+}
+
 export function useUpdateVaultSecret() {
     const { rootKey } = useKeys()
 

@@ -133,4 +133,22 @@ public class UsersService(AppDbContext ctx, UserManager<User> userManager)
         
         return Result<UserResponse>.Success(UserResponse.From(user));
     }
+
+    public async Task<Result<bool>> DeleteAccount(Guid userId)
+    {
+        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+        {
+            return Result<bool>.Failure(new ForbiddenError("You can't delete this user."));
+        }
+
+        var result = await userManager.DeleteAsync(user);
+        if (!result.Succeeded)
+        {
+            return Result<bool>.Failure(new ForbiddenError(result.Errors.First().Description));
+        }
+        await ctx.SaveChangesAsync();
+        
+        return Result<bool>.Success(true);
+    }
 }
