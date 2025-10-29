@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using EncryptionApp.Api.Entities;
+using EncryptionApp.Api.Global.Helpers;
 using File = EncryptionApp.Api.Entities.File;
 
 namespace EncryptionApp.Api.Dtos.Items;
@@ -12,7 +13,6 @@ public record ItemResponse(
     long? Size,
     [property: JsonConverter(typeof(JsonStringEnumConverter))]
     ContentType? ContentType,
-    string? Url,
     DateTime CreatedAt,
     Guid? ParentId,
     EncryptedData EncryptedKey,
@@ -26,10 +26,22 @@ public record ItemResponse(
             EncryptedData.From(folder.Name), 
             null,
             null,
-            null,
             folder.CreatedAt,
             folder.ParentFolderId,
             EncryptedData.From(folder.EncryptedKey), 
             withRootKey ? EncryptedData.From(folder.KeyEncryptedByRoot) : null);
+    }
+    public static ItemResponse From(File file, bool withRootKey)
+    {
+        return new ItemResponse(
+            file.Id,
+            ItemType.File,
+            EncryptedData.From(file.Name), 
+            file.Size,
+            file.ContentType.ToContentTypeEnum(),
+            file.CreatedAt,
+            file.ParentFolderId,
+            EncryptedData.From(file.EncryptedKey), 
+            withRootKey ? EncryptedData.From(file.KeyEncryptedByRoot) : null);
     }
 }

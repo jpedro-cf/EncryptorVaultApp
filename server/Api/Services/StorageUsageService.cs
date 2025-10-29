@@ -8,11 +8,16 @@ public class StorageUsageService(AppDbContext ctx)
 {
     private readonly long _storageLimit = 10L * 1024 * 1024 * 1024; // 10gb
 
-    public async Task<bool> StorageLimitExceeded(Guid userId, long newFileSize)
+    public async Task<bool> StorageLimitExceededWithLock(Guid userId, long newFileSize)
     {
-        var totalUsed = await ctx.StorageUsage
-            .Where(s => s.UserId == userId)
-            .SumAsync(s => (long?)s.TotalSize) ?? 0L;
+        var usageRows = await ctx.StorageUsage
+            .FromSqlInterpolated($@"
+                SELECT * FROM ""StorageUsage""
+                WHERE ""UserId"" = {userId}
+                FOR UPDATE")
+            .ToListAsync();
+        
+        var totalUsed = usageRows.Sum(x => x.TotalSize);
 
         return totalUsed + newFileSize > _storageLimit;
     }

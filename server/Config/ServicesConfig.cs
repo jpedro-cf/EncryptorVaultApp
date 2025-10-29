@@ -11,7 +11,7 @@ public static class ServicesConfig
     public static void AddServicesConfig(this WebApplicationBuilder builder, RSA privateKey, RSA publicKey)
     {
         builder.Services.AddSingleton<AmazonS3>();
-        builder.Services.AddSingleton<ItemResponseFactory>();
+        builder.Services.AddSingleton<ResponseFactory>();
         
         builder.Services.AddTransient<StorageUsageService>();
         builder.Services.AddTransient<FilesService>();

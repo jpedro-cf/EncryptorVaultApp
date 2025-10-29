@@ -9,22 +9,8 @@ public record FileResponse(
     string StorageKey,
     long Size,
     string ContentType,
+    string Url,
     EncryptedData EncryptedKey,
-    EncryptedData KeyEncryptedByRoot,
+    EncryptedData? KeyEncryptedByRoot,
     Guid? ParentId,
-    DateTime CreatedAt)
-{
-    public static FileResponse From(File file)
-    {
-        return new FileResponse(
-            file.Id, 
-            EncryptedData.From(file.Name), 
-            file.StorageKey,
-            file.Size,
-            file.ContentType,
-            EncryptedData.From(file.EncryptedKey), 
-            EncryptedData.From(file.KeyEncryptedByRoot),
-            file.ParentFolderId,
-            file.CreatedAt);
-    }
-}
+    DateTime CreatedAt);

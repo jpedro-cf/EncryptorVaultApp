@@ -40,7 +40,6 @@ public class UsersService(AppDbContext ctx, UserManager<User> userManager)
                 ctx.StorageUsage.Add(storageUsage);
             }
 
-
             await ctx.SaveChangesAsync();
             await transaction.CommitAsync();
             

@@ -10,6 +10,7 @@ public class CreateSharedItemRequest
     public Guid ItemId { get; set; }
     
     [Required]
+    [JsonPropertyName("itemType")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ItemType Type { get; set; }
     

@@ -8,7 +8,7 @@ using EncryptionApp.Api.Infra.Storage;
 using EncryptionApp.Config;
 using Microsoft.EntityFrameworkCore;
 using EncryptionApp.Api.Global.Helpers;
-using QRCoder.Extensions;
+using Microsoft.IdentityModel.Tokens;
 using File = EncryptionApp.Api.Entities.File;
 
 namespace EncryptionApp.Api.Services;
@@ -17,16 +17,10 @@ public class FilesService(
     AppDbContext ctx, 
     StorageUsageService storageUsageService, 
     AmazonS3 amazonS3,
-    ItemResponseFactory itemResponseFactory)
+    ResponseFactory responseFactory)
 {
     public async Task<Result<InitiateUploadResponse>> Upload(Guid userId, UploadFileRequest data)
     {
-        if (await storageUsageService.StorageLimitExceeded(userId, data.FileSize))
-        {
-            return Result<InitiateUploadResponse>.Failure(
-                new StorageLimitExceededError("You've reached your storage limit."));
-        }
-        
         try
         {
             var file = new File
@@ -69,41 +63,36 @@ public class FilesService(
 
     public async Task<Result<ItemResponse>> CompleteUpload(Guid userId, CompleteUploadRequest data)
     {
-        var file = await ctx.Files.FirstOrDefaultAsync(f => 
-            f.OwnerId == userId && f.Id == Guid.Parse(data.FileId) && f.UploadId == data.UploadId);
-
-        if (file == null)
-        {
-            return Result<ItemResponse>.Failure(
-                new NotFoundError("File not found. Check if you provided the correct data."));
-        }
-        
-        var uploadedParts = await amazonS3.ListUploadParts(data.Key, data.UploadId);
-
-        var notUploaded = uploadedParts.Any(p => p.Size == null);
-        var totalSize = uploadedParts.Sum(p => p.Size ?? 0L);
-        var storageExceeded = await storageUsageService.StorageLimitExceeded(userId, totalSize);
-
-        if (notUploaded || storageExceeded)
-        {
-            await CancelUpload(userId, Guid.Parse(data.FileId), 
-                new CancelUploadRequest(data.Key, data.UploadId));
-        }
-        
-        if (notUploaded)
-        {
-            return Result<ItemResponse>.Failure(
-                new UnprocessableEntityError("You didn't upload one of the parts."));
-        }
-        if (storageExceeded)
-        {
-            return Result<ItemResponse>.Failure(
-                new StorageLimitExceededError("You've reached your storage limit."));   
-        }
-        
         await using var transaction = await ctx.Database.BeginTransactionAsync();
         try
         {
+            var file = await ctx.Files.FirstOrDefaultAsync(f => 
+                f.OwnerId == userId && f.Id == Guid.Parse(data.FileId) && f.UploadId == data.UploadId);
+
+            if (file == null)
+            {
+                return Result<ItemResponse>.Failure(
+                    new NotFoundError("File not found. Check if you provided the correct data."));
+            }
+            
+            // trust the source of truth, not the client
+            var uploadedParts = await amazonS3.ListUploadParts(data.Key, data.UploadId);
+
+            var notUploaded = uploadedParts.Any(p => p.Size == null);
+            var totalSize = uploadedParts.Sum(p => p.Size ?? 0L);
+        
+            var storageExceeded = await storageUsageService.StorageLimitExceededWithLock(userId, totalSize);
+
+            if (notUploaded || storageExceeded)
+            {
+                await CancelUpload(file, new CancelUploadRequest(data.Key, data.UploadId));
+                AppError error = notUploaded
+                    ? new UnprocessableEntityError("You didn't upload one of the parts.")
+                    : new StorageLimitExceededError("You've reached your storage limit.");
+                
+                return Result<ItemResponse>.Failure(error);
+            }
+            
             // update actual file size in case the user manipulated the request to look like he uploaded a smaller file
             file.Status = FileStatus.Completed;
             file.Size = totalSize;
@@ -124,8 +113,7 @@ public class FilesService(
             await amazonS3.CompleteMultiPartUpload(data);
             await transaction.CommitAsync();
             
-            return Result<ItemResponse>.Success(
-                await itemResponseFactory.CreateFrom(file, true));
+            return Result<ItemResponse>.Success(ItemResponse.From(file, true));
         }
         catch (Exception e)
         {
@@ -135,26 +123,32 @@ public class FilesService(
         }
     }
 
-    private async Task<Result<bool>> CancelUpload(Guid userId, Guid fileId, CancelUploadRequest data)
+    private async Task<Result<bool>> CancelUpload(File file, CancelUploadRequest data)
+    {
+        ctx.Files.Remove(file);
+        await ctx.SaveChangesAsync();
+        await amazonS3.AbortMultiPartUpload(data.Key, data.UploadId);
+        
+        return Result<bool>.Success(true);
+    }
+    
+    public async Task<Result<bool>> CancelUploadWithTransaction(Guid userId, Guid fileId, CancelUploadRequest data)
     {
         await using var transaction = await ctx.Database.BeginTransactionAsync();
         try
         {
             var file = await ctx.Files.FirstOrDefaultAsync(f =>
-                f.Id == fileId && f.OwnerId == userId && f.UploadId == data.UploadId);
+                f.Id == fileId && f.OwnerId == userId);
 
             if (file == null)
             {
-                return Result<bool>.Failure(
-                    new NotFoundError("File not found. Check if you provided the correct data."));
+                return Result<bool>.Failure(new NotFoundError("File not found."));
             }
-
-            ctx.Files.Remove(file);
-            await ctx.SaveChangesAsync();
-            await amazonS3.AbortMultiPartUpload(data.Key, data.UploadId);
-            await transaction.CommitAsync();
             
-            return Result<bool>.Success(true);
+            var result = await CancelUpload(file, data);
+            await transaction.CommitAsync();
+
+            return result;
         }
         catch (Exception e)
         {
@@ -162,6 +156,40 @@ public class FilesService(
             return Result<bool>.Failure(
                 new InternalServerError("An error occured while cancelling upload."));
         }
+    }
+
+    public async Task<Result<FileResponse>> GetFile(Guid fileId, Guid? userId, GetFileRequest data)
+    {
+        // TODO: Use joins instead of querying each one
+        var file = await ctx.Files.FirstOrDefaultAsync(f => f.Id == fileId);
+        if (file == null)
+        {
+            return Result<FileResponse>.Failure(new NotFoundError("File not found."));
+        }
+        
+        if (!data.ShareId.IsNullOrEmpty())
+        {
+            var sharedItem = await ctx.SharedItems.FirstOrDefaultAsync(s => 
+                s. Id == Guid.Parse(data.ShareId!));
+            
+            if (sharedItem == null || sharedItem.OwnerId != file.OwnerId)
+            {
+                return Result<FileResponse>.Failure(
+                    new ForbiddenError("You're not allowed to view this file."));
+            }
+
+            return Result<FileResponse>.Success(
+                await responseFactory.CreateFileResponse(file,false));
+        }
+        
+        if (userId == null)
+        {
+            return Result<FileResponse>.Failure(
+                new ForbiddenError("You're not allowed to view this file"));
+        }
+
+        return Result<FileResponse>.Success(
+            await responseFactory.CreateFileResponse(file,true));
     }
     
     public async Task<Result<bool>> DeleteFile(Guid userId, Guid fileId)
@@ -175,7 +203,7 @@ public class FilesService(
             if (file == null)
             {
                 return Result<bool>.Failure(
-                    new NotFoundError("File not found or upload was not completed correctly."));
+                    new NotFoundError("File not found or upload was not completed."));
             }
 
             var contentType = file.ContentType.ToContentTypeEnum();

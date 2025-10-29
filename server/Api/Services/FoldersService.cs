@@ -1,6 +1,5 @@
 using EncryptionApp.Api.Dtos.Folders;
 using EncryptionApp.Api.Entities;
-using EncryptionApp.Api.Factory;
 using EncryptionApp.Api.Global;
 using EncryptionApp.Api.Global.Errors;
 using EncryptionApp.Api.Global.Helpers;
@@ -10,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace EncryptionApp.Api.Services;
 
-public class FoldersService(AppDbContext ctx, ItemResponseFactory itemResponseFactory)
+public class FoldersService(AppDbContext ctx)
 {
     public async Task<Result<FolderResponse>> Create(Guid userId, CreateFolderRequest data)
     {
@@ -21,8 +20,7 @@ public class FoldersService(AppDbContext ctx, ItemResponseFactory itemResponseFa
             ctx.Folders.Add(folder);
             await ctx.SaveChangesAsync();
 
-            return Result<FolderResponse>.Success(
-                await itemResponseFactory.CreateFolderResponse(folder, true));
+            return Result<FolderResponse>.Success(FolderResponse.From(folder, true));
         }
 
         var parent = await ctx.Folders.FirstOrDefaultAsync(f => f.Id == data.ParentId);
@@ -42,8 +40,7 @@ public class FoldersService(AppDbContext ctx, ItemResponseFactory itemResponseFa
         ctx.Folders.Add(subFolder);
         await ctx.SaveChangesAsync();
 
-        return Result<FolderResponse>.Success(
-            await itemResponseFactory.CreateFolderResponse(subFolder, true));
+        return Result<FolderResponse>.Success(FolderResponse.From(subFolder, true));
     }
 
     public async Task<Result<FolderResponse>> GetFolder(Guid folderId, Guid? userId, GetFolderRequest data)
@@ -69,8 +66,7 @@ public class FoldersService(AppDbContext ctx, ItemResponseFactory itemResponseFa
                     new ForbiddenError("You're not allowed to view this folder."));
             }
             
-            return Result<FolderResponse>.Success(
-                await itemResponseFactory.CreateFolderResponse(folder, false));
+            return Result<FolderResponse>.Success(FolderResponse.From(folder, false));
         }
         
         if (userId == null)
@@ -79,8 +75,7 @@ public class FoldersService(AppDbContext ctx, ItemResponseFactory itemResponseFa
                 new ForbiddenError("You're not allowed to view this folder"));
         }
 
-        return Result<FolderResponse>.Success(
-            await itemResponseFactory.CreateFolderResponse(folder, true));
+        return Result<FolderResponse>.Success(FolderResponse.From(folder, true));
     }
 
     public async Task<Result<bool>> DeleteFolder(Guid userId, Guid folderId)
