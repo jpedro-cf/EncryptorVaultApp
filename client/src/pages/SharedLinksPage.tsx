@@ -31,7 +31,7 @@ export function SharedLinksPage() {
 
     if (isError || !data) {
         return (
-            <Alert className="border-blue-500/50 bg-blue-500/10 flex items-start gap-2 m-5">
+            <Alert className="border-blue-500/50 bg-blue-500/10 flex items-start gap-2">
                 <div className="text-blue-400">
                     <AlertCircle className="h-4 w-4" />
                 </div>
@@ -44,7 +44,11 @@ export function SharedLinksPage() {
     }
 
     return (
-        <div className="flex-1 overflow-auto p-6 space-y-6 relative">
+        <div className="flex-1 overflow-auto space-y-6 relative">
+            <h1 className="text-3xl font-bold text-white mb-1">Shared links</h1>
+            <p className="text-slate-400">
+                Visualize and manage your shared links
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
                 {data?.map((item) => (
                     <SharedLinkCard key={item.id} sharedLink={item} />

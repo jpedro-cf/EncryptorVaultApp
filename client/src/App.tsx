@@ -33,7 +33,9 @@ function App() {
                         path="/shared-links"
                         element={
                             <DashboardLayout>
-                                <SharedLinksPage />
+                                <div className="flex-1 overflow-auto p-6 space-y-6 relative">
+                                    <SharedLinksPage />
+                                </div>
                             </DashboardLayout>
                         }
                     />

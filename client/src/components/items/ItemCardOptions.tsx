@@ -79,7 +79,7 @@ export function ItemCardOptions({ item }: Props) {
                         variant="ghost"
                         type="button"
                         size="icon"
-                        className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-white"
+                        className="text-slate-400 hover:text-white"
                     >
                         <MoreVertical className="w-4 h-4" />
                     </Button>

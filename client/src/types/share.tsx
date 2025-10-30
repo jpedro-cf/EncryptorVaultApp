@@ -1,6 +1,6 @@
 import type { EncryptedData, ItemResponse, ItemType } from './items'
 
-export interface SharedItemResponse {
+export interface SharedLinkResponse {
     id: string
     itemId: string
     type: ItemType
@@ -10,6 +10,6 @@ export interface SharedItemResponse {
 
 export interface SharedContentResponse {
     items: ItemResponse[]
-    shareType: ItemType
+    itemType: ItemType
     keyToDecryptItems: EncryptedData
 }

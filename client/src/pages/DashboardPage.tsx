@@ -1,4 +1,3 @@
-import { StorageUsage } from '@/components/dashboard/StorageUsage'
 import { Explorer } from '@/components/dashboard/explorer/Explorer'
 import { useAuth } from '@/hooks/use-auth'
 import { useEffect } from 'react'

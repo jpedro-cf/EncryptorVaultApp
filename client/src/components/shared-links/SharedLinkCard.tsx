@@ -1,4 +1,4 @@
-import type { SharedItemResponse } from '@/types/share'
+import type { SharedLinkResponse } from '@/types/share'
 import { Card } from '../ui/card'
 import { cn } from '@/lib/utils'
 import { LinkIcon, Trash } from 'lucide-react'
@@ -6,7 +6,7 @@ import { Button } from '../ui/button'
 import { useDeleteSharedLink } from '@/api/share/share'
 
 interface Props {
-    sharedLink: SharedItemResponse
+    sharedLink: SharedLinkResponse
 }
 export function SharedLinkCard({ sharedLink }: Props) {
     const { mutate, isPending } = useDeleteSharedLink()

@@ -1,7 +1,11 @@
+import { Progress } from '@/components/ui/progress'
+import { config } from '@/config/config'
 import { useAuth } from '@/hooks/use-auth'
-import { cn } from '@/lib/utils'
-import { CircleUser, Files, Link2, Lock } from 'lucide-react'
+import { cn, formatFileSize } from '@/lib/utils'
+import { CircleUser, Files, HardDrive, Link2, Lock } from 'lucide-react'
 import { useLocation, Link } from 'react-router'
+
+const totalStorage = config.TOTAL_STORAGE
 
 const links = [
     { href: '/', label: 'Dashboard', icon: Files },
@@ -9,13 +13,20 @@ const links = [
     { href: '/profile', label: 'Profile', icon: CircleUser },
 ]
 export function Sidebar() {
+    const { storageUsage } = useAuth()
+
+    const usedStorage = Object.values(storageUsage).reduce(
+        (prev, curr) => curr + prev,
+        0
+    )
+    const percentage = (usedStorage / totalStorage) * 100
     const location = useLocation()
     const pathname = location.pathname
 
     return (
         <aside
             className={
-                'fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-800 border-r border-slate-700'
+                'hidden md:block static inset-y-0 left-0 z-50 w-64 bg-slate-800 border-r border-slate-700 max-h-screen overflow-y-scroll'
             }
         >
             <div className="flex flex-col h-full">
@@ -52,6 +63,29 @@ export function Sidebar() {
                         )
                     })}
                 </nav>
+                <div className="p-4 mb-5 block lg:hidden">
+                    <h3 className="text-md font-semibold text-white mb-4 flex items-center gap-2">
+                        <HardDrive className="w-5 h-5 text-blue-400" />
+                        Storage Usage
+                    </h3>
+                    <div className="space-y-3">
+                        <div>
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs text-slate-300">
+                                    {formatFileSize(usedStorage)} of{' '}
+                                    {formatFileSize(totalStorage)}
+                                </span>
+                                <span className="text-xs font-semibold text-blue-400">
+                                    {Math.round(percentage)}%
+                                </span>
+                            </div>
+                            <Progress
+                                value={percentage}
+                                className="h-2 bg-slate-700"
+                            />
+                        </div>
+                    </div>
+                </div>
                 <div className="p-4 border-t border-slate-700">
                     <p className="text-xs text-slate-500">
                         &copy; {new Date().getFullYear()} SecureVault

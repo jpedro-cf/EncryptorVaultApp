@@ -76,7 +76,7 @@ export function Explorer({ folderId }: Props) {
 
     if (rootItems.isError || folderQuery.isError) {
         return (
-            <Alert className="border-blue-500/50 bg-blue-500/10 flex items-start gap-2 m-5">
+            <Alert className="border-blue-500/50 bg-blue-500/10 flex items-start gap-2">
                 <div className="text-blue-400">
                     <AlertCircle className="h-4 w-4" />
                 </div>

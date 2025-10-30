@@ -8,12 +8,11 @@ import type {
 } from '@/types/items'
 import { api } from '../axios'
 import { Encoding } from '@/lib/encoding'
-import type { SharedContentResponse, SharedItemResponse } from '@/types/share'
+import type { SharedContentResponse, SharedLinkResponse } from '@/types/share'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { AxiosError } from 'axios'
 import { decryptItem } from '../items/items'
-import type { Folder } from '@/types/folders'
 
 interface CreateSharedLink {
     itemId: string
@@ -50,7 +49,7 @@ export function useCreateSharedLink() {
             key: encryptionKey,
         })
 
-        const sharedItem: SharedItemResponse = (
+        const sharedItem: SharedLinkResponse = (
             await api.post('/shared-links', {
                 ...data,
                 encryptedKey: Encoding.uint8ArrayToBase64(encryptedKey),
@@ -74,7 +73,7 @@ export function useCreateSharedLink() {
             key: encryptionKey,
         })
 
-        const sharedItem: SharedItemResponse = (
+        const sharedItem: SharedLinkResponse = (
             await api.post('/shared-links', {
                 ...data,
                 encryptedKey: Encoding.uint8ArrayToBase64(encryptedKey),
@@ -92,7 +91,7 @@ export function useCreateSharedLink() {
                     'An error occured while performing this operation.'
             ),
         onSuccess: (data) => {
-            const links: SharedItemResponse[] =
+            const links: SharedLinkResponse[] =
                 queryClient.getQueryData(['shared-links']) ?? []
 
             queryClient.setQueryData(['shared-links'], [data.item, ...links])
@@ -111,8 +110,8 @@ export function useSharedLink({ shareId, enabled }: UseSharedLink) {
 
         const decryptionKey = Encoding.decodeUrlSafeBase64(hash)
 
-        const { items, keyToDecryptItems, shareType }: SharedContentResponse = (
-            await api.get(`/share/${shareId}`)
+        const { items, keyToDecryptItems, itemType }: SharedContentResponse = (
+            await api.get(`/shared-links/${shareId}`)
         ).data
 
         const itemsKey = await Encryption.decrypt({
@@ -122,7 +121,7 @@ export function useSharedLink({ shareId, enabled }: UseSharedLink) {
         })
 
         const decryptionPromise = items.map((item) => {
-            if (shareType == 'File') {
+            if (itemType == 'File') {
                 return decryptSharedItem(itemsKey, item)
             }
             return decryptItem({
@@ -131,7 +130,7 @@ export function useSharedLink({ shareId, enabled }: UseSharedLink) {
             })
         })
 
-        if (shareType == 'File') {
+        if (itemType == 'File') {
             setFileKey(items[0].id, itemsKey)
         } else {
             setFolderKey(items[0].parentId!, itemsKey)
@@ -152,7 +151,7 @@ export function useSharedLink({ shareId, enabled }: UseSharedLink) {
 }
 
 export function useSharedLinks() {
-    async function request(): Promise<SharedItemResponse[]> {
+    async function request(): Promise<SharedLinkResponse[]> {
         return (await api.get('/shared-links')).data
     }
 
@@ -181,7 +180,7 @@ export function useDeleteSharedLink() {
                     'An error occured while performing this operation.'
             ),
         onSuccess: (_, variables) => {
-            const links: SharedItemResponse[] =
+            const links: SharedLinkResponse[] =
                 queryClient.getQueryData(['shared-links']) ?? []
 
             const id = variables

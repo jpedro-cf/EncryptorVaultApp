@@ -9,7 +9,7 @@ export function DashboardLayout({ children }: PropsWithChildren) {
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header />
-                <main className="flex-1 flex overflow-auto h-full">
+                <main className="flex-1 flex overflow-auto">
                     {children}
 
                     <StorageUsage />
