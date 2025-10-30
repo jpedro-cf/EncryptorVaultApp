@@ -45,34 +45,50 @@ public class FoldersService(AppDbContext ctx)
 
     public async Task<Result<FolderResponse>> GetFolder(Guid folderId, Guid? userId, GetFolderRequest data)
     {
-        var folder = await ctx.Folders.FirstOrDefaultAsync(f => f.Id == folderId);
-        if (folder == null)
-        {
-            return Result<FolderResponse>.Failure(new NotFoundError("Folder not found."));
-        }
-        
         if (!data.ShareId.IsNullOrEmpty())
         {
-            var sharedItem = await ctx.SharedLinks.FirstOrDefaultAsync(s => 
-                s. Id == Guid.Parse(data.ShareId!));
+            var sharedFolder = await ctx.Folders
+                .FromSqlInterpolated($@"
+                    WITH RECURSIVE RecursiveFolders AS (
+                        SELECT f.""Id"" FROM ""Folders"" f
+                        JOIN ""SharedLinks"" s
+                            ON s.""ItemId"" = f.""Id"" 
+                            AND s.""Id"" = {Guid.Parse(data.ShareId!)}
+                            AND f.""Status"" = {nameof(FolderStatus.Active)}
+
+                        UNION ALL
+
+                        SELECT f.""Id"" FROM ""Folders"" f
+                        JOIN RecursiveFolders rf ON f.""ParentFolderId"" = rf.""Id""
+                        WHERE f.""Status"" = {nameof(FolderStatus.Active)}
+                    )
+                    SELECT f.* FROM ""Folders"" f
+                    JOIN RecursiveFolders rf ON f.""Id"" = rf.""Id""
+                    WHERE f.""Id"" = {folderId} AND f.""Status"" = {nameof(FolderStatus.Active)}
+                ")
+                .FirstOrDefaultAsync();
             
-            if (sharedItem == null)
-            {
-                return Result<FolderResponse>.Failure(new NotFoundError("Shared item not found."));
-            }
-            if (sharedItem.OwnerId != folder.OwnerId)
+            if (sharedFolder == null)
             {
                 return Result<FolderResponse>.Failure(
                     new ForbiddenError("You're not allowed to view this folder."));
             }
             
-            return Result<FolderResponse>.Success(FolderResponse.From(folder, false));
+            return Result<FolderResponse>.Success(FolderResponse.From(sharedFolder, false));
         }
         
         if (userId == null)
         {
             return Result<FolderResponse>.Failure(
                 new ForbiddenError("You're not allowed to view this folder"));
+        }
+        
+        var folder = await ctx.Folders.FirstOrDefaultAsync(f => 
+            f.Id == folderId && f.OwnerId == userId);
+        
+        if (folder == null)
+        {
+            return Result<FolderResponse>.Failure(new NotFoundError("Folder not found."));
         }
 
         return Result<FolderResponse>.Success(FolderResponse.From(folder, true));
@@ -126,6 +142,10 @@ public class FoldersService(AppDbContext ctx)
     
             // mark for deletion (BATCH JOBS to delete all S3 objects later)
             folder.Status = FolderStatus.Deleted;
+            foreach (var file in filesToDelete)
+            {
+                file.Status = FileStatus.Deleted;
+            }
             
             await ctx.SaveChangesAsync();
             await transaction.CommitAsync();

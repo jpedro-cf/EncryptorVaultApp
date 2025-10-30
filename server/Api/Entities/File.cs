@@ -17,9 +17,6 @@ public class File : BaseEncryptedEntity
     public FileStatus Status { get; set; } = FileStatus.Pending;
     
     [Required]
-    public int TreeLevel { get; set; }
-    
-    [Required]
     public string ContentType { get; set; }
     
     [Required]

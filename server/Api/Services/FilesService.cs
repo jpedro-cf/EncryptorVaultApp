@@ -1,5 +1,4 @@
 using EncryptionApp.Api.Dtos.Files;
-using EncryptionApp.Api.Dtos.Items;
 using EncryptionApp.Api.Entities;
 using EncryptionApp.Api.Factory;
 using EncryptionApp.Api.Global;
@@ -9,7 +8,6 @@ using EncryptionApp.Config;
 using Microsoft.EntityFrameworkCore;
 using EncryptionApp.Api.Global.Helpers;
 using Microsoft.IdentityModel.Tokens;
-using File = EncryptionApp.Api.Entities.File;
 
 namespace EncryptionApp.Api.Services;
 
@@ -20,16 +18,27 @@ public class FilesService(
 {
     public async Task<Result<FileResponse>> GetFile(Guid fileId, Guid? userId, GetFileRequest data)
     {
-        // TODO: LEFT JOIN Folders to verify tree level, if null, join file
         if (!data.ShareId.IsNullOrEmpty())
         {
-            var sharedFile = await ctx.SharedLinks
-                .Join(ctx.Files,
-                    link => link.ItemId,
-                    file => file.Id,
-                    (link, file) => new { link, file })
-                .Where(x => x.link.Id == Guid.Parse(data.ShareId!))
-                .Select(x => x.file)
+            var sharedFile = await ctx.Files
+                .FromSqlInterpolated($@"
+                    WITH RECURSIVE RecursiveFolders AS (
+                        SELECT f.""Id"" FROM ""Folders"" f
+                        JOIN ""SharedLinks"" s
+                            ON s.""ItemId"" = f.""Id"" 
+                            AND s.""Id"" = {Guid.Parse(data.ShareId!)}
+                            AND f.""Status"" = {nameof(FolderStatus.Active)}
+
+                        UNION ALL
+
+                        SELECT f.""Id"" FROM ""Folders"" f
+                        JOIN RecursiveFolders rf ON f.""ParentFolderId"" = rf.""Id""
+                        WHERE f.""Status"" = {nameof(FolderStatus.Active)}
+                    )
+                    SELECT f.* FROM ""Files"" f
+                    JOIN RecursiveFolders rf ON f.""ParentFolderId"" = rf.""Id""
+                    WHERE f.""Id"" = {fileId} AND f.""Status"" = {nameof(FileStatus.Completed)}
+                ")
                 .FirstOrDefaultAsync();
             
             if (sharedFile == null)

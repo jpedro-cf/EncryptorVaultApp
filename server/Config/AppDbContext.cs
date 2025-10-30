@@ -54,6 +54,10 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
         builder.Entity<File>()
             .Property(f => f.Status)
             .HasConversion<string>();
+        
+        builder.Entity<Folder>()
+            .Property(f => f.Status)
+            .HasConversion<string>();
 
         builder.Entity<StorageUsage>()
             .HasOne(s => s.User)

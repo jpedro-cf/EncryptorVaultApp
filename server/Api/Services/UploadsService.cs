@@ -27,7 +27,6 @@ public class UploadsService(
                 OwnerId = userId,
                 ContentType = data.ContentType,
                 Size = data.FileSize,
-                TreeLevel = 0,
                 EncryptedKey = data.EncryptedKey,
                 KeyEncryptedByRoot = data.KeyEncryptedByRoot,
             };
@@ -41,7 +40,6 @@ public class UploadsService(
                         new NotFoundError("Parent folder not found."));
                 }
                 file.ParentFolderId = parentFolder.Id;
-                file.TreeLevel = parentFolder.TreeLevel + 1;
             }
 
             var uploadInitiated = await amazonS3.InitiateMultiPartUpload(file);

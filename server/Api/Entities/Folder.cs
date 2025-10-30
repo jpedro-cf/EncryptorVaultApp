@@ -9,9 +9,6 @@ public class Folder : BaseEncryptedEntity
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public FolderStatus Status { get; set; } = FolderStatus.Active;
     
-    [Required]
-    public int TreeLevel { get; set; }
-    
     public Guid? ParentFolderId { get; set; }
     public virtual ICollection<Folder> Folders { get; set; } = new List<Folder>();
 
@@ -24,8 +21,7 @@ public class Folder : BaseEncryptedEntity
             Name = name,
             OwnerId = ownerId,
             EncryptedKey = encryptedKey,
-            KeyEncryptedByRoot = keyEncryptedByRoot,
-            TreeLevel = 0
+            KeyEncryptedByRoot = keyEncryptedByRoot
         };
     }
 
@@ -42,7 +38,6 @@ public class Folder : BaseEncryptedEntity
             OwnerId = ownerId,
             ParentFolderId = parent.Id,
             EncryptedKey = encryptedKey,
-            TreeLevel = parent.TreeLevel + 1,
             KeyEncryptedByRoot = keyEncryptedByRoot
         };
     }
