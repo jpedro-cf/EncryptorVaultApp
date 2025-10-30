@@ -49,7 +49,7 @@ export function SharedLinksPage() {
             <p className="text-slate-400">
                 Visualize and manage your shared links
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 {data?.map((item) => (
                     <SharedLinkCard key={item.id} sharedLink={item} />
                 ))}

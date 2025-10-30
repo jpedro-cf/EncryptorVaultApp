@@ -17,7 +17,7 @@ export function DropZone({ onDrop, disabled, className, children }: Props) {
     return (
         <Button
             className={cn(
-                'relative h-auto w-full flex-col overflow-hidden p-8 border-2 border-dashed border-slate-700',
+                'relative h-auto w-full flex-col overflow-hidden p-4 lg:p-8 border-2 border-dashed border-slate-700',
                 isDragActive && 'border-solid border-slate-700 bg-slate-700',
                 className
             )}

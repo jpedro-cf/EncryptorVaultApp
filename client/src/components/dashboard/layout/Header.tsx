@@ -11,15 +11,18 @@ import {
 import { useAuth } from '@/hooks/use-auth'
 import { Menu, User } from 'lucide-react'
 import { Link } from 'react-router'
+import { SidebarDrawer } from './SidebarDrawer'
 
 export function Header() {
     const { account } = useAuth()
     const { mutate, isPending } = useLogout()
     return (
         <header className="border-b border-slate-700 bg-slate-800 px-6 py-2 flex items-center justify-between text-slate-100">
-            <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="w-5 h-5" />
-            </Button>
+            <SidebarDrawer>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                    <Menu className="w-5 h-5" />
+                </Button>
+            </SidebarDrawer>
 
             <div className="flex-1" />
 

@@ -65,7 +65,7 @@ export function VaultSecret() {
                     <ItemCardSkeleton key={i} />
                 ))}
             </div>
-            <Card className="bg-slate-800/50 border-slate-600 p-6 gap-1 w-2/3 absolute left-1/2 -translate-x-1/2 top-0 ">
+            <Card className="bg-slate-800/50 border-slate-600 p-6 gap-1 w-full md:w-2/3 absolute left-1/2 -translate-x-1/2 top-0 ">
                 <CardTitle className="text-white">
                     Enter your vault secret
                 </CardTitle>

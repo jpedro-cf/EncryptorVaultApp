@@ -21,7 +21,7 @@ export function UploadFilesDialog({ children }: PropsWithChildren) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent className="sm:max-w-[650px]">
+            <DialogContent className="sm:max-w-[650px] overflow-y-scroll">
                 <DialogHeader>
                     <DialogTitle>Upload files</DialogTitle>
                     <DialogDescription>
