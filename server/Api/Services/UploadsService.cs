@@ -95,13 +95,9 @@ public class UploadsService(
             file.Size = totalSize;
             var contentType = file.ContentType.ToContentTypeEnum();
             
-            // Pessimistic Lock
             var storageUsage = await ctx.StorageUsage
-                .FromSqlInterpolated($@"
-                    SELECT * FROM ""StorageUsage""
-                    WHERE ""UserId"" = {userId} AND ""ContentType"" = {contentType.ToString()}
-                    FOR UPDATE")
-                .SingleAsync();
+                .Where(s => s.ContentType == contentType)
+                .FirstAsync();
             
             storageUsage.TotalSize += totalSize;
                 
