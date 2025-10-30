@@ -33,7 +33,7 @@ public class FoldersService(AppDbContext ctx)
         var subFolder = Folder.CreateSubFolder(
             data.Name,
             userId,
-            data.ParentId.Value,
+            parent,
             data.EncryptedKey,
             data.KeyEncryptedByRoot);
 
@@ -53,7 +53,7 @@ public class FoldersService(AppDbContext ctx)
         
         if (!data.ShareId.IsNullOrEmpty())
         {
-            var sharedItem = await ctx.SharedItems.FirstOrDefaultAsync(s => 
+            var sharedItem = await ctx.SharedLinks.FirstOrDefaultAsync(s => 
                 s. Id == Guid.Parse(data.ShareId!));
             
             if (sharedItem == null)
@@ -80,7 +80,9 @@ public class FoldersService(AppDbContext ctx)
 
     public async Task<Result<bool>> DeleteFolder(Guid userId, Guid folderId)
     {
-        var folder = await ctx.Folders.FirstOrDefaultAsync(f => f.Id == folderId && f.OwnerId == userId);
+        var folder = await ctx.Folders.FirstOrDefaultAsync(f => 
+            f.Id == folderId && f.OwnerId == userId && f.Status == FolderStatus.Active);
+        
         if (folder == null)
         {
             return Result<bool>.Failure(new NotFoundError("Folder not found."));
@@ -100,26 +102,31 @@ public class FoldersService(AppDbContext ctx)
                     )
                     SELECT f.* FROM ""Files"" f
                     JOIN RecursiveFolders rf ON f.""ParentFolderId"" = rf.""Id""
+                    WHERE f.""Status"" = {nameof(FileStatus.Completed)}
                 ")
                 .ToListAsync();
 
-            var fileSizeGroupedByContentType = filesToDelete
+            var sizeGroupedByContentType = filesToDelete
                 .GroupBy(f => f.ContentType.ToContentTypeEnum())
                 .ToDictionary(
                     g => g.Key,
                     g => g.Sum(f => f.Size)
                 );
-
+            
+            var storageUsages = await ctx.StorageUsage
+                .Where(s => s.UserId == userId)
+                .ToListAsync();
+            
             // update storage usage
-            foreach (var group in fileSizeGroupedByContentType)
+            foreach (var storageUsage in storageUsages)
             {
-                var storageUsage = await ctx.StorageUsage.FirstAsync(s => 
-                    s.ContentType == group.Key && s.UserId == userId);
-                
-                storageUsage.TotalSize -= group.Value;
+                if (sizeGroupedByContentType.TryGetValue(storageUsage.ContentType, out var size))
+                    storageUsage.TotalSize -= size;
             }
-
-            ctx.Folders.Remove(folder);
+    
+            // mark for deletion (BATCH JOBS to delete all S3 objects later)
+            folder.Status = FolderStatus.Deleted;
+            
             await ctx.SaveChangesAsync();
             await transaction.CommitAsync();
             

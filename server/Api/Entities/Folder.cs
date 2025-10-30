@@ -1,7 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
 namespace EncryptionApp.Api.Entities;
 
 public class Folder : BaseEncryptedEntity
 {
+    [Required]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public FolderStatus Status { get; set; } = FolderStatus.Active;
+    
+    [Required]
+    public int TreeLevel { get; set; }
+    
     public Guid? ParentFolderId { get; set; }
     public virtual ICollection<Folder> Folders { get; set; } = new List<Folder>();
 
@@ -15,13 +25,14 @@ public class Folder : BaseEncryptedEntity
             OwnerId = ownerId,
             EncryptedKey = encryptedKey,
             KeyEncryptedByRoot = keyEncryptedByRoot,
+            TreeLevel = 0
         };
     }
 
     public static Folder CreateSubFolder(
         string name, 
         Guid ownerId,
-        Guid parentFolderId,
+        Folder parent,
         string encryptedKey, 
         string keyEncryptedByRoot)
     {
@@ -29,9 +40,16 @@ public class Folder : BaseEncryptedEntity
         {
             Name = name,
             OwnerId = ownerId,
-            ParentFolderId = parentFolderId,
+            ParentFolderId = parent.Id,
             EncryptedKey = encryptedKey,
+            TreeLevel = parent.TreeLevel + 1,
             KeyEncryptedByRoot = keyEncryptedByRoot
         };
     }
+}
+
+public enum FolderStatus
+{
+    Deleted,
+    Active
 }

@@ -12,7 +12,7 @@ public class ShareController(ShareService shareService): ControllerBase
 {
     [HttpPost]
     [Authorize]
-    public async Task<IResult> Create([FromBody] CreateSharedItemRequest request)
+    public async Task<IResult> Create([FromBody] CreateSharedLinkRequest request)
     {
         if (!ModelState.IsValid)
         {

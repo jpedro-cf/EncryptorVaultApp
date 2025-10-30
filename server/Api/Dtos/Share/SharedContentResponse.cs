@@ -7,5 +7,5 @@ namespace EncryptionApp.Api.Dtos.Share;
 public record SharedContentResponse(
     List<ItemResponse> Items,
     [property: JsonConverter(typeof(JsonStringEnumConverter))]
-    ItemType ShareType, 
+    ItemType ItemType, 
     EncryptedData KeyToDecryptItems);

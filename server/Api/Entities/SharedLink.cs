@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace EncryptionApp.Api.Entities;
 
-public class SharedItem
+public class SharedLink
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     

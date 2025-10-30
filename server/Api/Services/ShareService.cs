@@ -11,27 +11,27 @@ namespace EncryptionApp.Api.Services;
 
 public class ShareService(AppDbContext ctx)
 {
-    public async Task<Result<SharedItemResponse>> CreateShare(Guid userId, CreateSharedItemRequest data)
+    public async Task<Result<SharedLinkResponse>> CreateShare(Guid userId, CreateSharedLinkRequest data)
     {
         object? item = null;
         if (data.Type == ItemType.File)
         {
             item = await ctx.Files.FirstOrDefaultAsync(f => 
-                f.OwnerId == userId && f.Id == data.ItemId);
+                f.OwnerId == userId && f.Id == data.ItemId && f.Status == FileStatus.Completed);
         }
         else
         {
             item = await ctx.Folders.FirstOrDefaultAsync(f => 
-                f.OwnerId == userId && f.Id == data.ItemId);
+                f.OwnerId == userId && f.Id == data.ItemId && f.Status == FolderStatus.Active);
         }
         
         if (item == null)
         {
-            return Result<SharedItemResponse>.Failure(
+            return Result<SharedLinkResponse>.Failure(
                 new NotFoundError("Item not found."));
         }
         
-        var sharedItem = new SharedItem
+        var sharedLink = new SharedLink
         {
             OwnerId = userId,
             ItemType = data.Type,
@@ -39,66 +39,73 @@ public class ShareService(AppDbContext ctx)
             ItemId = data.ItemId
         };
 
-        ctx.SharedItems.Add(sharedItem);
+        ctx.SharedLinks.Add(sharedLink);
         await ctx.SaveChangesAsync();
         
-        return Result<SharedItemResponse>.Success(SharedItemResponse.From(sharedItem));
+        return Result<SharedLinkResponse>.Success(SharedLinkResponse.From(sharedLink));
     }
 
-    public async Task<Result<SharedContentResponse>> GetSharedContent(string shareId)
+    public async Task<Result<SharedContentResponse>> GetSharedContent(string sharedLinkId)
     {
-        var sharedItem = await ctx.SharedItems.FirstOrDefaultAsync(s => s.Id == Guid.Parse(shareId));
-        if (sharedItem == null)
+        var sharedLink = await ctx.SharedLinks.FirstOrDefaultAsync(s => s.Id == Guid.Parse(sharedLinkId));
+        if (sharedLink == null)
         {
             return Result<SharedContentResponse>.Failure(new NotFoundError("Shared item not found."));
         }
 
-        if (sharedItem.ItemType == ItemType.File)
+        if (sharedLink.ItemType == ItemType.File)
         {
-            var file = await ctx.Files.FirstOrDefaultAsync(f => f.Id == sharedItem.ItemId);
+            var file = await ctx.Files.FirstOrDefaultAsync(f => 
+                f.Id == sharedLink.ItemId && f.Status == FileStatus.Completed);
+            
             if (file == null)
             {
                 return Result<SharedContentResponse>.Failure(
-                    new NotFoundError("Shared item not found."));
+                    new ForbiddenError("You're not allowed to view this item."));
             }
 
             var items = new List<ItemResponse>() { ItemResponse.From(file, false) };
             return Result<SharedContentResponse>.Success(
-                new SharedContentResponse(items, ItemType.File, EncryptedData.From(sharedItem.EncryptedKey)));
+                new SharedContentResponse(items, ItemType.File, EncryptedData.From(sharedLink.EncryptedKey)));
         }
         
-        var folder = await ctx.Folders.FirstOrDefaultAsync(f => f.Id == sharedItem.ItemId);
+        var folder = await ctx.Folders.FirstOrDefaultAsync(f => 
+            f.Id == sharedLink.ItemId && f.Status == FolderStatus.Active);
+        
         if (folder == null)
         {
             return Result<SharedContentResponse>.Failure(
-                new NotFoundError("Shared item not found."));
+                new ForbiddenError("You're not allowed to view this item."));
         }
 
         var children = FolderResponse.From(folder, false).Children;
         return Result<SharedContentResponse>.Success(
-            new SharedContentResponse(children, ItemType.Folder, EncryptedData.From(sharedItem.EncryptedKey)));
+            new SharedContentResponse(
+                children, 
+                ItemType.Folder, 
+                EncryptedData.From(sharedLink.EncryptedKey)));
     }
 
-    public async Task<List<SharedItemResponse>> GetSharedLinks(Guid userId)
+    public async Task<List<SharedLinkResponse>> GetSharedLinks(Guid userId)
     {
-        return await ctx.SharedItems
+        return await ctx.SharedLinks
             .Where(s => s.OwnerId == userId)
-            .Select(x => SharedItemResponse.From(x))
+            .Select(x => SharedLinkResponse.From(x))
             .ToListAsync();
     }
 
     public async Task<Result<bool>> DeleteShare(Guid userId, Guid shareId)
     {
-        var share = await ctx.SharedItems.FirstOrDefaultAsync(s => 
+        var sharedLink = await ctx.SharedLinks.FirstOrDefaultAsync(s => 
             s.Id == shareId && s.OwnerId == userId);
 
-        if (share == null)
+        if (sharedLink == null)
         {
             return Result<bool>.Failure(
-                new NotFoundError("Share link not found."));
+                new NotFoundError("Shared link not found."));
         }
 
-        ctx.SharedItems.Remove(share);
+        ctx.SharedLinks.Remove(sharedLink);
         await ctx.SaveChangesAsync();
         
         return Result<bool>.Success(true);

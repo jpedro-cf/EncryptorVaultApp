@@ -4,7 +4,7 @@ using EncryptionApp.Api.Entities;
 
 namespace EncryptionApp.Api.Dtos.Share;
 
-public record SharedItemResponse(
+public record SharedLinkResponse(
     Guid Id, 
     Guid ItemId, 
     [property: JsonConverter(typeof(JsonStringEnumConverter))]
@@ -12,8 +12,8 @@ public record SharedItemResponse(
     EncryptedData EncryptedKey, 
     DateTime CreatedAt)
 {
-    public static SharedItemResponse From(SharedItem item)
+    public static SharedLinkResponse From(SharedLink link)
     {
-        return new SharedItemResponse(item.Id, item.ItemId, item.ItemType, EncryptedData.From(item.EncryptedKey), item.CreatedAt);
+        return new SharedLinkResponse(link.Id, link.ItemId, link.ItemType, EncryptedData.From(link.EncryptedKey), link.CreatedAt);
     }
 }

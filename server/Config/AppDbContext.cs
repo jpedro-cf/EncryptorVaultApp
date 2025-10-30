@@ -11,7 +11,7 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
     public DbSet<Folder> Folders { get; set; }
     public DbSet<File> Files { get; set; }
     public DbSet<StorageUsage> StorageUsage { get; set; }
-    public DbSet<SharedItem> SharedItems { get; set; }
+    public DbSet<SharedLink> SharedLinks { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -69,13 +69,13 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, Id
             .HasIndex(s =>new { s.ContentType, s.UserId })
             .IsUnique();
         
-        builder.Entity<SharedItem>()
+        builder.Entity<SharedLink>()
             .HasOne(s => s.Owner)
-            .WithMany(u => u.SharedItems)
+            .WithMany(u => u.SharedLinks)
             .HasForeignKey(s => s.OwnerId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        builder.Entity<SharedItem>()
+        builder.Entity<SharedLink>()
             .Property(s => s.ItemType)
             .HasConversion<string>();
     }

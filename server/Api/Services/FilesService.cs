@@ -15,38 +15,44 @@ namespace EncryptionApp.Api.Services;
 
 public class FilesService(
     AppDbContext ctx, 
-    StorageUsageService storageUsageService, 
     AmazonS3 amazonS3,
     ResponseFactory responseFactory)
 {
     public async Task<Result<FileResponse>> GetFile(Guid fileId, Guid? userId, GetFileRequest data)
     {
-        // TODO: Use joins instead of querying each one
-        var file = await ctx.Files.FirstOrDefaultAsync(f => f.Id == fileId);
-        if (file == null)
-        {
-            return Result<FileResponse>.Failure(new NotFoundError("File not found."));
-        }
-        
+        // TODO: LEFT JOIN Folders to verify tree level, if null, join file
         if (!data.ShareId.IsNullOrEmpty())
         {
-            var sharedItem = await ctx.SharedItems.FirstOrDefaultAsync(s => 
-                s. Id == Guid.Parse(data.ShareId!));
+            var sharedFile = await ctx.SharedLinks
+                .Join(ctx.Files,
+                    link => link.ItemId,
+                    file => file.Id,
+                    (link, file) => new { link, file })
+                .Where(x => x.link.Id == Guid.Parse(data.ShareId!))
+                .Select(x => x.file)
+                .FirstOrDefaultAsync();
             
-            if (sharedItem == null || sharedItem.OwnerId != file.OwnerId)
+            if (sharedFile == null)
             {
                 return Result<FileResponse>.Failure(
                     new ForbiddenError("You're not allowed to view this file."));
             }
 
             return Result<FileResponse>.Success(
-                await responseFactory.CreateFileResponse(file,false));
+                await responseFactory.CreateFileResponse(sharedFile,false));
         }
         
         if (userId == null)
         {
             return Result<FileResponse>.Failure(
                 new ForbiddenError("You're not allowed to view this file"));
+        }
+        
+        var file = await ctx.Files.FirstOrDefaultAsync(f => 
+            f.Id == fileId && f.Status == FileStatus.Completed && f.OwnerId == userId);
+        if (file == null)
+        {
+            return Result<FileResponse>.Failure(new NotFoundError("File not found."));
         }
 
         return Result<FileResponse>.Success(

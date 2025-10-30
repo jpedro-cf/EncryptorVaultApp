@@ -18,7 +18,7 @@ public class AuthService(
 {
     public async Task<Result<LoginResponse>> Login(LoginRequest data)
     {
-        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Email == data.Email);
+        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Email == data.Email && u.EmailConfirmed == true);
         if (user == null)
         {
              return Result<LoginResponse>.Failure(new UnauthorizedError("Incorrect e-mail or password."));
@@ -58,7 +58,7 @@ public class AuthService(
 
     public async Task<Result<MfaKeyResponse>> GetMfaKey(Guid userId)
     {
-        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Id == userId && u.EmailConfirmed == true);
         if (user == null)
         {
             return Result<MfaKeyResponse>.Failure(new NotFoundError("User not found."));
@@ -77,7 +77,7 @@ public class AuthService(
 
     public async Task<Result<bool>> SetupMfa(Guid userId, string code)
     {
-        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await ctx.Users.FirstOrDefaultAsync(u => u.Id == userId && u.EmailConfirmed == true);
         if (user == null)
         {
             return Result<bool>.Failure(new NotFoundError("User not found."));

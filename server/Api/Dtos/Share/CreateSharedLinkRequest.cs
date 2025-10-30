@@ -4,7 +4,7 @@ using EncryptionApp.Api.Entities;
 
 namespace EncryptionApp.Api.Dtos.Share;
 
-public class CreateSharedItemRequest
+public class CreateSharedLinkRequest
 {
     [Required]
     public Guid ItemId { get; set; }
