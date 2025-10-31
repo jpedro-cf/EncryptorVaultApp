@@ -220,8 +220,8 @@ export function VaultSecretForm() {
 
     function handleSubmit(data: VaultSecretSchema) {
         mutate(data, {
-            onSuccess: () => {
-                setRootKey(Encoding.textToUint8Array(data.secret))
+            onSuccess: (key) => {
+                setRootKey(key)
                 setCurrentStep(RegistrationStep.MFA)
             },
         })

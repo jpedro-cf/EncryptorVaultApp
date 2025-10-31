@@ -73,7 +73,9 @@ export function useAccountDeletion() {
 export function useUpdateVaultSecret() {
     const { rootKey } = useKeys()
 
-    async function request(data: VaultSecretSchema): Promise<void> {
+    async function request(
+        data: VaultSecretSchema
+    ): Promise<Uint8Array<ArrayBuffer>> {
         const rootKeyToEncrypt = rootKey ?? Encryption.generateRandomSecret()
 
         const { salt, key } = await Encryption.deriveKeyFromSecret(
@@ -96,6 +98,8 @@ export function useUpdateVaultSecret() {
             vaultKey: Encoding.uint8ArrayToBase64(combined),
             twoFactorCode: data.twoFactorCode,
         })
+
+        return rootKeyToEncrypt
     }
 
     return useMutation({

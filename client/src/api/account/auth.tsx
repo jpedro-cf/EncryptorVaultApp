@@ -2,7 +2,7 @@ import type { CreateAccountSchema } from '@/components/register/RegisterForm'
 import { api } from '../axios'
 import type { User } from '@/types/account'
 import type { AxiosError } from 'axios'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { LoginSchema, TwoFactorSchema } from '@/components/login/LoginForm'
 import { useAuth } from '@/hooks/use-auth'
@@ -83,16 +83,20 @@ export function useSetupMfa() {
 }
 
 export function useLogout() {
+    const queryClient = useQueryClient()
     const { setAccount } = useAuth()
     const { setRootKey } = useKeys()
     async function request(): Promise<void> {
         await api.post('/auth/logout')
-        setRootKey(null)
     }
 
     return useMutation({
         mutationFn: request,
-        onSuccess: () => setAccount(null),
+        onSuccess: () => {
+            setAccount(null)
+            setRootKey(null)
+            queryClient.invalidateQueries()
+        },
         onError: (e: AxiosError<{ detail?: string }>) => {
             toast.warning(
                 e.response?.data.detail ??

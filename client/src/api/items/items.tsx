@@ -7,10 +7,8 @@ import { Encoding } from '@/lib/encoding'
 
 interface UseItems {
     enabled: boolean
-    shareId?: string
-    folderId?: string
 }
-export function useItems({ enabled, shareId, folderId }: UseItems) {
+export function useItems({ enabled }: UseItems) {
     const { rootKey, setFileKey, setFolderKey } = useKeys()
 
     async function request(): Promise<(FileItem | FolderItem)[]> {
@@ -23,7 +21,7 @@ export function useItems({ enabled, shareId, folderId }: UseItems) {
         const items: ItemResponse[] = (await api.get('/items')).data
 
         const decryptionPromise = items.map((item) =>
-            decryptItem({ item, key: { root: true, value: rootKey! } }).then(
+            decryptItem({ item, key: { root: true, value: rootKey } }).then(
                 (decryptedItem) => {
                     if ('contentType' in decryptedItem) {
                         setFileKey(decryptedItem.id, decryptedItem.key)
