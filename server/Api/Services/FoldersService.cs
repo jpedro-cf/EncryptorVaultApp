@@ -3,13 +3,14 @@ using EncryptionApp.Api.Entities;
 using EncryptionApp.Api.Global;
 using EncryptionApp.Api.Global.Errors;
 using EncryptionApp.Api.Global.Helpers;
+using EncryptionApp.Api.Workers;
 using EncryptionApp.Config;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace EncryptionApp.Api.Services;
 
-public class FoldersService(AppDbContext ctx)
+public class FoldersService(AppDbContext ctx, BackgroundTaskQueue backgroundTaskQueue)
 {
     public async Task<Result<FolderResponse>> Create(Guid userId, CreateFolderRequest data)
     {
@@ -51,10 +52,9 @@ public class FoldersService(AppDbContext ctx)
                 .FromSqlInterpolated($@"
                     WITH RECURSIVE RecursiveFolders AS (
                         SELECT f.""Id"" FROM ""Folders"" f
-                        JOIN ""SharedLinks"" s
-                            ON s.""ItemId"" = f.""Id"" 
+                        JOIN ""SharedLinks"" s ON s.""ItemId"" = f.""Id"" 
                             AND s.""Id"" = {Guid.Parse(data.ShareId!)}
-                            AND f.""Status"" = {nameof(FolderStatus.Active)}
+                        WHERE f.""Status"" = {nameof(FolderStatus.Active)}
 
                         UNION ALL
 
@@ -84,7 +84,7 @@ public class FoldersService(AppDbContext ctx)
         }
         
         var folder = await ctx.Folders.FirstOrDefaultAsync(f => 
-            f.Id == folderId && f.OwnerId == userId);
+            f.Id == folderId && f.OwnerId == userId && f.Status == FolderStatus.Active);
         
         if (folder == null)
         {
@@ -108,7 +108,7 @@ public class FoldersService(AppDbContext ctx)
         try
         {
             // get all files recursively
-            var filesToDelete = await ctx.Files
+            var subFiles = await ctx.Files
                 .FromSqlInterpolated($@"
                     WITH RECURSIVE RecursiveFolders AS (
                         SELECT ""Id"" FROM ""Folders"" WHERE ""Id"" = {folderId}
@@ -122,34 +122,30 @@ public class FoldersService(AppDbContext ctx)
                 ")
                 .ToListAsync();
 
-            var sizeGroupedByContentType = filesToDelete
+            var sizeGroupedByContentType = subFiles
                 .GroupBy(f => f.ContentType.ToContentTypeEnum())
                 .ToDictionary(
                     g => g.Key,
                     g => g.Sum(f => f.Size)
                 );
             
-            var storageUsages = await ctx.StorageUsage
+            var storageUsage = await ctx.StorageUsage
                 .Where(s => s.UserId == userId)
                 .ToListAsync();
             
-            // update storage usage
-            foreach (var storageUsage in storageUsages)
+            // free space so user can upload more
+            foreach (var usage in storageUsage)
             {
-                if (sizeGroupedByContentType.TryGetValue(storageUsage.ContentType, out var size))
-                    storageUsage.TotalSize -= size;
+                if (sizeGroupedByContentType.TryGetValue(usage.ContentType, out var size))
+                    usage.TotalSize -= size;
             }
     
-            // mark for deletion (BATCH JOBS to delete all S3 objects later)
+            // mark for deletion (BATCH JOBS to delete all subfiles S3 objects later)
             folder.Status = FolderStatus.Deleted;
-            foreach (var file in filesToDelete)
-            {
-                file.Status = FileStatus.Deleted;
-            }
-            
             await ctx.SaveChangesAsync();
             await transaction.CommitAsync();
             
+            backgroundTaskQueue.Enqueue(new BackgroundTask(folder.Id, BackgroundTaskType.Folder));
             return Result<bool>.Success(true);
         }
         catch (Exception e)

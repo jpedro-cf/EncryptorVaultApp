@@ -53,6 +53,15 @@ public class FilesController(FilesService filesService, UploadsService uploadsSe
         
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
     }
+    
+    [HttpGet("{id}")]
+    public async Task<IResult> Get([FromRoute] string id, [FromQuery] GetFileRequest data)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var result = await filesService.GetFile(Guid.Parse(id), userId != null ? Guid.Parse(userId) : null, data);
+        
+        return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
+    }
 
     [HttpDelete("{id}")]
     [Authorize]

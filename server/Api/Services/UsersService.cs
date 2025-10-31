@@ -2,6 +2,7 @@ using EncryptionApp.Api.Dtos.Users;
 using EncryptionApp.Api.Entities;
 using EncryptionApp.Api.Global;
 using EncryptionApp.Api.Global.Errors;
+using EncryptionApp.Api.Workers;
 using EncryptionApp.Config;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace EncryptionApp.Api.Services;
 
-public class UsersService(AppDbContext ctx, UserManager<User> userManager)
+public class UsersService(
+    AppDbContext ctx, 
+    UserManager<User> userManager, 
+    BackgroundTaskQueue backgroundTaskQueue)
 {
     public async Task<Result<bool>> Create(RegisterUserRequest data)
     {
@@ -145,6 +149,7 @@ public class UsersService(AppDbContext ctx, UserManager<User> userManager)
         // delete user via BATCH JOBS (prevent too many api calls to s3 at once)
         user.EmailConfirmed = false;
         await ctx.SaveChangesAsync();
+        backgroundTaskQueue.Enqueue(new BackgroundTask(user.Id, BackgroundTaskType.User));
         
         return Result<bool>.Success(true);
     }

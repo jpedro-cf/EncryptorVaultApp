@@ -110,7 +110,7 @@ public class AmazonS3
             Key = key,
             Verb = HttpVerb.GET,
             Protocol = Env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
-            Expires = DateTime.UtcNow.AddMinutes(30),
+            Expires = DateTime.UtcNow.AddHours(3),
             ContentType = "application/octet-stream",
         };
 

@@ -3,12 +3,17 @@ using EncryptionApp.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using EncryptionApp.Api.Dtos.Users;
+using EncryptionApp.Api.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
 [Route("api/users")]
-public class UsersController(UsersService usersService, StorageUsageService storageUsageService) : ControllerBase
+public class UsersController(
+    UsersService usersService, 
+    StorageUsageService storageUsageService,
+    SignInManager<User> signInManager) : ControllerBase
 {
     [HttpGet("me")]
     [Authorize]
@@ -49,6 +54,9 @@ public class UsersController(UsersService usersService, StorageUsageService stor
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var result = await usersService.DeleteAccount(Guid.Parse(userId));
+        
+        Response.Cookies.Delete("accessToken");
+        await signInManager.SignOutAsync();
 
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.NoContent();
     }

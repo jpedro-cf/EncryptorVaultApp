@@ -24,9 +24,8 @@ public class FilesService(
                 .FromSqlInterpolated($@"
                     WITH RECURSIVE RecursiveFolders AS (
                         SELECT f.""Id"" FROM ""Folders"" f
-                        JOIN ""SharedLinks"" s
-                            ON s.""ItemId"" = f.""Id"" 
-                            AND s.""Id"" = {Guid.Parse(data.ShareId!)}
+                        JOIN ""SharedLinks"" s ON s.""ItemId"" = f.""Id"" 
+                        WHERE s.""Id"" = {Guid.Parse(data.ShareId!)} 
                             AND f.""Status"" = {nameof(FolderStatus.Active)}
 
                         UNION ALL
@@ -37,6 +36,12 @@ public class FilesService(
                     )
                     SELECT f.* FROM ""Files"" f
                     JOIN RecursiveFolders rf ON f.""ParentFolderId"" = rf.""Id""
+                    WHERE f.""Id"" = {fileId} AND f.""Status"" = {nameof(FileStatus.Completed)}
+                    
+                    UNION 
+                    
+                    SELECT f.* FROM ""Files"" f
+                    JOIN ""SharedLinks"" s ON s.""ItemId"" = f.""Id""
                     WHERE f.""Id"" = {fileId} AND f.""Status"" = {nameof(FileStatus.Completed)}
                 ")
                 .FirstOrDefaultAsync();
