@@ -4,12 +4,18 @@ import { cn } from '@/lib/utils'
 import { LinkIcon, Trash } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useDeleteSharedLink } from '@/api/share/share'
+import { ConfirmationDialog } from '../ui/confirmation-dialog'
 
 interface Props {
     sharedLink: SharedLinkResponse
 }
 export function SharedLinkCard({ sharedLink }: Props) {
     const { mutate, isPending } = useDeleteSharedLink()
+
+    function handleDelete() {
+        mutate(sharedLink.id)
+    }
+
     return (
         <Card
             className={cn(
@@ -30,14 +36,15 @@ export function SharedLinkCard({ sharedLink }: Props) {
                     {new Date(sharedLink.createdAt).toDateString()}
                 </p>
             </div>
-            <Button
-                variant={'destructive'}
-                size={'icon-sm'}
-                onClick={() => mutate(sharedLink.id)}
-                disabled={isPending}
-            >
-                <Trash />
-            </Button>
+            <ConfirmationDialog onConfirm={handleDelete}>
+                <Button
+                    variant={'destructive'}
+                    size={'icon-sm'}
+                    disabled={isPending}
+                >
+                    <Trash />
+                </Button>
+            </ConfirmationDialog>
         </Card>
     )
 }

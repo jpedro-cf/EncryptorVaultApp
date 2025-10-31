@@ -1,4 +1,4 @@
-import { MoreVertical } from 'lucide-react'
+import { AlertCircle, MoreVertical } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
     DropdownMenu,
@@ -16,6 +16,8 @@ import { config } from '@/config/config'
 import { Input } from '../ui/input'
 import { CopyToClipboard } from '../ui/copy-to-clipboard'
 import { useDeleteFolder } from '@/api/folders/folders'
+import { ConfirmationDialog } from '../ui/confirmation-dialog'
+import { Alert, AlertDescription } from '../ui/alert'
 
 interface Props {
     item: FileItem | FolderItem
@@ -122,21 +124,37 @@ export function ItemCardOptions({ item }: Props) {
                         className="text-red-400 focus:bg-slate-700 focus:text-red-300"
                         asChild
                     >
-                        <Button
-                            variant={'ghost'}
-                            className="w-full justify-start cursor-pointer"
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                handleDelete()
-                            }}
-                            disabled={isDeleting}
+                        <ConfirmationDialog
+                            onConfirm={handleDelete}
+                            extraElement={<DeletionAlert />}
                         >
-                            Delete
-                        </Button>
+                            <Button
+                                variant={'ghost'}
+                                className="w-full justify-start cursor-pointer text-red-400 focus:bg-slate-700 focus:text-red-300 px-2"
+                                type="button"
+                                onClick={(e) => e.stopPropagation()}
+                                disabled={isDeleting}
+                            >
+                                Delete
+                            </Button>
+                        </ConfirmationDialog>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </>
+    )
+}
+
+export function DeletionAlert() {
+    return (
+        <Alert className="border-yellow-500/50 bg-yellow-500/10 flex items-start gap-2">
+            <div className="text-yellow-400">
+                <AlertCircle className="h-4 w-4" />
+            </div>
+            <AlertDescription className="text-yellow-300 text-sm">
+                Deletion of folders might take some time to affect your storage
+                usage.
+            </AlertDescription>
+        </Alert>
     )
 }
