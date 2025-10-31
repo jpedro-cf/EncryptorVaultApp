@@ -38,7 +38,9 @@ public class ShareService(AppDbContext ctx)
             EncryptedKey = data.EncryptedKey,
             ItemId = data.ItemId
         };
-
+        
+        // TODO: Background service to map every sub-files & sub-folders to remove the need of recursive queries
+        
         ctx.SharedLinks.Add(sharedLink);
         await ctx.SaveChangesAsync();
         

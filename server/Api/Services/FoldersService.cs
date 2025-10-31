@@ -107,7 +107,7 @@ public class FoldersService(AppDbContext ctx, BackgroundTaskQueue backgroundTask
         await using var transaction = await ctx.Database.BeginTransactionAsync();
         try
         {
-            // get all files recursively
+            // This could be optimized by performing background tasks, caching or a pre-computed table
             var subFiles = await ctx.Files
                 .FromSqlInterpolated($@"
                     WITH RECURSIVE RecursiveFolders AS (

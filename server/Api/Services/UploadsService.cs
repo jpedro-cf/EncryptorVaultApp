@@ -93,7 +93,6 @@ public class UploadsService(
             // update actual file size in case the user manipulated the request to look like he uploaded a smaller file
             file.Status = FileStatus.Completed;
             file.Size = totalSize;
-            Console.Write($"SIZE {file.Id}: {totalSize}, total parts: {uploadedParts.Count}\n");
             var contentType = file.ContentType.ToContentTypeEnum();
             
             var storageUsage = await ctx.StorageUsage

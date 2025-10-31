@@ -20,6 +20,7 @@ public class FilesService(
     {
         if (!data.ShareId.IsNullOrEmpty())
         {
+            // This could be optimized by performing background tasks, caching or a pre-computed table
             var sharedFile = await ctx.Files
                 .FromSqlInterpolated($@"
                     WITH RECURSIVE RecursiveFolders AS (
