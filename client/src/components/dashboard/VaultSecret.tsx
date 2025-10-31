@@ -17,7 +17,7 @@ import { Input } from '../ui/input'
 import { useKeys } from '@/hooks/use-keys'
 import { useAuth } from '@/hooks/use-auth'
 import { Encryption } from '@/lib/encryption'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ItemCardSkeleton } from '../items/ItemCardSkeleton'
 
 const vaultSecretSchema = z.object({

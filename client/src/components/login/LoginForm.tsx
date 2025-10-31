@@ -1,5 +1,5 @@
 import { LoginStep } from '@/pages/LoginPage'
-import { useEffect, type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { useLoginContext } from './LoginContext'
 import { motion } from 'motion/react'
 import { CardDescription, CardTitle } from '../ui/card'
@@ -53,7 +53,7 @@ function DefaultForm() {
     const { clear: clearKeys } = useKeys()
     const { setCurrentStep } = useLoginContext()
 
-    const { mutate: login, isPending, isError } = useLogin()
+    const { mutate: login, isPending } = useLogin()
 
     const form = useForm<LoginSchema>({
         resolver: zodResolver(loginSchema),

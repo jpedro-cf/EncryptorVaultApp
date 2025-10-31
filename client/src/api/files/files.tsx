@@ -7,7 +7,6 @@ import { useAuth } from '@/hooks/use-auth'
 import type { Folder } from '@/types/folders'
 import type { FileResponse } from '@/types/files'
 import { useKeys } from '@/hooks/use-keys'
-import axios from 'axios'
 import { Encryption } from '@/lib/encryption'
 
 export function useFileDeletion() {

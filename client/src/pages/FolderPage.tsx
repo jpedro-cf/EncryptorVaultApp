@@ -1,5 +1,4 @@
 import { Explorer } from '@/components/dashboard/explorer/Explorer'
-import { StorageUsage } from '@/components/dashboard/StorageUsage'
 import { useAuth } from '@/hooks/use-auth'
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'

@@ -13,7 +13,6 @@ import {
 import { Spinner } from '../ui/spinner'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { useAuth } from '@/hooks/use-auth'
 
 const totpSchema = z.object({
     code: z.string().min(6).max(6),

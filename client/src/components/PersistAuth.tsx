@@ -1,5 +1,4 @@
 import { useCurrentUser } from '@/api/account/users'
-import { useAuth } from '@/hooks/use-auth'
 import { LoadingPage } from '@/pages/LoadingPage'
 import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router'

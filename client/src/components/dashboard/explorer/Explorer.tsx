@@ -27,7 +27,7 @@ export function Explorer({ folderId }: Props) {
     const [folderTree, setFolderTree] = useState<Folder[]>([])
 
     const { account } = useAuth()
-    const { rootKey, fileKeys, folderKeys } = useKeys()
+    const { rootKey } = useKeys()
 
     function pushFolder(folder: Folder) {
         setFolderTree((prev) => {

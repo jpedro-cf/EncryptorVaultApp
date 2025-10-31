@@ -1,16 +1,13 @@
 import { useFile } from '@/api/files/files'
-import { Button } from '@/components/ui/button'
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog'
-import { useEffect, useState, type PropsWithChildren } from 'react'
+import { useEffect, useState } from 'react'
 import { useExplorerContext } from '../dashboard/explorer/ExplorerContext'
-import { AlertCircle, XCircle } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import {
     ApplicationDisplay,
     AudioDisplay,

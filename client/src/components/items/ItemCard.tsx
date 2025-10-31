@@ -12,7 +12,6 @@ import { ItemCardOptions } from './ItemCardOptions'
 import { cn, formatFileSize } from '@/lib/utils'
 import { useExplorerContext } from '../dashboard/explorer/ExplorerContext'
 import { Link } from 'react-router'
-import { FileViewerDialog } from '../files/FileViewerDialog'
 
 interface ItemCardProps {
     data: FolderItem | FileItem

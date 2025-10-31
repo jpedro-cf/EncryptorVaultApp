@@ -17,7 +17,7 @@ export function CopyToClipboard({ content, className }: Props) {
         setLocalIsCopied(isCopied)
     }
     const handleCopy = useCallback(
-        (e: React.MouseEvent<HTMLButtonElement>) => {
+        (_: React.MouseEvent<HTMLButtonElement>) => {
             if (content) {
                 navigator.clipboard
                     .writeText(content)

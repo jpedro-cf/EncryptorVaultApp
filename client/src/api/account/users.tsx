@@ -1,7 +1,7 @@
 import type { VaultSecretSchema } from '@/components/register/RegisterForm'
 import { api } from '../axios'
 import type { AxiosError } from 'axios'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { CurrentUserData, User } from '@/types/account'
 import { Encryption } from '@/lib/encryption'

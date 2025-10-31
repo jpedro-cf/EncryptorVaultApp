@@ -10,7 +10,7 @@ export interface DisplayProps {
     contentType: string
 }
 
-export function TextDisplay({ fileContent, contentType, id }: DisplayProps) {
+export function TextDisplay({ fileContent, contentType, id: _ }: DisplayProps) {
     const [lines, setLines] = useState<string[]>([])
 
     function handle() {
@@ -39,7 +39,11 @@ export function TextDisplay({ fileContent, contentType, id }: DisplayProps) {
     )
 }
 
-export function AudioDisplay({ fileContent, contentType, id }: DisplayProps) {
+export function AudioDisplay({
+    fileContent,
+    contentType,
+    id: _,
+}: DisplayProps) {
     const [audioUrl, setAudioUrl] = useState<string | null>(null)
 
     function handle() {
@@ -63,7 +67,11 @@ export function AudioDisplay({ fileContent, contentType, id }: DisplayProps) {
     )
 }
 
-export function VideoDisplay({ fileContent, contentType, id }: DisplayProps) {
+export function VideoDisplay({
+    fileContent,
+    contentType,
+    id: _,
+}: DisplayProps) {
     const [videoUrl, setVideoUrl] = useState<string | null>(null)
 
     function handle() {
@@ -91,7 +99,11 @@ export function VideoDisplay({ fileContent, contentType, id }: DisplayProps) {
     )
 }
 
-export function ImageDisplay({ fileContent, contentType, id }: DisplayProps) {
+export function ImageDisplay({
+    fileContent,
+    contentType,
+    id: _,
+}: DisplayProps) {
     const [imageUrl, setImageUrl] = useState<string | null>(null)
 
     function handle() {
@@ -122,7 +134,7 @@ export function ImageDisplay({ fileContent, contentType, id }: DisplayProps) {
 export function ApplicationDisplay({
     fileContent,
     contentType,
-    id,
+    id: _,
 }: DisplayProps) {
     const [url, setUrl] = useState<string | null>(null)
 

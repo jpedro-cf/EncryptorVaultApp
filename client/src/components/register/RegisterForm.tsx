@@ -83,17 +83,9 @@ export function AccountForm() {
 
     const { setCurrentStep } = useRegistrationContext()
 
-    const {
-        mutate: register,
-        isPending: isRegistering,
-        isError: registrationFailed,
-    } = useRegister()
+    const { mutate: register, isPending: isRegistering } = useRegister()
 
-    const {
-        mutate: login,
-        isPending: isLoggingIn,
-        isError: loginFailed,
-    } = useLogin()
+    const { mutate: login, isPending: isLoggingIn } = useLogin()
 
     const form = useForm<CreateAccountSchema>({
         resolver: zodResolver(createAccountSchema),
@@ -217,7 +209,7 @@ export function AccountForm() {
 export function VaultSecretForm() {
     const { setRootKey } = useKeys()
     const { setCurrentStep } = useRegistrationContext()
-    const { mutate, isPending, isError } = useUpdateVaultSecret()
+    const { mutate, isPending } = useUpdateVaultSecret()
 
     const form = useForm<VaultSecretSchema>({
         resolver: zodResolver(vaultSecretSchema),

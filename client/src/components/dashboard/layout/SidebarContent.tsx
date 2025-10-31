@@ -1,10 +1,9 @@
-import { DrawerClose } from '@/components/ui/drawer'
 import { Progress } from '@/components/ui/progress'
 import { config } from '@/config/config'
 import { useAuth } from '@/hooks/use-auth'
 import { cn, formatFileSize } from '@/lib/utils'
 import { CircleUser, Files, HardDrive, Link2, Lock } from 'lucide-react'
-import { useLocation, Link, useNavigate } from 'react-router'
+import { useLocation, Link } from 'react-router'
 
 const totalStorage = config.TOTAL_STORAGE
 
@@ -19,9 +18,8 @@ interface Props {
 }
 export function SidebarContent({ onLinkClick }: Props) {
     const { storageUsage } = useAuth()
-    const navigate = useNavigate()
 
-    const usedStorage = Object.values(storageUsage).reduce(
+    const usedStorage = Object.values(storageUsage ?? {}).reduce(
         (prev, curr) => curr + prev,
         0
     )
