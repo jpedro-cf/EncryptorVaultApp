@@ -4,9 +4,12 @@ interface KeyState {
     rootKey: Uint8Array<ArrayBuffer> | null
     folderKeys: Record<string, Uint8Array<ArrayBuffer>>
     fileKeys: Record<string, Uint8Array<ArrayBuffer>>
+
     setRootKey: (key: Uint8Array<ArrayBuffer> | null) => void
     setFileKey: (id: string, key: Uint8Array<ArrayBuffer>) => void
     setFolderKey: (id: string, key: Uint8Array<ArrayBuffer>) => void
+
+    clear: () => void
 }
 
 export const useKeys = create<KeyState>()((set) => ({
@@ -32,4 +35,5 @@ export const useKeys = create<KeyState>()((set) => ({
                 [id]: key,
             },
         })),
+    clear: () => set(() => ({ rootKey: null, fileKeys: {}, folderKeys: {} })),
 }))

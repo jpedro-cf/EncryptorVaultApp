@@ -19,6 +19,8 @@ import { Button } from '../ui/button'
 import { Link, useNavigate } from 'react-router'
 import { useLogin, useLoginMfa } from '@/api/account/auth'
 import { useAuth } from '@/hooks/use-auth'
+import { useKeys } from '@/hooks/use-keys'
+import { useQueryClient } from '@tanstack/react-query'
 
 const loginSchema = z.object({
     email: z.email(),
@@ -45,8 +47,10 @@ export function LoginForm() {
 
 function DefaultForm() {
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
 
     const { setAccount } = useAuth()
+    const { clear: clearKeys } = useKeys()
     const { setCurrentStep } = useLoginContext()
 
     const { mutate: login, isPending, isError } = useLogin()
@@ -65,7 +69,9 @@ function DefaultForm() {
                 }
             },
             onSuccess: (data) => {
+                clearKeys()
                 setAccount(data)
+                queryClient.clear()
                 navigate('/', { replace: true })
             },
         })
@@ -150,7 +156,12 @@ function DefaultForm() {
 }
 
 function TwoFactorForm() {
+    const queryClient = useQueryClient()
+
     const navigate = useNavigate()
+
+    const { clear: clearKeys } = useKeys()
+    const { setAccount } = useAuth()
 
     const { mutate, isPending } = useLoginMfa()
 
@@ -159,7 +170,14 @@ function TwoFactorForm() {
     })
 
     function handleSubmit(data: TwoFactorSchema) {
-        mutate(data, { onSuccess: () => navigate('/', { replace: true }) })
+        mutate(data, {
+            onSuccess: (data) => {
+                clearKeys()
+                setAccount(data)
+                queryClient.clear()
+                navigate('/', { replace: true })
+            },
+        })
     }
 
     return (

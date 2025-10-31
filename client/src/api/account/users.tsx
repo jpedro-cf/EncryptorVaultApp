@@ -1,7 +1,7 @@
 import type { VaultSecretSchema } from '@/components/register/RegisterForm'
 import { api } from '../axios'
 import type { AxiosError } from 'axios'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { CurrentUserData, User } from '@/types/account'
 import { Encryption } from '@/lib/encryption'
@@ -50,7 +50,9 @@ export function useAccountMutation() {
 }
 
 export function useAccountDeletion() {
-    const { setAccount } = useAuth()
+    const { clear: clearAuthData } = useAuth()
+    const { clear: clearKeys } = useKeys()
+
     async function request(): Promise<void> {
         await api.delete('/users/me')
     }
@@ -64,7 +66,8 @@ export function useAccountDeletion() {
                     'An error occured while performing this operation.'
             ),
         onSuccess: () => {
-            setAccount(null)
+            clearAuthData()
+            clearKeys()
             toast.success('Account Deleted!')
         },
     })

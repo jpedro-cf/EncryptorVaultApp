@@ -17,7 +17,7 @@ import { Input } from '../ui/input'
 import { useKeys } from '@/hooks/use-keys'
 import { useAuth } from '@/hooks/use-auth'
 import { Encryption } from '@/lib/encryption'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ItemCardSkeleton } from '../items/ItemCardSkeleton'
 
 const vaultSecretSchema = z.object({
@@ -54,7 +54,7 @@ export function VaultSecret() {
         setPending(false)
     }
 
-    if (rootKey) {
+    if (rootKey != null) {
         return <></>
     }
 

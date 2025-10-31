@@ -118,7 +118,6 @@ public class FoldersService(AppDbContext ctx, BackgroundTaskQueue backgroundTask
                     )
                     SELECT f.* FROM ""Files"" f
                     JOIN RecursiveFolders rf ON f.""ParentFolderId"" = rf.""Id""
-                    WHERE f.""Status"" = {nameof(FileStatus.Completed)}
                 ")
                 .ToListAsync();
 
@@ -137,7 +136,9 @@ public class FoldersService(AppDbContext ctx, BackgroundTaskQueue backgroundTask
             foreach (var usage in storageUsage)
             {
                 if (sizeGroupedByContentType.TryGetValue(usage.ContentType, out var size))
+                {
                     usage.TotalSize -= size;
+                }
             }
     
             // mark for deletion (BATCH JOBS to delete all subfiles S3 objects later)

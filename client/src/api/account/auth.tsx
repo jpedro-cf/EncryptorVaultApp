@@ -45,7 +45,6 @@ export function useLogin() {
 }
 
 export function useLoginMfa() {
-    const { setAccount } = useAuth()
     async function request(data: TwoFactorSchema): Promise<User> {
         const res = await api.post('/auth/mfa/login', data)
         const { user } = res.data
@@ -60,7 +59,6 @@ export function useLoginMfa() {
                     'An error occured while performing this operation.'
             )
         },
-        onSuccess: (data) => setAccount(data),
     })
 }
 
@@ -83,9 +81,8 @@ export function useSetupMfa() {
 }
 
 export function useLogout() {
-    const queryClient = useQueryClient()
-    const { setAccount } = useAuth()
-    const { setRootKey } = useKeys()
+    const { clear: clearAuthData } = useAuth()
+    const { clear: clearKeys } = useKeys()
     async function request(): Promise<void> {
         await api.post('/auth/logout')
     }
@@ -93,9 +90,8 @@ export function useLogout() {
     return useMutation({
         mutationFn: request,
         onSuccess: () => {
-            setAccount(null)
-            setRootKey(null)
-            queryClient.invalidateQueries()
+            clearAuthData()
+            clearKeys()
         },
         onError: (e: AxiosError<{ detail?: string }>) => {
             toast.warning(

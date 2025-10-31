@@ -27,6 +27,7 @@ import { Encoding } from '@/lib/encoding'
 import { useKeys } from '@/hooks/use-keys'
 import { MfaForm } from '../account/MfaForm'
 import { CopyToClipboard } from '../ui/copy-to-clipboard'
+import { useQueryClient } from '@tanstack/react-query'
 
 const createAccountSchema = z
     .object({
@@ -75,8 +76,13 @@ export function RegisterForm() {
 }
 
 export function AccountForm() {
+    const queryClient = useQueryClient()
+
+    const { setAccount, clear: clearAuthData } = useAuth()
+    const { clear: clearKeys } = useKeys()
+
     const { setCurrentStep } = useRegistrationContext()
-    const { setAccount } = useAuth()
+
     const {
         mutate: register,
         isPending: isRegistering,
@@ -100,7 +106,11 @@ export function AccountForm() {
                     { email: data.email, password: data.password },
                     {
                         onSuccess: (data) => {
+                            clearAuthData()
+                            clearKeys()
                             setAccount(data)
+                            queryClient.clear()
+
                             setCurrentStep(RegistrationStep.VAULT_SECRET)
                         },
                     }

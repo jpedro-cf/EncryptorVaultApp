@@ -24,7 +24,7 @@ export function Explorer({ folderId }: Props) {
     const [folderTree, setFolderTree] = useState<Folder[]>([])
 
     const { account } = useAuth()
-    const { rootKey } = useKeys()
+    const { rootKey, fileKeys, folderKeys } = useKeys()
 
     function pushFolder(folder: Folder) {
         setFolderTree((prev) => {
@@ -64,7 +64,7 @@ export function Explorer({ folderId }: Props) {
         }
     }, [folderId])
 
-    if (rootItems.isLoading || folderQuery.isLoading) {
+    if (rootKey && (rootItems.isLoading || folderQuery.isLoading)) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {[1, 2, 3, 4].map((i) => (
@@ -74,7 +74,7 @@ export function Explorer({ folderId }: Props) {
         )
     }
 
-    if (rootItems.isError || folderQuery.isError) {
+    if (rootKey && (rootItems.isError || folderQuery.isError)) {
         return (
             <Alert className="border-blue-500/50 bg-blue-500/10 flex items-start gap-2">
                 <div className="text-blue-400">
