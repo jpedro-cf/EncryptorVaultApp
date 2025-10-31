@@ -6,19 +6,13 @@ import { Outlet } from 'react-router'
 
 export function PersistAuth() {
     const [loading, setLoading] = useState(true)
-    const { setAccount, setStorageUsage } = useAuth()
-    const { data, isSuccess, isFetched } = useCurrentUser()
+    const { data, isFetched } = useCurrentUser()
 
     useEffect(() => {
-        if (!isFetched) {
-            return
+        if (isFetched) {
+            setLoading(false)
         }
-        if (isSuccess) {
-            setAccount(data.user)
-            setStorageUsage(data.storageUsage)
-        }
-        setLoading(false)
-    }, [data, isFetched, isSuccess])
+    }, [data, isFetched])
 
     return loading ? <LoadingPage /> : <Outlet />
 }

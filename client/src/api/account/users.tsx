@@ -11,11 +11,14 @@ import type { ProfileFormSchema } from '@/components/account/ProfileForm'
 import { useAuth } from '@/hooks/use-auth'
 
 export function useCurrentUser() {
+    const { setAccount, setStorageUsage } = useAuth()
     async function request(): Promise<CurrentUserData> {
-        const res = await api.get('/users/me')
-        const user = res.data
+        const res: CurrentUserData = (await api.get('/users/me')).data
 
-        return user
+        setAccount(res.user)
+        setStorageUsage(res.storageUsage)
+
+        return res
     }
 
     return useQuery({
