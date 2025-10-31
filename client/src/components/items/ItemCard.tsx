@@ -12,6 +12,7 @@ import { ItemCardOptions } from './ItemCardOptions'
 import { cn, formatFileSize } from '@/lib/utils'
 import { useExplorerContext } from '../dashboard/explorer/ExplorerContext'
 import { Link } from 'react-router'
+import { FileViewerDialog } from '../files/FileViewerDialog'
 
 interface ItemCardProps {
     data: FolderItem | FileItem
@@ -32,7 +33,7 @@ export function ItemCard({ data }: ItemCardProps) {
                 onClick={() => !isFile && setCurrentFolderId(data.id)}
                 tabIndex={0}
                 role="button"
-                aria-label="Perform an action"
+                aria-label="Open folder"
                 className="rounded-lg focus-visible:outline-none focus-visible:border-slate-400 focus-visible:ring-slate-100/30 focus-visible:ring-[3px]"
             >
                 {card}
@@ -45,7 +46,14 @@ export function ItemCard({ data }: ItemCardProps) {
 export function FolderCard({ folder }: { folder: FolderItem }) {
     const { shareId } = useExplorerContext()
     return (
-        <div className="h-full group p-4 bg-slate-800 border border-yellow-800/80 rounded-lg hover:border-yellow-700 transition-colors cursor-pointer focus-visible:outline-none">
+        <div
+            className={cn(
+                'h-full group p-4',
+                'bg-slate-800 border border-yellow-800/80 rounded-lg hover:border-yellow-700',
+                'transition-colors cursor-pointer focus-visible:outline-none'
+            )}
+            aria-label="Open folder"
+        >
             <div className="flex items-start justify-between mb-3">
                 <div className="p-2 bg-yellow-900 rounded-lg group-hover:bg-yellow-600 transition-colors">
                     <Folder className="w-6 h-6 text-yellow-400 group-hover:text-white" />
@@ -63,21 +71,27 @@ export function FolderCard({ folder }: { folder: FolderItem }) {
 }
 
 export function FileCard({ file }: { file: FileItem }) {
-    const { shareId } = useExplorerContext()
+    const { shareId, setCurrentFile } = useExplorerContext()
 
     const styles: Record<ContentType, string> = {
         Application: 'border-slate-700 hover:border-slate-600',
         Audio: 'border-green-900/60 hover:border-green-800',
         Image: 'border-purple-900/60',
-        Text: '',
+        Text: 'border-blue-500/30',
         Video: 'border-red-900/30',
     }
     return (
         <div
+            tabIndex={0}
+            role="button"
+            aria-label="Open file content"
             className={cn(
-                'h-full group p-4 bg-slate-800 border border-transparent rounded-lg transition-colors cursor-pointer',
+                'h-full group p-4 bg-slate-800 border border-transparent rounded-lg',
+                'transition-colors cursor-pointer',
+                'focus-visible:outline-none focus-visible:border-slate-400 focus-visible:ring-slate-100/30 focus-visible:ring-[3px]',
                 styles[file.contentType]
             )}
+            onClick={() => setCurrentFile(file)}
         >
             <div className="flex items-start justify-between mb-3">
                 <FileIcon type={file.contentType} />
@@ -104,7 +118,7 @@ export function FileIcon({ type }: { type: ContentType }) {
             </div>
         ),
         Audio: (
-            <div className="p-2 bg-slate-700 rounded-lg group-hover:bg-green-900 transition-colors">
+            <div className="p-2 bg-slate-700 rounded-lg group-hover:bg-green-700 transition-colors">
                 <FileAudio className="w-6 h-6 text-green-400 group-hover:text-white" />
             </div>
         ),
@@ -115,7 +129,7 @@ export function FileIcon({ type }: { type: ContentType }) {
         ),
         Text: (
             <div className="p-2 bg-slate-700 rounded-lg group-hover:bg-blue-600 transition-colors">
-                <NotepadText className="w-6 h-6 text-blue-400 group-hover:text-white" />
+                <NotepadText className="w-6 h-6 text-sky-500 group-hover:text-white" />
             </div>
         ),
         Video: (

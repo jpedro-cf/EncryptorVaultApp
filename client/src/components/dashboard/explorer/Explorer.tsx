@@ -13,6 +13,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, ArrowLeftSquare } from 'lucide-react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
+import type { FileItem } from '@/types/items'
+import { FileViewerDialog } from '@/components/files/FileViewerDialog'
 
 interface Props {
     folderId: string | null
@@ -21,6 +23,7 @@ export function Explorer({ folderId }: Props) {
     const [currentFolderId, setCurrentFolderId] = useState<string | null>(
         folderId
     )
+    const [currentFile, setCurrentFile] = useState<FileItem | null>(null)
     const [folderTree, setFolderTree] = useState<Folder[]>([])
 
     const { account } = useAuth()
@@ -114,12 +117,15 @@ export function Explorer({ folderId }: Props) {
                 pushFolder,
                 currentFolderId,
                 setCurrentFolderId,
+                currentFile,
+                setCurrentFile,
                 items: folderQuery.data?.children ?? rootItems.data ?? [],
             }}
         >
             <ExplorerHeader />
             {rootKey != null && <ItemsGrid />}
             <VaultSecret />
+            <FileViewerDialog />
         </ExplorerContext.Provider>
     )
 }

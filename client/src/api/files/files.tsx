@@ -1,10 +1,14 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../axios'
-import type { AxiosError } from 'axios'
+import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import type { FileItem, FolderItem } from '@/types/items'
 import { useAuth } from '@/hooks/use-auth'
 import type { Folder } from '@/types/folders'
+import type { FileResponse } from '@/types/files'
+import { useKeys } from '@/hooks/use-keys'
+import axios from 'axios'
+import { Encryption } from '@/lib/encryption'
 
 export function useFileDeletion() {
     const queryClient = useQueryClient()
@@ -47,5 +51,59 @@ export function useFileDeletion() {
                 })
             }
         },
+    })
+}
+
+interface UseFile {
+    enabled: boolean
+    fileId: string
+    sharedLinkId?: string
+}
+export function useFile({ enabled, fileId, sharedLinkId }: UseFile) {
+    const { fileKeys } = useKeys()
+
+    async function request() {
+        const key = fileKeys[fileId]
+
+        if (!key) {
+            throw new Error('File key not found')
+        }
+
+        const res: FileResponse = (
+            await api.get(`/files/${fileId}`, {
+                headers: {
+                    'X-Share-Id': sharedLinkId,
+                },
+            })
+        ).data
+
+        const download = await fetch(res.url)
+
+        const encryptedFile = await download.arrayBuffer()
+
+        const iv = encryptedFile.slice(0, 12)
+        const encryptedData = encryptedFile.slice(12)
+
+        const decryptionResult = await Encryption.decrypt({
+            iv: new Uint8Array(iv),
+            encryptedData: new Uint8Array(encryptedData),
+            key,
+        })
+
+        return {
+            id: res.id,
+            fileContent: decryptionResult.buffer,
+            contentType: res.contentType,
+        }
+    }
+
+    return useQuery({
+        queryKey: ['file', { id: fileId }],
+        queryFn: request,
+        enabled: enabled,
+        retry: 1,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
     })
 }

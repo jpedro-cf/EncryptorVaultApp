@@ -130,13 +130,20 @@ export function useSharedLink({ shareId, enabled }: UseSharedLink) {
             })
         })
 
-        if (itemType == 'File') {
-            setFileKey(items[0].id, itemsKey)
-        } else {
+        if (itemType != 'File') {
             setFolderKey(items[0].parentId!, itemsKey)
         }
+        const decryptedItems = await Promise.all(decryptionPromise)
 
-        return await Promise.all(decryptionPromise)
+        decryptedItems.forEach((item) => {
+            if ('contentType' in item) {
+                setFileKey(item.id, item.key)
+            } else {
+                setFolderKey(item.id, item.key)
+            }
+        })
+
+        return decryptedItems
     }
 
     return useQuery({

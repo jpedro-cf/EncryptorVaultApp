@@ -9,6 +9,9 @@ type ExplorerContext = {
     currentFolderId: string | null
     setCurrentFolderId: (id: string | null) => void
 
+    currentFile: FileItem | null
+    setCurrentFile: (file: FileItem | null) => void
+
     items: (FileItem | FolderItem)[]
 
     shareId: string | null

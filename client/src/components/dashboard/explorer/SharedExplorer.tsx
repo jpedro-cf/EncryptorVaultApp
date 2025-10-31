@@ -1,21 +1,22 @@
 import type { Folder } from '@/types/folders'
 import { useEffect, useState } from 'react'
 import { ExplorerContext } from './ExplorerContext'
-import { useKeys } from '@/hooks/use-keys'
 import { useFolder } from '@/api/folders/folders'
 import { ExplorerHeader } from './ExplorerHeader'
 import { ItemsGrid } from '@/components/items/ItemsGrid'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, ArrowLeftSquare } from 'lucide-react'
-import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { useSharedLink } from '@/api/share/share'
+import type { FileItem } from '@/types/items'
+import { FileViewerDialog } from '@/components/files/FileViewerDialog'
 
 interface SharedExplorerProps {
     sharedLinkId: string
 }
 
 export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
+    const [currentFile, setCurrentFile] = useState<FileItem | null>(null)
     const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
     const [folderTree, setFolderTree] = useState<Folder[]>([])
 
@@ -69,7 +70,8 @@ export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
                             className="mt-1"
                             onClick={() =>
                                 setCurrentFolderId(
-                                    folderTree[folderTree.length - 1].id
+                                    folderTree[folderTree.length - 1]?.id ??
+                                        null
                                 )
                             }
                         >
@@ -89,11 +91,14 @@ export function SharedExplorer({ sharedLinkId }: SharedExplorerProps) {
                 pushFolder,
                 currentFolderId,
                 setCurrentFolderId,
+                currentFile,
+                setCurrentFile,
                 items: folderQuery.data?.children ?? sharedItems.data ?? [],
             }}
         >
             <ExplorerHeader />
             <ItemsGrid />
+            <FileViewerDialog />
         </ExplorerContext.Provider>
     )
 }
