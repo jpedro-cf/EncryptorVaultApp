@@ -1,0 +1,39 @@
+services:
+    server:
+        build: ./server
+        ports:
+            - '5190:5190'
+        environment:
+            ASPNETCORE_ENVIRONMENT: Production
+            ASPNETCORE_URLS: http://0.0.0.0:5190
+
+            CLIENT_URL: ${CLIENT_URL}
+            SERVER_URL: ${SERVER_URL}
+            DATABASE_CONNECTION: ${DATABASE_CONNECTION}
+
+            PUBLIC_KEY_PATH: /app/secrets/public.pem
+            PRIVATE_KEY_PATH: /app/secrets/private.pem
+            PUBLIC_KEY: ${PUBLIC_KEY}
+            PRIVATE_KEY: ${PRIVATE_KEY}
+
+            AWS_ACCESS: ${AWS_ACCESS}
+            AWS_SECRET: ${AWS_SECRET}
+            AWS_REGION: ${AWS_REGION}
+            AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
+            AWS_ENDPOINT: ${AWS_ENDPOINT}
+        networks:
+            - secure-vault-network
+
+    client:
+        build: ./client
+        ports:
+            - '80:80'
+        environment:
+            VITE_CLIENT_URL: ${CLIENT_URL}
+            VITE_SERVER_URL: ${SERVER_URL}/api
+        networks:
+            - secure-vault-network
+
+networks:
+    secure-vault-network:
+        driver: bridge
