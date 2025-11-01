@@ -1,6 +1,7 @@
+import { config } from '@/config/config'
 import axios from 'axios'
 
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5190/api',
+    baseURL: config.API_URL,
     withCredentials: true,
 })
