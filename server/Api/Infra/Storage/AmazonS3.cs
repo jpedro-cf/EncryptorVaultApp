@@ -20,7 +20,7 @@ public class AmazonS3
     {
         _bucketName = Environment.GetEnvironmentVariable("AWS_BUCKET_NAME") ?? "";
         _env = env;
-        _endpoint = Environment.GetEnvironmentVariable("AWS_S3_ENDPOINT");
+        _endpoint = Environment.GetEnvironmentVariable("AWSdp_ENDPOINT");
         
         var credentials = new BasicAWSCredentials(
             Environment.GetEnvironmentVariable("AWS_ACCESS") ?? "", 
