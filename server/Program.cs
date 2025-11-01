@@ -5,7 +5,7 @@ using EncryptionApp.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseLazyLoadingProxies()
         .UseNpgsql(connectionString));
@@ -18,12 +18,12 @@ builder.Services.AddSwaggerGen();
 
 var privateKey = RSA.Create();
 var publicKey = RSA.Create();
-privateKey.ImportFromPem(File.ReadAllText(builder.Configuration["Keys:PrivateKeyPath"]!));
-publicKey.ImportFromPem(File.ReadAllText(builder.Configuration["Keys:PublicKeyPath"]!));
+privateKey.ImportFromPem(File.ReadAllText(Environment.GetEnvironmentVariable("PRIVATE_KEY_PATH")!));
+publicKey.ImportFromPem(File.ReadAllText(Environment.GetEnvironmentVariable("PUBLIC_KEY_PATH")!));
 
-builder.AddSecurityConfig(builder.Configuration);
+builder.AddSecurityConfig();
 builder.AddIdentityConfig();
-builder.AddAuthConfig(builder.Configuration, publicKey);
+builder.AddAuthConfig(publicKey);
 builder.Services.AddAuthorization();
 
 builder.AddServicesConfig(publicKey, privateKey);

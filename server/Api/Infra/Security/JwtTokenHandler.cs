@@ -8,10 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace EncryptionApp.Api.Infra.Security;
 
-public class JwtTokenHandler(IConfiguration config, RSA privateKey, RSA publicKey)
+public class JwtTokenHandler(RSA privateKey, RSA publicKey)
 {
-    private readonly string _issuer = config["Jwt:Issuer"] ?? "";
-    private readonly string _audience = config["Jwt:Audience"] ?? "";
+    private readonly string _issuer = Environment.GetEnvironmentVariable("SERVER_URL") ?? "";
+    private readonly string _audience = Environment.GetEnvironmentVariable("CLIENT_URL") ?? "";
 
     public string Encode(User user, DateTime expiresAt)
     {

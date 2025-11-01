@@ -2,15 +2,15 @@ namespace EncryptionApp.Config;
 
 public static class SecurityConfig
 {
-    public static void AddSecurityConfig(this WebApplicationBuilder builder, IConfiguration configuration)
+    public static void AddSecurityConfig(this WebApplicationBuilder builder)
     {
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowSpecificOrigin", policy =>
             {
-                var origins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+                var origin = Environment.GetEnvironmentVariable("CLIENT_URL");
                 policy
-                    .WithOrigins(origins ?? ["http://localhost:5173"])
+                    .WithOrigins(origin != null ? [origin] : ["http://localhost:5173"])
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

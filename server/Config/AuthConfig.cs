@@ -7,7 +7,7 @@ namespace EncryptionApp.Config;
 
 public static class AuthConfig
 {
-    public static void AddAuthConfig(this WebApplicationBuilder builder, IConfiguration configuration, RSA publicKey)
+    public static void AddAuthConfig(this WebApplicationBuilder builder, RSA publicKey)
     {
         builder.Services.ConfigureApplicationCookie(options =>
         {
@@ -23,9 +23,9 @@ public static class AuthConfig
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidIssuer = Environment.GetEnvironmentVariable("SERVER_URL"),
                 ValidateAudience = true,
-                ValidAudience = configuration["Jwt:Audience"],
+                ValidAudience = Environment.GetEnvironmentVariable("CLIENT_URL"),
                 ValidateLifetime = true,
                 RequireExpirationTime = true,
                 ValidateIssuerSigningKey = true,

@@ -14,23 +14,25 @@ public class AmazonS3
     private readonly IHostEnvironment Env;
     private readonly AmazonS3Client _client;
 
-    public AmazonS3(IConfiguration configuration, IHostEnvironment env)
+    public AmazonS3(IHostEnvironment env)
     {
-        BucketName = configuration["AWS:BucketName"] ?? "";
+        BucketName = Environment.GetEnvironmentVariable("AWS_BUCKET_NAME") ?? "";
         Env = env;
         
-        var credentials = new BasicAWSCredentials(configuration["AWS:AccessKey"] ?? "", configuration["AWS:SecretKey"] ?? "");
+        var credentials = new BasicAWSCredentials(
+            Environment.GetEnvironmentVariable("AWS_ACCESS_KEY") ?? "", 
+            Environment.GetEnvironmentVariable("AWS_SECRET_KEY") ?? "");
 
         var config = new AmazonS3Config
         {
-            RegionEndpoint = RegionEndpoint.GetBySystemName(configuration["AWS:Region"]),
+            RegionEndpoint = RegionEndpoint.GetBySystemName(Environment.GetEnvironmentVariable("AWS_REGION")),
+            ForcePathStyle = true,
+            UseHttp = true
         };
         
         if (env.IsDevelopment())
         {
             config.ServiceURL = "http://localhost:4566"; // LocalStack
-            config.ForcePathStyle = true; // LocalStack
-            config.UseHttp = true;
         }
         
         _client = new AmazonS3Client(credentials, config);
