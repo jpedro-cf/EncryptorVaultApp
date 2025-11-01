@@ -46,7 +46,7 @@ public class FoldersService(AppDbContext ctx, BackgroundTaskQueue backgroundTask
 
     public async Task<Result<FolderResponse>> GetFolder(Guid folderId, Guid? userId, GetFolderRequest data)
     {
-        if (!data.ShareId.IsNullOrEmpty())
+        if (!string.IsNullOrEmpty(data.ShareId))
         {
             var sharedFolder = await ctx.Folders
                 .FromSqlInterpolated($@"

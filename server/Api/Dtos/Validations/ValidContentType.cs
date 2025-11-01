@@ -9,6 +9,6 @@ public class ValidContentType: ValidationAttribute
 {
    public override bool IsValid(object? value)
    {
-      return value is string str && !str.IsNullOrEmpty() && str.IsValidContentType();
+      return value is string str && !string.IsNullOrEmpty(str) && str.IsValidContentType();
    }
 }

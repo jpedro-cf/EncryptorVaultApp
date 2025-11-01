@@ -74,7 +74,7 @@ public class UsersService(
                 new ForbiddenError("Incorrect password."));
         }
         
-        if (!data.Email.IsNullOrEmpty())
+        if (!string.IsNullOrEmpty(data.Email))
         {
             var emailInUse = await userManager.FindByEmailAsync(data.Email!);
             if (emailInUse != null && emailInUse.Id != user.Id)
@@ -87,7 +87,7 @@ public class UsersService(
             await userManager.SetUserNameAsync(user, data.Email!);
         }
 
-        if (!data.NewPassword.IsNullOrEmpty())
+        if (!string.IsNullOrEmpty(data.NewPassword))
         {
             var hash = userManager.PasswordHasher.HashPassword(user, data.NewPassword!);
             user.PasswordHash = hash;
@@ -113,7 +113,7 @@ public class UsersService(
             var code = data.TwoFactorCode;
             var validCode = await userManager.VerifyTwoFactorTokenAsync(user, tokenProvider, code ?? "");
             
-            if (code.IsNullOrEmpty() || !validCode)
+            if (string.IsNullOrEmpty(code) || !validCode)
             {
                 return Result<bool>.Failure(new ForbiddenError("Invalid two factor code."));
             }

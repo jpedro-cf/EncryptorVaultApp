@@ -33,7 +33,7 @@ public class AmazonS3
             UseHttp = true
         };
         
-        if (!_endpoint.IsNullOrEmpty())
+        if (!string.IsNullOrEmpty(_endpoint))
         {
             config.ServiceURL = _endpoint;
         }

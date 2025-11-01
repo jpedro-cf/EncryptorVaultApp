@@ -18,7 +18,7 @@ public class FilesService(
 {
     public async Task<Result<FileResponse>> GetFile(Guid fileId, Guid? userId, GetFileRequest data)
     {
-        if (!data.ShareId.IsNullOrEmpty())
+        if (!string.IsNullOrEmpty(data.ShareId))
         {
             // This could be optimized by performing background tasks, caching or a pre-computed table
             var sharedFile = await ctx.Files
