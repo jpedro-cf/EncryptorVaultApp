@@ -3,7 +3,6 @@ using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using EncryptionApp.Api.Dtos.Files;
-using Microsoft.IdentityModel.Tokens;
 using File = EncryptionApp.Api.Entities.File;
 
 namespace EncryptionApp.Api.Infra.Storage;
@@ -16,11 +15,14 @@ public class AmazonS3
     private readonly AmazonS3Client _client;
     private readonly string? _endpoint;
 
-    public AmazonS3(IHostEnvironment env)
+    private readonly ILogger<AmazonS3> _logger;
+
+    public AmazonS3(IHostEnvironment env, ILogger<AmazonS3> logger)
     {
         _bucketName = Environment.GetEnvironmentVariable("AWS_BUCKET_NAME") ?? "";
         _env = env;
-        _endpoint = Environment.GetEnvironmentVariable("AWSdp_ENDPOINT");
+        _endpoint = Environment.GetEnvironmentVariable("AWS_ENDPOINT");
+        _logger = logger;
         
         var credentials = new BasicAWSCredentials(
             Environment.GetEnvironmentVariable("AWS_ACCESS") ?? "", 
@@ -43,83 +45,124 @@ public class AmazonS3
 
     public async Task<InitiateUploadResponse> InitiateMultiPartUpload(File file)
     {
-        var initRequest = new InitiateMultipartUploadRequest
+        try
         {
-            BucketName = _bucketName,
-            Key = file.StorageKey,
-        };
-        
-        initRequest.Metadata.Add("file_id", file.Id.ToString());
-        
-        var initResponse = await _client.InitiateMultipartUploadAsync(initRequest);
-        var presignedUrls = new List<PresignedPartUrl>();
-        
-        const int chunkSizeMb = 100;
-        int totalParts = (int)Math.Ceiling((double)file.Size / (chunkSizeMb * 1024 * 1024));
-        
-        for (var i = 1; i <= totalParts; i++)
-        {
-            var urlRequest = new GetPreSignedUrlRequest
+            var initRequest = new InitiateMultipartUploadRequest
             {
                 BucketName = _bucketName,
                 Key = file.StorageKey,
-                Verb = HttpVerb.PUT,
-                Protocol = _env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
-                PartNumber = i,
-                UploadId = initResponse.UploadId,
-                Expires = DateTime.UtcNow.AddMinutes(30),
-                ContentType = "application/octet-stream",
             };
+            initRequest.Metadata.Add("file_id", file.Id.ToString());
+            
+            var initResponse = await _client.InitiateMultipartUploadAsync(initRequest);
+            var presignedUrls = new List<PresignedPartUrl>();
+            
+            const int chunkSizeMb = 100;
+            int totalParts = (int)Math.Ceiling((double)file.Size / (chunkSizeMb * 1024 * 1024));
+            
+            for (var i = 1; i <= totalParts; i++)
+            {
+                var urlRequest = new GetPreSignedUrlRequest
+                {
+                    BucketName = _bucketName,
+                    Key = file.StorageKey,
+                    Verb = HttpVerb.PUT,
+                    Protocol = _env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
+                    PartNumber = i,
+                    UploadId = initResponse.UploadId,
+                    Expires = DateTime.UtcNow.AddMinutes(30),
+                    ContentType = "application/octet-stream",
+                };
 
-            var url = await _client.GetPreSignedURLAsync(urlRequest);
-            presignedUrls.Add(new PresignedPartUrl(i, url));
+                var url = await _client.GetPreSignedURLAsync(urlRequest);
+                presignedUrls.Add(new PresignedPartUrl(i, url));
+            }
+            
+            return new InitiateUploadResponse(file.Id.ToString(), initResponse.UploadId, file.StorageKey, presignedUrls);
         }
-        
-        return new InitiateUploadResponse(file.Id.ToString(), initResponse.UploadId, file.StorageKey, presignedUrls);
+        catch (Exception e)
+        {
+            _logger.LogError($"Error while initiating upload: {e}");
+            throw;
+        }
     }
 
     public async Task<UploadCompletedResponse> CompleteMultiPartUpload(CompleteUploadRequest data)
     {
-        var completeRequest = new CompleteMultipartUploadRequest
+        try
         {
-            BucketName = _bucketName,
-            Key = data.Key,
-            UploadId = data.UploadId,
-            PartETags = data.Parts.Select(p => new PartETag(p.PartNumber, p.ETag)).ToList()
-        };
-        
-        var response = await _client.CompleteMultipartUploadAsync(completeRequest);
+            var completeRequest = new CompleteMultipartUploadRequest
+            {
+                BucketName = _bucketName,
+                Key = data.Key,
+                UploadId = data.UploadId,
+                PartETags = data.Parts.Select(p => new PartETag(p.PartNumber, p.ETag)).ToList()
+            };
+            
+            var response = await _client.CompleteMultipartUploadAsync(completeRequest);
 
-        return new UploadCompletedResponse(response.Key);
+            return new UploadCompletedResponse(response.Key);
+
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Error while completing upload: {e}");
+            throw;
+        }
     }
 
     public async Task<List<UploadPart>> ListUploadParts(string key, string uploadId)
     {
-        var data = await _client.ListPartsAsync(_bucketName, key, uploadId);
-        
-        return data.Parts
-            .Select(p => new UploadPart(p.LastModified, p.Size, p.PartNumber, p.ETag))
-            .ToList();
+        try
+        {
+            var data = await _client.ListPartsAsync(_bucketName, key, uploadId);
+            
+            return data.Parts
+                .Select(p => new UploadPart(p.LastModified, p.Size, p.PartNumber, p.ETag))
+                .ToList();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Error while listing upload parts: {e}");
+            throw;
+        }
     }
 
     public async Task AbortMultiPartUpload(string key, string uploadId)
     {
-        await _client.AbortMultipartUploadAsync(_bucketName, key, uploadId);
+        try
+        {
+            await _client.AbortMultipartUploadAsync(_bucketName, key, uploadId);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Error while aborting upload: {e}");
+            throw;
+        }
     }
 
     public async Task<string> GeneratePresignedUrl(string key)
     {
-        var request = new GetPreSignedUrlRequest
+        try
         {
-            BucketName = _bucketName,
-            Key = key,
-            Verb = HttpVerb.GET,
-            Protocol = _env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
-            Expires = DateTime.UtcNow.AddHours(3),
-            ContentType = "application/octet-stream",
-        };
+            var request = new GetPreSignedUrlRequest
+            {
+                BucketName = _bucketName,
+                Key = key,
+                Verb = HttpVerb.GET,
+                Protocol = _env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
+                Expires = DateTime.UtcNow.AddHours(3),
+                ContentType = "application/octet-stream",
+            };
 
-        return await _client.GetPreSignedURLAsync(request);
+            return await _client.GetPreSignedURLAsync(request);
+
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Error while generating signed url: {e}");
+            throw;
+        }
     }
 
     public async Task<GetObjectMetadataResponse> GetObjectMetadata(string key)
@@ -129,6 +172,14 @@ public class AmazonS3
 
     public async Task DeleteObject(string key)
     {
-        await _client.DeleteObjectAsync(_bucketName, key);
+        try
+        {
+            await _client.DeleteObjectAsync(_bucketName, key);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Error while deleting object '{key}': {e}");
+            throw;
+        }
     }
 }
