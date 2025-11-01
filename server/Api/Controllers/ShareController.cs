@@ -38,7 +38,7 @@ public class ShareController(ShareService shareService): ControllerBase
     [HttpGet("{id}")]
     public async Task<IResult> Create([FromRoute] string id)
     {
-        var result = await shareService.GetSharedContent(id);
+        var result = await shareService.GetSharedContent(Guid.Parse(id));
         return !result.IsSuccess ? result.Error!.ToHttpResult() : Results.Ok(result.Data);
     }
     

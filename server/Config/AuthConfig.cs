@@ -7,8 +7,12 @@ namespace EncryptionApp.Config;
 
 public static class AuthConfig
 {
-    public static void AddAuthConfig(this WebApplicationBuilder builder, RSA publicKey)
+    public static void AddAuthConfig(this WebApplicationBuilder builder)
     {
+        var publicKey = RSA.Create();
+        publicKey.ImportFromPem(
+            File.ReadAllText(Environment.GetEnvironmentVariable("PUBLIC_KEY_PATH")!));
+        
         builder.Services.ConfigureApplicationCookie(options =>
         {
             options.LoginPath = "/Auth"; // redirect here if unauthorized

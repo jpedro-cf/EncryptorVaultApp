@@ -47,9 +47,9 @@ public class ShareService(AppDbContext ctx)
         return Result<SharedLinkResponse>.Success(SharedLinkResponse.From(sharedLink));
     }
 
-    public async Task<Result<SharedContentResponse>> GetSharedContent(string sharedLinkId)
+    public async Task<Result<SharedContentResponse>> GetSharedContent(Guid sharedLinkId)
     {
-        var sharedLink = await ctx.SharedLinks.FirstOrDefaultAsync(s => s.Id == Guid.Parse(sharedLinkId));
+        var sharedLink = await ctx.SharedLinks.FirstOrDefaultAsync(s => s.Id == sharedLinkId);
         if (sharedLink == null)
         {
             return Result<SharedContentResponse>.Failure(new NotFoundError("Shared item not found."));

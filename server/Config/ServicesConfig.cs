@@ -9,8 +9,15 @@ namespace EncryptionApp.Config;
 
 public static class ServicesConfig
 {
-    public static void AddServicesConfig(this WebApplicationBuilder builder, RSA privateKey, RSA publicKey)
+    private static readonly RSA _privateKey = RSA.Create();
+    private static readonly RSA _publicKey = RSA.Create();
+    
+        
+    public static void AddServicesConfig(this WebApplicationBuilder builder)
     {
+        _privateKey.ImportFromPem(File.ReadAllText(Environment.GetEnvironmentVariable("PRIVATE_KEY_PATH")!));
+        _publicKey.ImportFromPem(File.ReadAllText(Environment.GetEnvironmentVariable("PUBLIC_KEY_PATH")!));
+        
         builder.Services.AddSingleton<AmazonS3>();
         builder.Services.AddSingleton<ResponseFactory>();
         
@@ -27,8 +34,8 @@ public static class ServicesConfig
         builder.Services.AddTransient<ShareService>();
         builder.Services.AddTransient<ItemsService>();
 
-        builder.Services.AddSingleton(privateKey);
-        builder.Services.AddSingleton(publicKey);
+        builder.Services.AddSingleton(_privateKey);
+        builder.Services.AddSingleton(_publicKey);
         builder.Services.AddSingleton<JwtTokenHandler>();
     }
 }
