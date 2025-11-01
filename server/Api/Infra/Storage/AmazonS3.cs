@@ -3,25 +3,28 @@ using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using EncryptionApp.Api.Dtos.Files;
+using Microsoft.IdentityModel.Tokens;
 using File = EncryptionApp.Api.Entities.File;
 
 namespace EncryptionApp.Api.Infra.Storage;
 
 public class AmazonS3
 {
-    public string BucketName { get; private set; }
 
-    private readonly IHostEnvironment Env;
+    public readonly string _bucketName;
+    private readonly IHostEnvironment _env;
     private readonly AmazonS3Client _client;
+    private readonly string? _endpoint;
 
     public AmazonS3(IHostEnvironment env)
     {
-        BucketName = Environment.GetEnvironmentVariable("AWS_BUCKET_NAME") ?? "";
-        Env = env;
+        _bucketName = Environment.GetEnvironmentVariable("AWS_BUCKET_NAME") ?? "";
+        _env = env;
+        _endpoint = Environment.GetEnvironmentVariable("AWS_S3_ENDPOINT");
         
         var credentials = new BasicAWSCredentials(
-            Environment.GetEnvironmentVariable("AWS_ACCESS_KEY") ?? "", 
-            Environment.GetEnvironmentVariable("AWS_SECRET_KEY") ?? "");
+            Environment.GetEnvironmentVariable("AWS_ACCESS") ?? "", 
+            Environment.GetEnvironmentVariable("AWS_SECRET") ?? "");
 
         var config = new AmazonS3Config
         {
@@ -30,9 +33,9 @@ public class AmazonS3
             UseHttp = true
         };
         
-        if (env.IsDevelopment())
+        if (!_endpoint.IsNullOrEmpty())
         {
-            config.ServiceURL = "http://localhost:4566"; // LocalStack
+            config.ServiceURL = _endpoint;
         }
         
         _client = new AmazonS3Client(credentials, config);
@@ -42,7 +45,7 @@ public class AmazonS3
     {
         var initRequest = new InitiateMultipartUploadRequest
         {
-            BucketName = BucketName,
+            BucketName = _bucketName,
             Key = file.StorageKey,
         };
         
@@ -58,10 +61,10 @@ public class AmazonS3
         {
             var urlRequest = new GetPreSignedUrlRequest
             {
-                BucketName = BucketName,
+                BucketName = _bucketName,
                 Key = file.StorageKey,
                 Verb = HttpVerb.PUT,
-                Protocol = Env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
+                Protocol = _env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
                 PartNumber = i,
                 UploadId = initResponse.UploadId,
                 Expires = DateTime.UtcNow.AddMinutes(30),
@@ -79,7 +82,7 @@ public class AmazonS3
     {
         var completeRequest = new CompleteMultipartUploadRequest
         {
-            BucketName = BucketName,
+            BucketName = _bucketName,
             Key = data.Key,
             UploadId = data.UploadId,
             PartETags = data.Parts.Select(p => new PartETag(p.PartNumber, p.ETag)).ToList()
@@ -92,7 +95,7 @@ public class AmazonS3
 
     public async Task<List<UploadPart>> ListUploadParts(string key, string uploadId)
     {
-        var data = await _client.ListPartsAsync(BucketName, key, uploadId);
+        var data = await _client.ListPartsAsync(_bucketName, key, uploadId);
         
         return data.Parts
             .Select(p => new UploadPart(p.LastModified, p.Size, p.PartNumber, p.ETag))
@@ -101,17 +104,17 @@ public class AmazonS3
 
     public async Task AbortMultiPartUpload(string key, string uploadId)
     {
-        await _client.AbortMultipartUploadAsync(BucketName, key, uploadId);
+        await _client.AbortMultipartUploadAsync(_bucketName, key, uploadId);
     }
 
     public async Task<string> GeneratePresignedUrl(string key)
     {
         var request = new GetPreSignedUrlRequest
         {
-            BucketName = BucketName,
+            BucketName = _bucketName,
             Key = key,
             Verb = HttpVerb.GET,
-            Protocol = Env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
+            Protocol = _env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
             Expires = DateTime.UtcNow.AddHours(3),
             ContentType = "application/octet-stream",
         };
@@ -121,11 +124,11 @@ public class AmazonS3
 
     public async Task<GetObjectMetadataResponse> GetObjectMetadata(string key)
     {
-        return await _client.GetObjectMetadataAsync(BucketName, key);
+        return await _client.GetObjectMetadataAsync(_bucketName, key);
     }
 
     public async Task DeleteObject(string key)
     {
-        await _client.DeleteObjectAsync(BucketName, key);
+        await _client.DeleteObjectAsync(_bucketName, key);
     }
 }
