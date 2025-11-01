@@ -9,4 +9,5 @@ variable "AWS_SECRET" {
 }
 variable "DEV_MODE" {
   type = string
+  default = true
 }
