@@ -7,7 +7,7 @@ variable "AWS_ACCESS" {
 variable "AWS_SECRET" {
   type = string
 }
-variable "DEV_MODE" {
+variable "AWS_ENDPOINT" {
   type = string
-  default = true
+  default = null
 }

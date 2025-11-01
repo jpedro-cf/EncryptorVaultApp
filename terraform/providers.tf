@@ -12,14 +12,13 @@ provider "aws" {
   access_key = var.AWS_ACCESS
   secret_key = var.AWS_SECRET
 
-  s3_use_path_style        = var.DEV_MODE ? true : null
-  skip_credentials_validation = var.DEV_MODE ? true : null
-  skip_metadata_api_check     = var.DEV_MODE ? true : null
-  skip_requesting_account_id  = var.DEV_MODE ? true : null
+  s3_use_path_style        = var.AWS_ENDPOINT != null ? true : null
+  skip_credentials_validation = var.AWS_ENDPOINT != null ? true : null
+  skip_metadata_api_check     = var.AWS_ENDPOINT != null ? true : null
+  skip_requesting_account_id  = var.AWS_ENDPOINT != null ? true : null
 
   endpoints {
-    s3 = var.DEV_MODE ? "http://localhost:4566" : null
-    sqs = var.DEV_MODE ? "http://localhost:4566" : null
-    sts = var.DEV_MODE ? "http://localhost:4566" : null
+    s3 = var.AWS_ENDPOINT != null ? var.AWS_ENDPOINT : null
+    sts = var.AWS_ENDPOINT != null ? var.AWS_ENDPOINT : null
   }
 }
