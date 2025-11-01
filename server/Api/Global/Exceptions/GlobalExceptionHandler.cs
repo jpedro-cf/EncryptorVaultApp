@@ -13,7 +13,7 @@ public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService
         var genericProblem = new ProblemDetails
         {
             Title = "Internal Server Error",
-            Detail = exception.Message,
+            Detail = "An error occurred while performing this operation. Try again later or contact us.",
             Status = StatusCodes.Status500InternalServerError,
         };
 
@@ -37,10 +37,8 @@ public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService
                 }
             });
         }
-        else
-        {
-            httpContext.Response.Redirect("/Home/Error");
-            return true;
-        }
+        
+        httpContext.Response.Redirect("/Home/Error");
+        return true;
     }
 }
