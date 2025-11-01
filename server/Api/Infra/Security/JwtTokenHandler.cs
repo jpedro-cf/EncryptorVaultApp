@@ -5,13 +5,31 @@ using EncryptionApp.Api.Entities;
 using EncryptionApp.Api.Global;
 using EncryptionApp.Api.Global.Errors;
 using Microsoft.IdentityModel.Tokens;
+using File = System.IO.File;
 
 namespace EncryptionApp.Api.Infra.Security;
 
-public class JwtTokenHandler(RSA privateKey, RSA publicKey)
+public class JwtTokenHandler
 {
+    private readonly RSA _privateKey = RSA.Create();
+    private readonly RSA _publicKey = RSA.Create();
+    
     private readonly string _issuer = Environment.GetEnvironmentVariable("SERVER_URL") ?? "";
     private readonly string _audience = Environment.GetEnvironmentVariable("CLIENT_URL") ?? "";
+
+    public JwtTokenHandler ()
+    {
+        var privateKeyPath = Environment.GetEnvironmentVariable("PRIVATE_KEY_PATH");
+        var publicKeyPath = Environment.GetEnvironmentVariable("PUBLIC_KEY_PATH");
+
+        if (string.IsNullOrEmpty(privateKeyPath) || string.IsNullOrEmpty(publicKeyPath))
+        {
+            throw new ArgumentNullException(privateKeyPath != null ? nameof(_publicKey) : nameof(_privateKey));
+        }
+        
+        _privateKey.ImportFromPem(File.ReadAllText(privateKeyPath));
+        _publicKey.ImportFromPem(File.ReadAllText(publicKeyPath));
+    }
 
     public string Encode(User user, DateTime expiresAt)
     {
@@ -27,7 +45,7 @@ public class JwtTokenHandler(RSA privateKey, RSA publicKey)
 
     public string Encode(List<Claim> claims, DateTime expiresAt)
     {
-        var creds = new SigningCredentials(new RsaSecurityKey(privateKey), 
+        var creds = new SigningCredentials(new RsaSecurityKey(_privateKey), 
             SecurityAlgorithms.RsaSha256);
 
         claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
@@ -55,7 +73,7 @@ public class JwtTokenHandler(RSA privateKey, RSA publicKey)
             ValidateLifetime = true,
             RequireExpirationTime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new RsaSecurityKey(publicKey)
+            IssuerSigningKey = new RsaSecurityKey(_publicKey)
         };
 
         try
