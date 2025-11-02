@@ -25,12 +25,13 @@ services:
             - secure-vault-network
 
     client:
-        build: ./client
+        build:
+            context: ./client
+            args:
+                VITE_CLIENT_URL: ${CLIENT_URL}
+                VITE_SERVER_URL: ${SERVER_URL}/api
         ports:
             - '80:80'
-        environment:
-            VITE_CLIENT_URL: ${CLIENT_URL}
-            VITE_SERVER_URL: ${SERVER_URL}/api
         networks:
             - secure-vault-network
 
