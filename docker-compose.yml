@@ -2,7 +2,7 @@ services:
     server:
         build: ./server
         environment:
-            ASPNETCORE_ENVIRONMENT: Production
+            ASPNETCORE_ENVIRONMENT: Development
 
             CLIENT_URL: ${CLIENT_URL}
             SERVER_URL: ${SERVER_URL}
