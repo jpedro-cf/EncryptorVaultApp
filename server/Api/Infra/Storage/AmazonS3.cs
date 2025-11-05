@@ -32,7 +32,8 @@ public class AmazonS3
         {
             RegionEndpoint = RegionEndpoint.GetBySystemName(Environment.GetEnvironmentVariable("AWS_REGION")),
             ForcePathStyle = true,
-            UseHttp = true
+            UseHttp = true,
+            AuthenticationRegion = Environment.GetEnvironmentVariable("AWS_REGION")
         };
         
         if (!string.IsNullOrEmpty(_endpoint))
