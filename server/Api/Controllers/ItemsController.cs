@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
-[Route("api/items")]
+[Route("items")]
 public class ItemsController(ItemsService itemsService): ControllerBase
 {
     [HttpGet]

@@ -1,0 +1,44 @@
+name: Secure Vault CI/CD
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - deploy
+
+jobs:
+    migrations:
+        environment: production
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+
+            - name: Setup dotnet
+              uses: actions/setup-dotnet@v5
+              with:
+                  dotnet-version: '8.0.x'
+
+            - name: Setup EF Tools
+              working-directory: ./server
+              run: |
+                  dotnet tool install --global dotnet-ef 
+                  dotnet tool restore
+
+            - name: Bundle EF Migrations
+              working-directory: ./server
+              env:
+                  DATABASE_CONNECTION: ${{ secrets.DATABASE_CONNECTION }}
+                  PUBLIC_KEY: ${{ secrets.PUBLIC_KEY }}
+                  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+              run: |
+                  dotnet ef migrations bundle --self-contained -r linux-x64
+
+            - name: Run migrations
+              working-directory: ./server
+              env:
+                  DATABASE_CONNECTION: ${{ secrets.DATABASE_CONNECTION }}
+                  PUBLIC_KEY: ${{ secrets.PUBLIC_KEY }}
+                  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+              run: |
+                  chmod +x efbundle
+                  ./efbundle --connection "${{ secrets.DATABASE_CONNECTION }}"

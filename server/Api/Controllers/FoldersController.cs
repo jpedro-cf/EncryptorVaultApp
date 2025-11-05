@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
-[Route("api/folders")]
+[Route("folders")]
 public class FoldersController(FoldersService foldersService) : ControllerBase
 {
     [HttpPost]

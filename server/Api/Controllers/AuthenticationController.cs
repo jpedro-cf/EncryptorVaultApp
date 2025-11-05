@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("auth")]
 public class AuthenticationController(
     UsersService usersService, 
     AuthService authService, 

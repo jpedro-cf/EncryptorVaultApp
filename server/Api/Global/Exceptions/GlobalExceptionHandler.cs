@@ -23,22 +23,15 @@ public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService
             _ => StatusCodes.Status500InternalServerError
         };
         
-        if (httpContext.Request.Path.StartsWithSegments("/api") 
-            || httpContext.Request.Headers["Accept"].ToString().Contains("application/json"))
+        return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
         {
-            return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+            HttpContext = httpContext,
+            Exception = exception,
+            ProblemDetails = exception switch
             {
-                HttpContext = httpContext,
-                Exception = exception,
-                ProblemDetails = exception switch
-                {
-                    ApplicationException appEx => appEx.ToProblemDetail(),
-                    _ => genericProblem
-                }
-            });
-        }
-        
-        httpContext.Response.Redirect("/Home/Error");
-        return true;
+                ApplicationException appEx => appEx.ToProblemDetail(),
+                _ => genericProblem
+            }
+        });
     }
 }

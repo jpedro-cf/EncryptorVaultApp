@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
-[Route("api/files")]
+[Route("files")]
 public class FilesController(FilesService filesService, UploadsService uploadsService): ControllerBase
 {
     [HttpPost("upload")]

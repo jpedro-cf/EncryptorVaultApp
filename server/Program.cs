@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using Microsoft.EntityFrameworkCore;
 using EncryptionApp.Api.Global.Exceptions;
 using EncryptionApp.Config;
 

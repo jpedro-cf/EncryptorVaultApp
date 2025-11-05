@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
-[Route("api/shared-links")]
+[Route("shared-links")]
 public class ShareController(ShareService shareService): ControllerBase
 {
     [HttpPost]

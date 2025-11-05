@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 namespace EncryptionApp.Api.Controllers;
 
 [ApiController]
-[Route("api/users")]
+[Route("users")]
 public class UsersController(
     UsersService usersService, 
     StorageUsageService storageUsageService,

@@ -1,18 +1,13 @@
 services:
     server:
         build: ./server
-        ports:
-            - '5190:5190'
         environment:
             ASPNETCORE_ENVIRONMENT: Production
-            ASPNETCORE_URLS: http://0.0.0.0:5190
 
             CLIENT_URL: ${CLIENT_URL}
             SERVER_URL: ${SERVER_URL}
             DATABASE_CONNECTION: ${DATABASE_CONNECTION}
 
-            PUBLIC_KEY_PATH: /app/secrets/public.pem
-            PRIVATE_KEY_PATH: /app/secrets/private.pem
             PUBLIC_KEY: ${PUBLIC_KEY}
             PRIVATE_KEY: ${PRIVATE_KEY}
 
@@ -22,19 +17,17 @@ services:
             AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
             AWS_ENDPOINT: ${AWS_ENDPOINT}
         networks:
-            - secure-vault-network
+            - dokploy-network
 
     client:
         build:
             context: ./client
             args:
-                VITE_CLIENT_URL: ${CLIENT_URL}
-                VITE_SERVER_URL: ${SERVER_URL}/api
-        ports:
-            - '80:80'
+                CLIENT_URL: ${CLIENT_URL}
+                SERVER_URL: ${SERVER_URL}
         networks:
-            - secure-vault-network
-
+            - dokploy-network
+        #
 networks:
-    secure-vault-network:
-        driver: bridge
+    dokploy-network:
+        external: true

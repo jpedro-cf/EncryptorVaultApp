@@ -10,11 +10,11 @@ import { ProfilePage } from './pages/ProfilePage'
 import { SharedLinksPage } from './pages/SharedLinksPage'
 function App() {
     return (
-        <Router>
+        <Router basename="/secure-vault">
             <Routes>
                 <Route element={<PersistAuth />}>
                     <Route
-                        path="/"
+                        path="*"
                         element={
                             <DashboardLayout>
                                 <DashboardPage />
