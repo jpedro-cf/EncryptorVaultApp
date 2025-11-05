@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using EncryptionApp.Api.Entities;
 using EncryptionApp.Api.Global;
 using EncryptionApp.Api.Global.Errors;
+using EncryptionApp.Api.Global.Helpers;
 using Microsoft.IdentityModel.Tokens;
 using File = System.IO.File;
 
@@ -21,16 +22,16 @@ public class JwtTokenHandler
 
     public JwtTokenHandler (ILogger<JwtTokenHandler> logger)
     {
-        var privateKeyPath = Environment.GetEnvironmentVariable("PRIVATE_KEY_PATH");
-        var publicKeyPath = Environment.GetEnvironmentVariable("PUBLIC_KEY_PATH");
+        var privateKeyContent = Environment.GetEnvironmentVariable("PRIVATE_KEY");
+        var publicKeyContent = Environment.GetEnvironmentVariable("PUBLIC_KEY");
 
-        if (string.IsNullOrEmpty(privateKeyPath) || string.IsNullOrEmpty(publicKeyPath))
+        if (string.IsNullOrEmpty(privateKeyContent) || string.IsNullOrEmpty(publicKeyContent))
         {
-            throw new ArgumentNullException(privateKeyPath != null ? nameof(_publicKey) : nameof(_privateKey));
+            throw new ArgumentNullException(privateKeyContent != null ? nameof(_publicKey) : nameof(_privateKey));
         }
         
-        _privateKey.ImportFromPem(File.ReadAllText(privateKeyPath));
-        _publicKey.ImportFromPem(File.ReadAllText(publicKeyPath));
+        _privateKey.ImportFromPem(privateKeyContent.FromBase64());
+        _publicKey.ImportFromPem(publicKeyContent.FromBase64());
         _logger = logger;
     }
 

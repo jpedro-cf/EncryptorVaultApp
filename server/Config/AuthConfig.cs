@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using EncryptionApp.Api.Global.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -10,8 +11,15 @@ public static class AuthConfig
     public static void AddAuthConfig(this WebApplicationBuilder builder)
     {
         var publicKey = RSA.Create();
-        publicKey.ImportFromPem(
-            File.ReadAllText(Environment.GetEnvironmentVariable("PUBLIC_KEY_PATH")!));
+        
+        var publicKeyContent = Environment.GetEnvironmentVariable("PUBLIC_KEY");
+        if (string.IsNullOrEmpty(publicKeyContent))
+        {
+            throw new ArgumentException(nameof(publicKeyContent));
+        }
+
+        
+        publicKey.ImportFromPem(publicKeyContent.FromBase64());
         
         builder.Services.ConfigureApplicationCookie(options =>
         {

@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using System.Text;
 using QRCoder;
 
 namespace EncryptionApp.Api.Global.Helpers;
@@ -22,19 +23,10 @@ public static class StringExtensions
         return Convert.ToBase64String(value);
     }
 
-    public static bool IsBase64Encoded(this string value)
+    public static string FromBase64(this string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            return false;
+        var bytes = Convert.FromBase64String(value);
 
-        try
-        {
-            var fromBase64String = Convert.FromBase64String(value);
-            return true;
-        }
-        catch (FormatException)
-        {
-            return false;
-        }
+        return Encoding.UTF8.GetString(bytes);
     }
 }
