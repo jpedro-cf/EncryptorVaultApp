@@ -6,7 +6,6 @@ COPY . .
 RUN dotnet restore
 RUN dotnet publish -o /app/publish
 
-
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
 EXPOSE 5190
@@ -16,4 +15,6 @@ COPY --from=build /app/publish .
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENV ASPNETCORE_URLS=http://+:5190
+
+CMD ["dotnet", "EncryptionApp.dll"]
