@@ -53,7 +53,7 @@ public class AmazonS3
                 BucketName = _bucketName,
                 Key = file.StorageKey,
             };
-            initRequest.Metadata.Add("file_id", file.Id.ToString());
+            // initRequest.Metadata.Add("file_id", file.Id.ToString());
             
             var initResponse = await _client.InitiateMultipartUploadAsync(initRequest);
             var presignedUrls = new List<PresignedPartUrl>();
