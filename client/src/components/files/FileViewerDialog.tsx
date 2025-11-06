@@ -22,7 +22,7 @@ import { FileDisplaySkeleton } from './FileDisplaySkeleton'
 
 export function FileViewerDialog() {
     const [open, setOpen] = useState(false)
-    const { shareId, currentFile } = useExplorerContext()
+    const { shareId, currentFile, setCurrentFile } = useExplorerContext()
 
     const displays: Record<ContentType, React.ComponentType<DisplayProps>> = {
         Text: TextDisplay,
@@ -46,10 +46,17 @@ export function FileViewerDialog() {
         return <></>
     }
 
+    function onOpenChange(open: boolean) {
+        if (!open) {
+            setCurrentFile(null)
+        }
+        setOpen(open)
+    }
+
     const Display = displays[currentFile.contentType]
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 className="max-w-[95vw] max-h-[90vh] sm:max-w-auto w-auto overflow-x-hidden text-slate-100 bg-transparent justify-center border-none p-0 overflow-y-scroll"
                 showCloseButton={false}
