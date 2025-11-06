@@ -33,7 +33,7 @@ public class AmazonS3
             RegionEndpoint = RegionEndpoint.GetBySystemName(Environment.GetEnvironmentVariable("AWS_REGION")),
             ForcePathStyle = true,
             UseHttp = true,
-            AuthenticationRegion = Environment.GetEnvironmentVariable("AWS_REGION")
+            AuthenticationRegion = Environment.GetEnvironmentVariable("AWS_REGION"),
         };
         
         if (!string.IsNullOrEmpty(_endpoint))
@@ -72,7 +72,6 @@ public class AmazonS3
                     PartNumber = i,
                     UploadId = initResponse.UploadId,
                     Expires = DateTime.UtcNow.AddMinutes(30),
-                    ContentType = "application/octet-stream",
                 };
 
                 var url = await _client.GetPreSignedURLAsync(urlRequest);
@@ -153,7 +152,6 @@ public class AmazonS3
                 Verb = HttpVerb.GET,
                 Protocol = _env.IsDevelopment() ? Protocol.HTTP : Protocol.HTTPS,
                 Expires = DateTime.UtcNow.AddHours(3),
-                ContentType = "application/octet-stream",
             };
 
             return await _client.GetPreSignedURLAsync(request);
