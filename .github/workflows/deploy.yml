@@ -4,7 +4,7 @@ on:
     workflow_dispatch:
     push:
         branches:
-            - deploy
+            - deploy-v2
 
 jobs:
     migrations:
@@ -42,3 +42,18 @@ jobs:
               run: |
                   chmod +x efbundle
                   ./efbundle --connection "${{ secrets.DATABASE_CONNECTION }}"
+
+    trigger:
+        environment: production
+        runs-on: ubuntu-latest
+        steps:
+            - name: Trigger deployment
+              run: |
+                  curl -X 'POST' \
+                        '${{secrets.VPS_URL}}/api/compose.redeploy' \
+                        -H 'accept: application/json' \
+                        -H 'Content-Type: application/json' \
+                        -H 'x-api-key: ${{secrets.VPS_API_KEY}}' \
+                        -d '{
+                        "composeId": "${{secrets.APPLICATION_COMPOSE_ID}}"
+                        }'
