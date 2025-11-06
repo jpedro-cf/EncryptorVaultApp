@@ -201,12 +201,16 @@ async function uploadParts(
     data.urls.forEach((u) => {
         const chunk = data.fileContent.slice(offset, offset + chunkSize)
 
-        const promise = api.put(u.url, chunk).then((res) => {
-            const etag = res.headers['ETag'] || res.headers['etag']
-            completedParts.push({ ETag: etag, partNumber: u.partNumber })
+        const promise = api
+            .put(u.url, chunk, {
+                withCredentials: false,
+            })
+            .then((res) => {
+                const etag = res.headers['ETag'] || res.headers['etag']
+                completedParts.push({ ETag: etag, partNumber: u.partNumber })
 
-            callback((completedParts.length / data.urls.length) * 100)
-        })
+                callback((completedParts.length / data.urls.length) * 100)
+            })
 
         offset += chunkSize
 
