@@ -51,7 +51,7 @@ jobs:
             - name: Trigger deployment
               run: |
                   curl -X 'POST' \
-                        '${{secrets.VPS_URL}}/api/compose.redeploy' \
+                        '${{secrets.VPS_URL}}/api/compose.deploy' \
                         -H 'accept: application/json' \
                         -H 'Content-Type: application/json' \
                         -H 'x-api-key: ${{secrets.VPS_API_KEY}}' \
